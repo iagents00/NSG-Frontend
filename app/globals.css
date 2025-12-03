@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  /* Custom Colors */
+  --color-navy-950: #020617;
+  --color-navy-900: #0B1121;
+  --color-navy-850: #111827;
+  --color-navy-800: #1f2937;
+  --color-slate-850: #1e293b;
+  --color-slate-900: #0f172a;
+  --color-deep-900: #020410;
+
+  /* Custom Shadows */
+  --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+  --shadow-sovereign: 0 25px 50px -12px rgba(2, 6, 23, 0.12), 0 0 1px rgba(2, 6, 23, 0.1);
+  --shadow-precision: 0 0 0 1px rgba(15, 23, 42, 0.05), 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+  --shadow-glow: 0 0 40px rgba(59, 130, 246, 0.25);
+  --shadow-island: 0 15px 40px -10px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08) inset;
+
+  /* Animations */
+  --animate-fade-in-up: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-slide-in-right: slideInRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-slide-up-toast: slideUpToast 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-slide-down: slideDown 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-pulse-slow: pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-breathing: deepBreath 10s ease-in-out infinite;
+  --animate-sound-wave: soundWave 1.2s ease-in-out infinite;
+  --animate-spin-slow: spin 6s linear infinite;
+  --animate-spin-process: spin 3s linear infinite;
+  --animate-text-glow: textGlow 1.5s ease-in-out infinite alternate;
+}
+
+/* Keyframes */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideUpToast {
+  from { opacity: 0; transform: translateY(50px) scale(0.9); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-20px) translateX(-50%); }
+  to { opacity: 1; transform: translateY(0) translateX(-50%); }
+}
+@keyframes deepBreath {
+  0%, 100% { transform: scale(0.92); filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.1)); }
+  50% { transform: scale(1.08); filter: drop-shadow(0 0 50px rgba(59, 130, 246, 0.3)); }
+}
+@keyframes soundWave {
+  0%, 100% { height: 20%; }
+  50% { height: 80%; }
+}
+@keyframes textGlow {
+  0% { opacity: 0.6; text-shadow: 0 0 5px rgba(59, 130, 246, 0); }
+  100% { opacity: 1; text-shadow: 0 0 20px rgba(59, 130, 246, 0.6); }
+}
+
+:root {
+  --background: #F8FAFC;
+  --foreground: #0F172A;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0B1121;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Utilities */
+.will-change-transform {
+  will-change: transform;
+}
