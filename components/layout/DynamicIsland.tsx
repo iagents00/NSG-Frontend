@@ -57,9 +57,9 @@ export default function DynamicIsland({ currentMode, setMode }: DynamicIslandPro
         >
           {(() => {
             const Icon = currentModeItem?.icon || Activity;
-            return <Icon className="w-3.5 h-3.5 text-cyan-300 transition-transform group-hover:scale-110" />;
+            return <Icon className="w-3.5 h-3.5 text-blue-400 transition-transform group-hover:scale-110" />;
           })()}
-          <span className="text-[13px] font-medium text-slate-200 group-hover:text-cyan-300 transition-colors">
+          <span className="text-[13px] font-medium text-slate-200 group-hover:text-blue-400 transition-colors">
             {currentModeLabel}
           </span>
           <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-300 ease-out ${isOpen ? 'rotate-180' : ''}`} />
@@ -107,7 +107,7 @@ export default function DynamicIsland({ currentMode, setMode }: DynamicIslandPro
                 className={`
                   w-full px-4 py-2.5 rounded-full text-left text-[13px] font-medium transition-all flex items-center gap-3
                   ${currentMode === item.id 
-                    ? 'bg-blue-600/20 text-cyan-300' 
+                    ? 'bg-blue-600/20 text-blue-400' 
                     : 'text-slate-300 hover:bg-slate-800/50 hover:text-white'}
                 `}
               >

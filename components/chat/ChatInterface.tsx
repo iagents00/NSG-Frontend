@@ -10,6 +10,7 @@ import {
   Sparkles, 
   Loader2
 } from 'lucide-react';
+// Refresh import to clear stale cache
 import DynamicIsland from '@/components/layout/DynamicIsland';
 import clsx from 'clsx';
 import NewsAnalysisResult from './NewsAnalysisResult';
