@@ -41,69 +41,83 @@ export default function DynamicIsland({ currentMode, setMode }: DynamicIslandPro
   }, [isOpen]);
 
   return (
-    <div className="relative" ref={containerRef}>
-      <div className="bg-slate-950 rounded-full px-4 py-2 flex items-center gap-3 shadow-island transition-all duration-300 hover:scale-105 backdrop-blur-md border border-white/10">
-        <div className="flex items-center gap-2">
-          <div className={`w-2 h-2 rounded-full ${isContextCached ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}`}></div>
-          <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{currentRole}</span>
-        </div>
-        <div className="h-4 w-px bg-white/10"></div>
-        
+
+    <div className="relative z-50" ref={containerRef}>
+      <div className={`
+        relative flex items-center gap-3 px-5 py-2.5 
+        bg-slate-950/90 backdrop-blur-xl border border-white/10 
+        rounded-full shadow-island 
+        transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
+        ${isOpen ? 'rounded-b-none rounded-[28px]' : 'rounded-full hover:scale-[1.02]'}
+      `}>
         {/* Mode Selector */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors"
+          className="flex items-center gap-2 group"
         >
-          <Activity className="w-3 h-3" />
-          <span className="text-xs font-bold">{currentModeLabel}</span>
-          <ChevronDown className={`w-3 h-3 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+          {(() => {
+            const Icon = currentModeItem?.icon || Activity;
+            return <Icon className="w-3.5 h-3.5 text-cyan-300 transition-transform group-hover:scale-110" />;
+          })()}
+          <span className="text-[13px] font-medium text-slate-200 group-hover:text-cyan-300 transition-colors">
+            {currentModeLabel}
+          </span>
+          <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-300 ease-out ${isOpen ? 'rotate-180' : ''}`} />
         </button>
       </div>
 
-      {/* Dropdown Menu */}
-      {isOpen && (
-        <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-slate-950 rounded-2xl shadow-2xl border border-white/10 backdrop-blur-md overflow-hidden min-w-[200px] animate-fade-in-up">
-          <div className="py-2">
-            {/* Standard Mode */}
-            <button
-              onClick={() => {
-                setMode('standard');
-                setIsOpen(false);
-              }}
-              className={`w-full px-4 py-2 text-left text-xs font-medium transition-colors flex items-center gap-2 ${
-                currentMode === 'standard' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'text-slate-300 hover:bg-slate-800'
-              }`}
-            >
-              <Activity className="w-3 h-3" />
-              Standard
-            </button>
+      {/* Dropdown Menu - Connected Surface */}
+      <div 
+        className={`
+          absolute top-full left-0 w-full mt-[-1px] pt-2 pb-3
+          bg-slate-950/90 backdrop-blur-xl border-x border-b border-white/10
+          rounded-b-[24px] shadow-2xl overflow-hidden
+          transition-all duration-300 origin-top
+          ${isOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'}
+        `}
+      >
+        <div className="flex flex-col gap-1 px-1">
+          {/* Standard Mode */}
+          <button
+            onClick={() => {
+              setMode('standard');
+              setIsOpen(false);
+            }}
+            className={`
+              w-full px-4 py-2.5 rounded-full text-left text-[13px] font-medium transition-all flex items-center gap-3
+              ${currentMode === 'standard' 
+                ? 'bg-blue-600/20 text-blue-400' 
+                : 'text-slate-300 hover:bg-slate-800/50 hover:text-white'}
+            `}
+          >
+            <Activity className="w-4 h-4" />
+            Standard
+          </button>
 
-            {/* Menu Items */}
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    setMode(item.id);
-                    setIsOpen(false);
-                  }}
-                  className={`w-full px-4 py-2 text-left text-xs font-medium transition-colors flex items-center gap-2 ${
-                    currentMode === item.id 
-                      ? 'bg-blue-600 text-white' 
-                      : 'text-slate-300 hover:bg-slate-800'
-                  } ${item.special ? 'border-t border-white/10' : ''}`}
-                >
-                  <Icon className="w-3 h-3" />
-                  {item.label}
-                </button>
-              );
-            })}
-          </div>
+          {/* Menu Items */}
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.id}
+                onClick={() => {
+                  setMode(item.id);
+                  setIsOpen(false);
+                }}
+                className={`
+                  w-full px-4 py-2.5 rounded-full text-left text-[13px] font-medium transition-all flex items-center gap-3
+                  ${currentMode === item.id 
+                    ? 'bg-blue-600/20 text-cyan-300' 
+                    : 'text-slate-300 hover:bg-slate-800/50 hover:text-white'}
+                `}
+              >
+                <Icon className="w-4 h-4" />
+                {item.label}
+              </button>
+            );
+          })}
         </div>
-      )}
+      </div>
     </div>
   );
 }

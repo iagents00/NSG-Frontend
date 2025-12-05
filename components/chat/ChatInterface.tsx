@@ -169,32 +169,30 @@ export default function ChatInterface() {
       {/* --- LAYER 2: CHAT BODY --- */}
       <div className="flex-1 overflow-y-auto custom-scroll p-6 lg:p-12 pt-24 lg:pt-32 space-y-8">
         
-        {/* Messages List */}
+        {/* Messages List - Material 3 Style */}
         {messages.map((msg) => (
           <div key={msg.id} className={clsx("flex w-full animate-fade-in-up", msg.role === 'user' ? "justify-end" : "justify-start")}>
             
             {msg.role === 'user' ? (
-              // USER MESSAGE STYLE
-              <div className="bg-blue-600 text-white px-6 py-4 rounded-3xl rounded-tr-none text-sm font-medium max-w-[85%] shadow-lg leading-relaxed">
+              // USER MESSAGE - Standard Blue
+              <div className="bg-blue-600 text-white px-6 py-3.5 rounded-[24px] text-[15px] max-w-[85%] shadow-sm leading-relaxed font-normal selection:bg-white/30">
                 {msg.content}
               </div>
             ) : (
-              // AI MESSAGE STYLE
+              // AI MESSAGE - Clean Surface
               <div className="flex gap-4 group max-w-[90%]">
-                 <div className="w-9 h-9 bg-navy-950 rounded-2xl flex items-center justify-center shrink-0 shadow-lg text-white mt-auto mb-1">
-                    <Sparkles className="w-4 h-4" />
+                 <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shrink-0 shadow-sm text-white mt-1">
+                    <Sparkles className="w-4 h-4 text-white/90" />
                  </div>
                  
-                 {/* Logic to choose between Text Bubble or Special Analysis Card */}
                  {msg.type === 'analysis' ? (
                     <NewsAnalysisResult 
                       tag={msg.metadata?.tag}
                       roleContext={msg.metadata?.roleContext}
                     />
                  ) : (
-                    <div className="bg-white p-6 rounded-3xl rounded-tl-none text-sm text-slate-700 shadow-card border border-slate-100">
-                        {/* Using whitespace-pre-wrap to handle line breaks from AI */}
-                        <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                    <div className="bg-white px-6 py-4 rounded-[24px] text-[15px] text-slate-800 leading-7 shadow-sm border border-slate-100">
+                        <p className="whitespace-pre-wrap">{msg.content}</p>
                     </div>
                  )}
               </div>
@@ -219,46 +217,56 @@ export default function ChatInterface() {
                          </svg>
                       </div>
                  </div>
-                 <p className="text-xs font-bold text-blue-500 tracking-widest uppercase animate-text-glow">Procesando...</p>
+                 <p className="text-[11px] font-bold text-blue-600/60 tracking-widest uppercase animate-pulse">Procesando...</p>
              </div>
         )}
         
         <div ref={chatEndRef} />
       </div>
 
-      {/* --- LAYER 3: INPUT AREA --- */}
-      <div className="shrink-0 relative z-20 safe-pb-modal bg-white/80 backdrop-blur-xl border-t border-slate-200">
-        <div className="p-4 sm:p-6 lg:p-8">
+      {/* --- LAYER 3: INPUT AREA (Floating Pill) --- */}
+      <div className="shrink-0 relative z-20 bg-gradient-to-t from-white via-white/95 to-transparent pt-10 pb-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
             {!isContextCached ? (
-                <div className="flex items-center justify-center gap-2 text-sm text-blue-600 font-medium py-4 animate-pulse">
+                <div className="flex items-center justify-center gap-3 text-sm text-blue-600 font-medium py-4 bg-white rounded-full animate-pulse border border-blue-100 shadow-sm">
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Sincronizando Contexto de {currentRole?.toUpperCase()}...
+                    <span>Sincronizando Contexto de {currentRole?.toUpperCase()}...</span>
                 </div>
             ) : (
-                <form onSubmit={handleSubmit} className="relative max-w-4xl mx-auto group">
-                    <div className="absolute inset-0 bg-linear-to-r from-blue-500/20 to-purple-500/20 rounded-2xl blur-lg opacity-0 group-focus-within:opacity-100 transition-opacity duration-500 pointer-events-none transform scale-95"></div>
-                    <div className="relative flex items-center bg-white border border-slate-200 rounded-3xl shadow-sm focus-within:shadow-md transition-all duration-300">
-                        <div className="flex gap-1 pl-3 text-slate-400">
-                            <button type="button" className="p-2.5 hover:bg-slate-100 rounded-xl hover:text-blue-600 transition"><Mic className="w-5 h-5"/></button>
-                            <button type="button" className="p-2.5 hover:bg-slate-100 rounded-xl hover:text-blue-600 transition"><Paperclip className="w-5 h-5"/></button>  
+                <form onSubmit={handleSubmit} className="relative group">
+                    <div className="relative flex items-center bg-white border border-slate-200 p-2 pr-2.5 rounded-full transition-all duration-300 focus-within:shadow-md focus-within:border-blue-300/50 hover:shadow-sm">
+                        
+                        {/* Action Buttons */}
+                        <div className="flex gap-2 pl-2">
+                            <button type="button" className="p-2.5 text-slate-400 hover:bg-slate-100 hover:text-blue-600 rounded-full transition-colors flex items-center justify-center">
+                                <Mic className="w-[22px] h-[22px]" />
+                            </button>
+                            <button type="button" className="p-2.5 text-slate-400 hover:bg-slate-100 hover:text-blue-600 rounded-full transition-colors flex items-center justify-center">
+                                <Paperclip className="w-[22px] h-[22px]" />
+                            </button>
                         </div>
+
+                        {/* Input Field */}
                         <input 
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             disabled={isLoading}
-                            className="flex-1 bg-transparent border-none py-4 px-3 font-medium text-navy-900 focus:ring-0 placeholder-slate-400 text-base focus:outline-none disabled:opacity-50" 
-                            placeholder={`Escribe tu consulta o comando para ${currentRole}...`}
+                            className="flex-1 bg-transparent border-none py-3 px-4 font-normal text-slate-800 placeholder:text-slate-400 text-[16px] focus:ring-0 focus:outline-none disabled:opacity-50" 
+                            placeholder={`Pregunta a ${currentRole || 'NSG'}...`}
                             autoComplete="off" 
                         />
-                        <div className="pr-2">
-                            <button 
-                                type="submit" 
-                                disabled={isLoading || !input.trim()}
-                                className="p-3 bg-navy-900 text-white rounded-2xl hover:bg-blue-600 transition shadow-lg flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                <ArrowUp className="w-5 h-5" />
-                            </button>
-                        </div>
+                        
+                        {/* Send Button */}
+                        <button 
+                            type="submit" 
+                            disabled={isLoading || !input.trim()}
+                            className={`
+                                w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300
+                                ${input.trim() ? 'bg-navy-900 text-white shadow-md hover:scale-105 hover:bg-blue-600' : 'bg-slate-100 text-slate-300 cursor-default'}
+                            `}
+                        >
+                            <ArrowUp className="w-5 h-5" />
+                        </button>
                     </div>
                 </form>
             )}

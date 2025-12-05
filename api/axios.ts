@@ -1,14 +1,10 @@
 import axios from "axios";
 
-// Get the N8N webhook URL from environment variables
-const N8N_WEBHOOK = process.env.NEXT_PUBLIC_N8N_WEBHOOK || process.env.N8N_WEBHOOK;
-
-if (!N8N_WEBHOOK) {
-  console.warn('N8N_WEBHOOK environment variable is not set');
-}
+// Point to our local proxy API route which handles the N8N connection server-side
+const baseURL = '/api/n8n';
 
 const instance = axios.create({
-    baseURL: N8N_WEBHOOK || '',
+    baseURL: baseURL,
     headers: {
         'Content-Type': 'application/json',
     }
