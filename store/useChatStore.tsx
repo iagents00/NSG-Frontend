@@ -49,8 +49,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     // 3. Determine Context based on Role
     let roleContext = "Aplicación Clínica & Desarrollo Profesional.";
-    if (currentRole === 'directivo') roleContext = "Impacto en Estrategia Corporativa & Ventaja Competitiva.";
-    else if (currentRole === 'paciente') roleContext = "Optimización de Bienestar Personal & Rutinas.";
+    if (currentRole === 'manager') roleContext = "Impacto en Estrategia Corporativa & Ventaja Competitiva.";
+    else if (currentRole === 'patient') roleContext = "Optimización de Bienestar Personal & Rutinas.";
 
     // 4. Simulate AI Delay & Response
     setTimeout(() => {

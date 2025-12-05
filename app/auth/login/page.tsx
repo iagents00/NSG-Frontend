@@ -1,12 +1,12 @@
 "use client";
-/*import { useRouter } from "next/navigation";
-import { useAppStore } from "@/store/useAppStore";
+import { useRouter } from "next/navigation";
+import { useAppStore, Role } from "@/store/useAppStore";
 
 export default function LoginPage() {
   const router = useRouter();
   const setRole = useAppStore((state) => state.setRole);
 
-  const handleLogin = (role) => {
+  const handleLogin = (role: Role) => {
     // 1. Perform actual authentication logic (API call) here
     // 2. Set the role based on the response
     setRole(role); 
@@ -22,4 +22,3 @@ export default function LoginPage() {
     </div>
   );
 }
-  */

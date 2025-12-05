@@ -78,28 +78,7 @@ export default function ChatInterface() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 
-  // 4. HEADER CONTENT LOGIC (From Visuals)
-  const getHeaderContent = () => {
-    let title = "NSG Neural Core v14.6";
-    let subtitle = "Asistente general activo.";
-    let colorClass = "text-navy-900";
 
-    if (mode !== 'standard') {
-      const roleKey = (currentRole as RoleType) || 'consultant';
-      // Safety check for CONTEXT access
-      const roleData = CONTEXT[roleKey];
-      const item = roleData?.menu.find((i) => i.id === mode);
-      
-      if (item) {
-        title = `Módulo: ${item.label}`;
-        subtitle = `Contexto cargado: ${roleKey.toUpperCase()} > ${item.label}. Listo para análisis.`;
-        colorClass = "text-blue-700";
-      }
-    }
-    return { title, subtitle, colorClass };
-  };
-
-  const { title, subtitle, colorClass } = getHeaderContent();
 
   // 5. HANDLER (Merged Logic: UI Updates + API Stream)
   const handleSubmit = async (e: React.FormEvent) => {
@@ -128,16 +107,35 @@ export default function ChatInterface() {
       };
       setMessages(prev => [...prev, assistantMessage]);
 
-      // Use the axios instance to send data to N8N
-      const response = await axiosInstance.post('https://personal-n8n.suwsiw.easypanel.host/webhook/ngs-intelligence', {
-        messages: [...messages, userMessage], // Send history
-        cacheName,
-      });
+      console.log('Sending message to N8N webhook...');
+      
+      // Prepare the request data
+      const requestData = {
+        message: input.trim(),
+        context: {
+          role: currentRole,
+          mode: mode,
+          cacheName: cacheName,
+          messageHistory: [...messages, userMessage].map(m => ({
+            role: m.role,
+            content: m.content,
+            type: m.type,
+            metadata: m.metadata
+          }))
+        }
+      };
 
-      // Assuming N8N returns { output: "response text" } or similar. 
-      const assistantContent = response.data.output || response.data.content || response.data.text || (typeof response.data === 'string' ? response.data : JSON.stringify(response.data));
+      // Make the POST request to N8N webhook
+      console.log('Request data:', JSON.stringify(requestData, null, 2));
+      const response = await axiosInstance.post('', requestData);
 
-      // Update the specific message in state
+      // Process the response
+      const responseData = response.data;
+      const assistantContent = responseData.response || responseData.output || 
+                             responseData.content || responseData.text || 
+                             (typeof responseData === 'string' ? responseData : JSON.stringify(responseData));
+
+      // Update the assistant's message with the response
       setMessages(prev => 
         prev.map(m => 
           m.id === assistantMessage.id 
@@ -147,10 +145,11 @@ export default function ChatInterface() {
       );
 
     } catch (error) {
-      console.error('Chat error:', error);
+      console.error('Error sending message to N8N:', error);
       setMessages(prev => prev.map(m => 
         m.id === (Date.now() + 1).toString() 
-        ? { ...m, content: "Error connecting to NSG Intelligence." } : m
+          ? { ...m, content: "Error: Could not connect to NSG Intelligence. Please try again later." } 
+          : m
       ));
     } finally {
       setIsLoading(false);
@@ -168,27 +167,8 @@ export default function ChatInterface() {
       </div>
 
       {/* --- LAYER 2: CHAT BODY --- */}
-      <div className="flex-1 overflow-y-auto custom-scroll p-6 lg:p-12 pt-32 lg:pt-40 space-y-8">
+      <div className="flex-1 overflow-y-auto custom-scroll p-6 lg:p-12 pt-24 lg:pt-32 space-y-8">
         
-        {/* Context Header Card */}
-        <div className="bg-white p-6 lg:p-8 rounded-4xl shadow-sovereign max-w-[95%] lg:max-w-[85%] border border-slate-100 flex gap-6 items-start animate-fade-in-up mx-auto">
-           <div className="w-10 h-10 relative shrink-0 atom-container">
-               <div className="w-full h-full atom-breathe">
-                   <svg viewBox="0 0 100 100" className="w-full h-full text-navy-900">
-                       <circle cx="50" cy="50" r="42" className="morph-orbit orbit-1 ui-orbit" stroke="currentColor"/>
-                       <circle cx="50" cy="50" r="42" className="morph-orbit orbit-2 ui-orbit" stroke="currentColor"/>
-                       <circle cx="50" cy="50" r="14" fill="#3B82F6"/>
-                   </svg>
-               </div>
-           </div>
-           <div>
-               <p className={`text-sm font-bold ${colorClass} mb-2`}>{title}</p>
-               <p className="text-sm text-slate-600 leading-relaxed">
-                 {isContextCached ? subtitle : "Estableciendo conexión neuronal con base de datos..."}
-               </p>
-           </div>
-        </div>
-
         {/* Messages List */}
         {messages.map((msg) => (
           <div key={msg.id} className={clsx("flex w-full animate-fade-in-up", msg.role === 'user' ? "justify-end" : "justify-start")}>
