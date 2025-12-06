@@ -14,7 +14,7 @@ import {
 import DynamicIsland from '@/components/layout/DynamicIsland';
 import clsx from 'clsx';
 import NewsAnalysisResult from './NewsAnalysisResult';
-import axiosInstance from '@/api/axios';
+import axios from 'axios';
 
 // Extended Message Type to support your Analysis Cards AND standard text
 export interface Message {
@@ -43,36 +43,12 @@ export default function ChatInterface() {
   // Refs for scrolling
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // 3. INITIALIZE CONTEXT (Your Backend Logic)
+  // 3. INITIALIZE CONTEXT (Simple - no Gemini dependency)
   useEffect(() => {
-    const initContext = async () => {
-      setContextCached(false);
-      setCacheName(null);
-      setMessages([]); // Clear messages on role switch
-      
-      try {
-        const res = await fetch('/api/context', {
-          method: 'POST',
-          body: JSON.stringify({ role: currentRole }),
-        });
-        const data = await res.json();
-        if (data.cacheName) {
-          setCacheName(data.cacheName);
-          setContextCached(true);
-        } else {
-          // Fallback if cache creation failed
-          setContextCached(true);
-        }
-      } catch (error) {
-        console.error("Failed to init context:", error);
-        setContextCached(true); // Allow proceed anyway
-      }
-    };
-
-    if (currentRole) {
-      initContext();
-    }
-  }, [currentRole, setContextCached]);
+    // Set context as ready immediately - N8N will handle the rest
+    setContextCached(true);
+    setCacheName('n8n-managed');
+  }, [setContextCached]);
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -83,8 +59,14 @@ export default function ChatInterface() {
 
   // 5. HANDLER (Merged Logic: UI Updates + API Stream)
   const handleSubmit = async (e: React.FormEvent) => {
+    console.log('handleSubmit called!');
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    console.log('Form prevented default');
+    if (!input.trim() || isLoading) {
+      console.log('Early return - input:', input.trim(), 'isLoading:', isLoading);
+      return;
+    }
+    console.log('Proceeding with submission...');
 
     // Add User Message immediately
     const userMessage: Message = {
@@ -108,7 +90,9 @@ export default function ChatInterface() {
       };
       setMessages(prev => [...prev, assistantMessage]);
 
-      console.log('Sending message to N8N webhook...');
+      // Use local API proxy to avoid CORS and hide upstream URL
+      const webhookUrl = '/api/chat';
+      console.log('Using API Proxy:', webhookUrl);
       
       // Prepare the request data
       const requestData = {
@@ -128,16 +112,34 @@ export default function ChatInterface() {
 
       // Make the POST request to N8N webhook
       console.log('Request data:', JSON.stringify(requestData, null, 2));
-      const response = await axiosInstance.post('', requestData);
+      console.log('About to make POST request to:', webhookUrl);
+      
+      const response = await axios.post(webhookUrl, requestData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      console.log('Response received:', response.status, response.data);
 
       // Process the response
       const responseData = response.data;
       
       let assistantContent;
+      let messageType: 'text' | 'analysis' = 'text';
+      let messageMetadata = {};
       
       if (responseData.message === "Workflow was started") {
         assistantContent = "⚠️ **Configuration Issue:** The N8N workflow started successfully, but returned the default message. \n\nTo fix this, add a **Respond to Webhook** node at the end of your N8N workflow to return the AI's response.";
       } else {
+        // Support structured responses from N8N (allowing the flowchart to control UI mode)
+        if (responseData.type === 'analysis' || responseData.type === 'text') {
+            messageType = responseData.type;
+        }
+        if (responseData.metadata) {
+            messageMetadata = responseData.metadata;
+        }
+
+        // Flexible content extraction
         assistantContent = responseData.response || responseData.output || 
                                responseData.content || responseData.text || 
                                responseData.message ||
@@ -148,16 +150,35 @@ export default function ChatInterface() {
       setMessages(prev => 
         prev.map(m => 
           m.id === assistantMessage.id 
-            ? { ...m, content: assistantContent }
+            ? { ...m, content: assistantContent, type: messageType, metadata: messageMetadata }
             : m
         )
       );
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending message to N8N:', error);
+      
+      let errorMessage = "Error: Could not connect to NSG Intelligence.";
+      
+      // Handle N8N 404 specifically (Workflow not listening)
+      if (error.response && error.response.status === 404) {
+           errorMessage = "⚠️ **Workflow Not Active:** The N8N test URL is not listening.\n\nPlease go to N8N and click **'Listen for Event'** (or Execute), then try again.";
+      } 
+      // Handle other server errors
+      else if (error.response && error.response.data) {
+           const logData = error.response.data;
+           console.error('Server detailed error:', JSON.stringify(logData, null, 2));
+           
+           if (logData.error) {
+               errorMessage = `Server Error: ${logData.error}`;
+           }
+      } else if (error.message) {
+           errorMessage = `Connection Error: ${error.message}`;
+      }
+
       setMessages(prev => prev.map(m => 
         m.id === (Date.now() + 1).toString() 
-          ? { ...m, content: "Error: Could not connect to NSG Intelligence. Please try again later." } 
+          ? { ...m, content: errorMessage } 
           : m
       ));
     } finally {
@@ -269,6 +290,7 @@ export default function ChatInterface() {
                         <button 
                             type="submit" 
                             disabled={isLoading || !input.trim()}
+                            onClick={() => console.log('Send button clicked!')}
                             className={`
                                 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300
                                 ${input.trim() ? 'bg-navy-900 text-white shadow-md hover:scale-105 hover:bg-blue-600' : 'bg-slate-100 text-slate-300 cursor-default'}
