@@ -97,15 +97,15 @@ export default function Sidebar() {
                       }}
                       className={clsx(
                         "w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium transition-all mb-1",
-                        // Special styling for Highlighted items vs Standard items
-                        item.special 
+                        // Remove default focus outline and white flash
+                        "focus:outline-none focus-visible:outline-none active:scale-[0.98]",
+                        // Apply blue gradient styling ONLY to active items (not special by default)
+                        isActive
                           ? "bg-gradient-to-r from-blue-900/40 to-navy-900/40 border border-blue-500/30 text-blue-300 shadow-glass hover:text-white" 
-                          : isActive 
-                              ? "bg-white/10 text-white shadow-md border border-white/5" 
-                              : "text-slate-400 hover:bg-white/5 hover:text-white hover:translate-x-1"
+                          : "text-slate-400 hover:bg-white/5 hover:text-white hover:translate-x-1 border border-transparent"
                       )}
                   >
-                      <Icon className={clsx("w-5 h-5", isActive || item.special ? "text-blue-400" : "text-slate-500 group-hover:text-white")} />
+                      <Icon className={clsx("w-5 h-5", isActive ? "text-blue-400" : "text-slate-500 group-hover:text-white")} />
                       {item.label}
                   </Link>
               );
@@ -118,9 +118,12 @@ export default function Sidebar() {
               <span>Precision Status</span>
               <span className="text-emerald-500 font-bold flex items-center gap-1"><Activity className="w-3 h-3" /> Optimal</span>
            </div>
-           <button className="flex items-center gap-3 text-sm font-medium hover:text-white transition w-full p-2.5 rounded-lg hover:bg-white/5 text-slate-400 group">
+           <Link 
+              href="/" 
+              className="flex items-center gap-3 text-sm font-medium hover:text-white transition w-full p-2.5 rounded-lg hover:bg-white/5 text-slate-400 group"
+           >
               <LogOut className="w-4 h-4 group-hover:text-red-400 transition" /> Cerrar Sesión
-           </button>
+           </Link>
         </div>
       </aside>
     </>
