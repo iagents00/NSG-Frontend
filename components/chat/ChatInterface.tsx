@@ -239,11 +239,12 @@ export default function ChatInterface() {
         {/* Loading State (Thinking...) */}
         {/* Loading State (Atom) */}
         {isLoading && !messages[messages.length - 1]?.content && (
-            <div className="flex flex-col items-center justify-center mt-4 animate-fade-in-up w-full max-w-3xl mx-auto">
-                <div className="flex items-center gap-3 self-start pl-6">
-                    <Atom className="w-6 h-6 text-[#1f1f1f] animate-spin" />
-                    <span className="text-sm font-medium text-slate-500 animate-pulse">Pensando...</span>
+            <div className="flex flex-col items-center justify-center mt-8 animate-fade-in-up w-full max-w-3xl mx-auto gap-4">
+                <div className="relative flex items-center justify-center">
+                    <Atom className="w-12 h-12 text-[#1f1f1f] animate-[spin_1s_linear_infinite]" />
+                    {/* Inner detail for atom look if needed, or just the icon */}
                 </div>
+                <span className="text-sm font-medium text-slate-500 animate-pulse tracking-wide">PENSANDO...</span>
             </div>
         )}
         
