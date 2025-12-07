@@ -11,7 +11,7 @@ export async function POST(req: Request) {
     
     // Check if we want to use the TEST webhook (for debugging in N8N editor)
     // Switched to FALSE for PRODUCTION usage (Requires Workflow to be Active)
-    const isTestMode = true; 
+    const isTestMode = false; 
     
     const n8nUrl = isTestMode 
         ? `${BASE_URL}/webhook-test/${PATH}`

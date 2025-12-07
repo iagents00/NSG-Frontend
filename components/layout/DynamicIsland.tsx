@@ -4,6 +4,7 @@ import { useAppStore } from "@/store/useAppStore";
 import { Activity, ChevronDown } from "lucide-react";
 import { CONTEXT, RoleType } from "@/data/context";
 import { Dispatch, SetStateAction, useState, useEffect, useRef } from "react";
+import clsx from "clsx";
 
 interface DynamicIslandProps {
   currentMode: string;
@@ -14,6 +15,20 @@ export default function DynamicIsland({ currentMode, setMode }: DynamicIslandPro
   const { currentRole, isContextCached } = useAppStore();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Close only if clicking outside
+  const handleSelect = (modeId: string) => {
+      setMode(modeId);
+      // Optional: don't close immediately to allow browsing? Or close nicely?
+      // User asked: "select the field - Keep the blue once selected" 
+      // It implies we can see the selection. Let's keep it open for a moment or let user close it.
+      // But typical UI is close on select. Let's close it but maybe after delay or just close.
+      // Wait, "scroll horizontally and select the field - Keep the blue once selected" might mean the list stays visible?
+      // Just select and highlight.
+      // I will close it to keep UI clean, but the pill reflects the selection.
+      // Actually, if I show ALL items when open, highlighting the active one is nice.
+      setIsOpen(false); 
+  };
 
   // Get menu items for current role
   const roleKey = (currentRole as RoleType) || 'consultant';
@@ -40,84 +55,119 @@ export default function DynamicIsland({ currentMode, setMode }: DynamicIslandPro
     };
   }, [isOpen]);
 
+  // Background Backdrop to prevent intersection
+  const Backdrop = () => (
+    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[150%] bg-slate-950/80 backdrop-blur-xl blur-lg rounded-[100%] pointer-events-none -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+  );
+
   return (
-
-    <div className="relative z-50" ref={containerRef}>
-      <div className={`
-        relative flex items-center gap-3 px-5 py-2.5 
-        bg-slate-950/90 backdrop-blur-xl border border-white/10 
-        rounded-full shadow-island 
-        transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
-        ${isOpen ? 'rounded-b-none rounded-[28px]' : 'rounded-full hover:scale-[1.02]'}
-      `}>
-        {/* Mode Selector */}
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 group"
-        >
-          {(() => {
-            const Icon = currentModeItem?.icon || Activity;
-            return <Icon className="w-3.5 h-3.5 text-blue-400 transition-transform group-hover:scale-110" />;
-          })()}
-          <span className="text-[13px] font-medium text-slate-200 group-hover:text-blue-400 transition-colors">
-            {currentModeLabel}
-          </span>
-          <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-300 ease-out ${isOpen ? 'rotate-180' : ''}`} />
-        </button>
-      </div>
-
-      {/* Dropdown Menu - Connected Surface */}
+    <div className="relative z-50 flex flex-col items-center justify-center p-2" ref={containerRef}>
+      {/* Scrim/Background - Absolute to respect container/modal rounds */}
+      <div className="absolute top-0 left-0 w-full h-32 bg-linear-to-b from-slate-50/90 via-slate-50/50 to-transparent pointer-events-none z-[-1]" aria-hidden="true" />
+      
       <div 
         className={`
-          absolute top-full left-0 w-full mt-[-1px] pt-2 pb-3
-          bg-slate-950/90 backdrop-blur-xl border-x border-b border-white/10
-          rounded-b-[24px] shadow-2xl overflow-hidden
-          transition-all duration-300 origin-top
-          ${isOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'}
+           relative flex items-center transition-all duration-200 ease-out
+           ${isOpen ? 'w-auto' : 'w-auto'}
         `}
       >
-        <div className="flex flex-col gap-1 px-1">
-          {/* Standard Mode */}
+        <div className={`
+            flex items-center p-1.5 gap-1.5 
+            bg-[#0F172A] backdrop-blur-xl border border-white/10 
+            rounded-full shadow-lg shadow-blue-900/10 
+            transition-all duration-200 ease-out overflow-hidden
+            ${isOpen ? 'pl-2 pr-2' : 'pl-4 pr-3 hover:scale-[1.02]'}
+        `}>
+          
+          {/* Active Item / Toggle Trigger */}
           <button
-            onClick={() => {
-              setMode('standard');
-              setIsOpen(false);
-            }}
+            onClick={() => setIsOpen(!isOpen)}
             className={`
-              w-full px-4 py-2.5 rounded-full text-left text-[13px] font-medium transition-all flex items-center gap-3
-              ${currentMode === 'standard' 
-                ? 'bg-blue-600/20 text-blue-400' 
-                : 'text-slate-300 hover:bg-slate-800/50 hover:text-white'}
+              flex items-center gap-2.5 rounded-full transition-all duration-300
+              ${isOpen ? 'mr-0' : ''}
+              group relative
             `}
           >
-            <Activity className="w-4 h-4" />
-            Standard
+            {/* The active icon */}
+            <div className={`
+              flex items-center justify-center w-8 h-8 rounded-full 
+              bg-linear-to-br from-blue-500/20 to-indigo-500/20 text-blue-400
+              transition-transform duration-300
+            `}>
+                {(() => {
+                  const Icon = currentModeItem?.icon || Activity;
+                  return <Icon className="w-4 h-4" />;
+                })()}
+            </div>
+            
+             <div className="flex flex-col items-start mr-1">
+                  <span className={`text-[13px] font-semibold tracking-wide transition-colors duration-300 ${isOpen ? 'text-blue-400' : 'text-blue-100'}`}>
+                    {currentModeLabel}
+                  </span>
+                 {/* Indicator of mode type if needed, or just removed for clean look */}
+            </div>
+
+            <ChevronDown 
+              className={`
+                w-4 h-4 text-slate-400 transition-transform duration-300 ease-out 
+                ${isOpen ? 'rotate-90 opacity-0 w-0 h-0 overflow-hidden ml-0' : 'rotate-0 ml-1'}
+              `} 
+            />
           </button>
 
-          {/* Menu Items */}
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            return (
+          {/* Expanded Options (Horizontal) */}
+            <div 
+              className={`
+                flex items-center gap-1 transition-all duration-200 ease-out overflow-hidden
+                ${isOpen ? 'max-w-lg opacity-100 translate-x-0 overflow-x-auto scrollbar-hide' : 'max-w-0 opacity-0 -translate-x-2'}
+              `}
+            >
+              <div className="w-px h-6 bg-white/10 mx-1 shrink-0" /> {/* Divider */}
+
+              {/* Standard Mode Option */}
               <button
-                key={item.id}
-                onClick={() => {
-                  setMode(item.id);
-                  setIsOpen(false);
-                }}
-                className={`
-                  w-full px-4 py-2.5 rounded-full text-left text-[13px] font-medium transition-all flex items-center gap-3
-                  ${currentMode === item.id 
-                    ? 'bg-blue-600/20 text-blue-400' 
-                    : 'text-slate-300 hover:bg-slate-800/50 hover:text-white'}
-                `}
+                 onClick={() => {
+                   setMode('standard');
+                 }}
+                 className={clsx(
+                    "px-3 py-1.5 rounded-full text-[13px] font-medium transition-all whitespace-nowrap shrink-0",
+                    currentMode === 'standard' 
+                        ? "bg-blue-500/20 text-blue-400 ring-1 ring-blue-500/30" 
+                        : "text-slate-400 hover:text-white hover:bg-white/5"
+                 )}
               >
-                <Icon className="w-4 h-4" />
-                {item.label}
+                 Standard
               </button>
-            );
-          })}
+
+              {menuItems.map((item) => (
+                   <button
+                     key={item.id}
+                     onClick={() => {
+                       setMode(item.id);
+                     }}
+                     className={clsx(
+                        "px-3 py-1.5 rounded-full text-[13px] font-medium transition-all whitespace-nowrap shrink-0",
+                        currentMode === item.id 
+                            ? "bg-blue-500/20 text-blue-400 ring-1 ring-blue-500/30" 
+                            : "text-slate-400 hover:text-white hover:bg-white/5"
+                     )}
+                   >
+                     {item.label}
+                   </button>
+              ))}
+            </div>
         </div>
       </div>
+      {/* Scrollbar hide styles */}
+      <style jsx>{`
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+      `}</style>
     </div>
   );
 }
