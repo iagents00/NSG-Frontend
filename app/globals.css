@@ -46,11 +46,10 @@
   --foreground: #0F172A;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0B1121;
-    --foreground: #ededed;
-  }
+/* Dark Mode (Auth Style) */
+.dark {
+  --background: #020617; /* navy-950 */
+  --foreground: #F1F5F9; /* slate-100 */
 }
 
 /* --- CORE STYLES --- */

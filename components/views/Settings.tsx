@@ -5,9 +5,18 @@ import { useToast } from "@/components/ui/ToastProvider";
 import clsx from "clsx";
 import axios from "axios";
 
+import { useAppStore } from "@/store/useAppStore";
+
 export default function Settings() {
   const { showToast } = useToast();
+  const { theme, setTheme } = useAppStore(); // Connect to store
   
+  const toggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    showToast(`Tema cambiado a ${newTheme === 'dark' ? 'Oscuro' : 'Claro'}`, 'success');
+  };
+
   // PDF Upload State
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -134,6 +143,7 @@ export default function Settings() {
             desc="Alertas basadas en contexto y prioridad." 
             color="blue" 
             active={true} 
+            onClick={() => showToast('Preferencia de notificaciones actualizada', 'info')}
           />
           <ToggleItem 
             icon={Shield} 
@@ -141,17 +151,19 @@ export default function Settings() {
             desc="Ocultar datos sensibles en dashboard compartido." 
             color="purple" 
             active={false} 
+            onClick={() => showToast('Preferencia de privacidad actualizada', 'info')}
           />
           <ToggleItem 
             icon={Moon} 
-            title="Modo Oscuro Automático" 
-            desc="Sincronizar con el sistema operativo." 
+            title="Modo Oscuro" 
+            desc="Activar interfaz oscura estilo Auth." 
             color="orange" 
-            active={true} 
+            active={theme === 'dark'} 
+            onClick={toggleTheme}
           />
         </div>
       </div>
-
+      
       {/* 2. PDF Upload Card */}
       <div className="bg-white p-8 rounded-[2.5rem] shadow-card border border-slate-200">
         <h3 className="font-display font-bold text-xl text-navy-900 mb-6">Subir Documentos</h3>
@@ -240,6 +252,7 @@ export default function Settings() {
           </button>
         </div>
       </div>
+
     </div>
   );
 }
@@ -251,11 +264,10 @@ interface ToggleItemProps {
     desc: string;
     color: 'blue' | 'purple' | 'orange';
     active: boolean;
+    onClick?: () => void;
 }
 
-function ToggleItem({ icon: Icon, title, desc, color, active }: ToggleItemProps) {
-  const { showToast } = useToast();
-
+function ToggleItem({ icon: Icon, title, desc, color, active, onClick }: ToggleItemProps) {
   // Explicit mapping allows Tailwind to scan these classes correctly
   const styles = {
     blue: {
@@ -280,7 +292,7 @@ function ToggleItem({ icon: Icon, title, desc, color, active }: ToggleItemProps)
             "flex items-center justify-between p-5 bg-white rounded-2xl border border-slate-200 transition-colors group cursor-pointer",
             currentStyle.container
         )} 
-        onClick={() => showToast('Preferencia actualizada', 'info')}
+        onClick={onClick}
     >
       <div className="flex items-center gap-4">
         <div className={clsx("p-3 rounded-xl transition-colors", currentStyle.iconBox)}>

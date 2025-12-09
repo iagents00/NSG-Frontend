@@ -20,8 +20,8 @@ export default function LandingPage() {
   // Logic for the profile selection buttons
   const selectProfile = (profile: string) => {
     console.log(`Profile selected: ${profile}`);
-    setRole(profile as any); // Set the role in global state
-    router.push('/dashboard'); // Navigate to dashboard
+    // Redirect to Auth page with selected role
+    router.push(`/auth/login?role=${profile}`);
   };
 
   return (

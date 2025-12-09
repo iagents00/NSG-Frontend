@@ -26,6 +26,10 @@ export const metadata: Metadata = {
   description: "Cognitive Infrastructure for Enterprise",
 };
 
+import ThemeProvider from "@/components/providers/ThemeProvider";
+
+// ... existing imports
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -33,8 +37,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={`${inter.variable} ${jakarta.variable} ${mono.variable} antialiased h-full`}>
-      <body className="h-full overflow-hidden bg-slate-50 text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900">
-        <ToastProvider>{children}</ToastProvider>
+      <body className="h-full overflow-hidden font-sans selection:bg-blue-100 selection:text-blue-900">
+        <ThemeProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
