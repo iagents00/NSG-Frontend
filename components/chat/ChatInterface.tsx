@@ -16,6 +16,7 @@ import clsx from 'clsx';
 import BrandAtom from '@/components/ui/BrandAtom';
 import AtomEffect from '@/components/ui/AtomEffect';
 import NewsAnalysisResult from './NewsAnalysisResult';
+import ModelSelectorTabs from './ModelSelectorTabs';
 import axios from 'axios';
 
 // Extended Message Type to support your Analysis Cards AND standard text
@@ -229,9 +230,7 @@ export default function ChatInterface() {
                             roleContext={msg.metadata?.roleContext}
                             />
                         ) : (
-                            <div className="text-[16px] text-[#1f1f1f] leading-8 font-normal tracking-normal">
-                                <p className="whitespace-pre-wrap">{msg.content}</p>
-                            </div>
+                            <ModelSelectorTabs content={msg.content} />
                         )}
                     </div>
                 </div>

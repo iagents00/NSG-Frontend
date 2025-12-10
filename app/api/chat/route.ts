@@ -6,19 +6,24 @@ export async function POST(req: Request) {
     // const body = await req.json(); // Moved parsing logic down
     
     // URL Configuration
+    // Use environment variable if available, otherwise fallback to hardcoded default
+    const envWebhook = process.env.N8N_WEBHOOK;
     const BASE_URL = 'https://personal-n8n.suwsiw.easypanel.host';
     const PATH = 'ngs-intelligence';
     
     // Check if we want to use the TEST webhook (for debugging in N8N editor)
-    // Switched to FALSE for PRODUCTION usage (Requires Workflow to be Active)
     const isTestMode = false; 
     
-    const n8nUrl = isTestMode 
-        ? `${BASE_URL}/webhook-test/${PATH}`
-        : `${BASE_URL}/webhook/${PATH}`;
+    let n8nUrl = envWebhook;
+
+    if (!n8nUrl) {
+         n8nUrl = isTestMode 
+            ? `${BASE_URL}/webhook-test/${PATH}`
+            : `${BASE_URL}/webhook/${PATH}`;
+    }
     
     console.log('\n--- 🚀 POSTING TO N8N WEBHOOK (AXIOS) ---');
-    console.log(`Mode: ${isTestMode ? 'TEST (Editor Listening)' : 'PRODUCTION (Active Workflow)'}`);
+    console.log(`Mode: ${envWebhook ? 'ENV VAR (N8N_WEBHOOK)' : (isTestMode ? 'TEST (Editor Listening)' : 'PRODUCTION (Active Workflow)')}`);
     console.log('Target URL:', n8nUrl);
     
     // Safety check
