@@ -27,6 +27,7 @@ export const metadata: Metadata = {
 };
 
 import ThemeProvider from "@/components/providers/ThemeProvider";
+import TokenVerifier from "@/components/auth/TokenVerifier";
 
 // ... existing imports
 
@@ -37,9 +38,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={`${inter.variable} ${jakarta.variable} ${mono.variable} antialiased h-full`} suppressHydrationWarning>
-      <body className="h-full overflow-hidden font-sans selection:bg-blue-100 selection:text-blue-900">
+      <body className="h-full overflow-hidden font-sans selection:bg-blue-100 selection:text-blue-900" suppressHydrationWarning>
         <ThemeProvider>
-          <ToastProvider>{children}</ToastProvider>
+          <TokenVerifier>
+            <ToastProvider>{children}</ToastProvider>
+          </TokenVerifier>
         </ThemeProvider>
       </body>
     </html>

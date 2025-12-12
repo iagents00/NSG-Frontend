@@ -5,7 +5,8 @@ import { useUIStore } from "@/store/useUIStore"; // Imported for mobile toggling
 import { CONTEXT } from "@/data/context";
 import { LogOut, Activity, X } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { authService } from "@/lib/auth";
 import clsx from "clsx";
 import BrandAtom from "@/components/ui/BrandAtom";
 
@@ -14,6 +15,7 @@ export default function Sidebar() {
   const { currentRole } = useAppStore();
   const { isSidebarOpen, toggleSidebar } = useUIStore(); // Controls mobile state
   const pathname = usePathname();
+  const router = useRouter();
   
   // Safety check: fallback to 'paciente' or handle null if store is empty initially
   const roleKey = currentRole || 'paciente';
@@ -131,12 +133,15 @@ export default function Sidebar() {
               <span>Precision Status</span>
               <span className="text-emerald-500 font-bold flex items-center gap-1"><Activity className="w-3 h-3" /> Optimal</span>
            </div>
-           <Link 
-              href="/" 
-              className="flex items-center gap-3 text-sm font-medium hover:text-white transition w-full p-2.5 rounded-lg hover:bg-white/5 text-slate-400 group cursor-pointer"
+           <button 
+              onClick={() => {
+                authService.logout();
+                router.push('/auth/login');
+              }}
+              className="flex items-center gap-3 text-sm font-medium hover:text-white transition w-full p-2.5 rounded-lg hover:bg-white/5 text-slate-400 group cursor-pointer text-left"
            >
               <LogOut className="w-4 h-4 group-hover:text-red-400 transition" /> Cerrar Sesión
-           </Link>
+           </button>
         </div>
       </aside>
     </>

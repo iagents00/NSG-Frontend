@@ -74,7 +74,7 @@ function RegisterContent() {
             
             {/* Header Section */}
             <div className="flex flex-col items-center text-center mb-6">
-                <BrandAtom className="w-12 h-12 mb-2 text-blue-600" />
+                <BrandAtom className="w-12 h-12 mb-2" variant="colored" />
                 
                 <div className="space-y-1">
                     <h1 className="font-display font-medium text-slate-900 text-2xl tracking-tight">

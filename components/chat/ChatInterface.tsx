@@ -10,7 +10,9 @@ import {
   Sparkles, 
   Loader2,
   Bot,
-  BrainCircuit
+  BrainCircuit,
+  X,
+  FileText
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -37,7 +39,7 @@ export interface Message {
 
 export default function ChatInterface() {
   // 1. GLOBAL STATE
-  const { currentRole, isContextCached, setContextCached } = useAppStore();
+  const { currentRole, isContextCached, setContextCached, userId } = useAppStore();
   
   // 2. LOCAL STATE
   const [cacheName, setCacheName] = useState<string | null>(null);
@@ -47,6 +49,12 @@ export default function ChatInterface() {
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
   const [mode, setMode] = useState('standard'); 
   const [selectedModel, setSelectedModel] = useState('Chat GPT');
+
+  // Attachment & Audio State
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
 
   // Derived state for current view
   const messages = conversations[mode] || [];
@@ -98,6 +106,53 @@ export default function ChatInterface() {
 
 
 
+  const handleFileSelect = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setAttachment(e.target.files[0]);
+    }
+  };
+
+  const handleRemoveAttachment = () => {
+    setAttachment(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleMicClick = async () => {
+    if (isRecording) {
+        mediaRecorderRef.current?.stop();
+        setIsRecording(false);
+    } else {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const mediaRecorder = new MediaRecorder(stream);
+            mediaRecorderRef.current = mediaRecorder;
+            const audioChunks: BlobPart[] = [];
+
+            mediaRecorder.ondataavailable = (event) => {
+                audioChunks.push(event.data);
+            };
+
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                const audioFile = new File([audioBlob], "voice_message.webm", { type: "audio/webm" });
+                setAttachment(audioFile);
+                // Optional: Stop tracks to release mic
+                stream.getTracks().forEach(track => track.stop());
+            };
+
+            mediaRecorder.start();
+            setIsRecording(true);
+        } catch (err) {
+            console.error("Error accessing microphone:", err);
+            alert("Could not access microphone. Please allow permissions.");
+        }
+    }
+  };
+
   // 5. HANDLER (Merged Logic: UI Updates + API Stream)
   const handleSubmit = async (e: React.FormEvent) => {
     console.log('handleSubmit called!');
@@ -107,7 +162,7 @@ export default function ChatInterface() {
     const activeMode = mode;
     const activeMessages = messages; // Snapshot of current messages for context
 
-    if (!input.trim() || isLoading) {
+    if ((!input.trim() && !attachment) || isLoading) {
       return;
     }
 
@@ -116,11 +171,13 @@ export default function ChatInterface() {
       id: Date.now().toString(),
       role: 'user',
       type: 'text',
-      content: input.trim(),
+      content: attachment ? `[Attached: ${attachment.name}] ${input.trim()}` : input.trim(),
     };
 
     updateMessages(activeMode, prev => [...prev, userMessage]);
     setInput('');
+    setAttachment(null); // Clear attachment immediately from UI (it's in the request now)
+    if (fileInputRef.current) fileInputRef.current.value = '';
     setLoading(activeMode, true);
 
     try {
@@ -136,25 +193,39 @@ export default function ChatInterface() {
       // Use local API proxy
       const webhookUrl = '/api/chat';
       
-      // Prepare the request data
-      const requestData = {
-        message: input.trim(),
-        context: {
-          role: currentRole,
-          mode: activeMode, // Send the captured mode
-          cacheName: cacheName,
-          // Use the snapshot + new message
-          messageHistory: [...activeMessages, userMessage].map(m => ({
-            role: m.role,
-            content: m.content,
-            type: m.type,
-            metadata: m.metadata
-          }))
-        }
+      let requestData;
+      let headers = { 'Content-Type': 'application/json' };
+
+      const contextData = {
+        role: currentRole,
+        mode: activeMode,
+        cacheName: cacheName,
+        messageHistory: [...activeMessages, userMessage].map(m => ({
+          role: m.role,
+          content: m.content,
+          type: m.type,
+          metadata: m.metadata
+        }))
       };
 
+      if (attachment) {
+          const formData = new FormData();
+          formData.append('file', attachment);
+          formData.append('message', input.trim());
+          formData.append('userId', userId); // Send User ID
+          formData.append('context', JSON.stringify(contextData));
+          requestData = formData;
+          headers = { 'Content-Type': 'multipart/form-data' }; // axios sets boundary automatically usually, but good to be explicit or let axios handle it
+      } else {
+          requestData = {
+              message: input.trim(),
+              userId: userId, // Send User ID
+              context: contextData
+          };
+      }
+
       const response = await axios.post(webhookUrl, requestData, {
-        headers: { 'Content-Type': 'application/json' },
+        headers: attachment ? undefined : headers, // Let browser set multipart headers with boundary
       });
 
       // Process the response
@@ -368,34 +439,70 @@ export default function ChatInterface() {
             ) : (
                 <form onSubmit={handleSubmit} className="relative group">
                     <div className="relative flex flex-col bg-[#f0f4f9] rounded-[28px] hover:bg-[#e9eef6] transition-colors duration-200 border border-transparent focus-within:bg-white focus-within:shadow-md focus-within:border-slate-200">
+                        {/* Attachment Preview */}
+                        {attachment && (
+                            <div className="px-6 pb-2 pt-0 flex">
+                                <div className="flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full text-sm animate-fade-in">
+                                    <FileText className="w-4 h-4" />
+                                    <span className="max-w-[150px] truncate">{attachment.name}</span>
+                                    <button 
+                                        type="button"
+                                        onClick={handleRemoveAttachment}
+                                        className="ml-1 p-0.5 hover:bg-blue-100 rounded-full cursor-pointer"
+                                    >
+                                        <X className="w-3 h-3" />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Top: Input */}
                         <input 
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             disabled={isLoading}
                             className="w-full bg-transparent border-none pt-4 pb-2 px-6 font-normal text-[#1f1f1f] placeholder:text-slate-500 text-[16px] focus:ring-0 focus:outline-none disabled:opacity-50" 
-                            placeholder={`Pregunta a ${currentRole || 'NSG'}...`}
+                            placeholder={isRecording ? "Grabando audio..." : (attachment ? "Añade un comentario..." : `Pregunta a ${currentRole || 'NSG'}...`)}
                             autoComplete="off" 
+                        />
+
+                        {/* Hidden File Input */}
+                        <input 
+                            type="file" 
+                            ref={fileInputRef}
+                            className="hidden"
+                            onChange={handleFileChange}
                         />
 
                         {/* Bottom: Icons & Send */}
                         <div className="flex justify-between items-center px-4 pb-3">
                             <div className="flex gap-1">
-                                <button type="button" className="p-2.5 text-slate-500 hover:bg-[#dce3f1] rounded-full transition-colors cursor-pointer">
+                                <button 
+                                    type="button" 
+                                    onClick={handleFileSelect}
+                                    className="p-2.5 text-slate-500 hover:bg-[#dce3f1] rounded-full transition-colors cursor-pointer"
+                                >
                                     <Paperclip className="w-5 h-5" />
                                 </button>
-                                <button type="button" className="p-2.5 text-slate-500 hover:bg-[#dce3f1] rounded-full transition-colors cursor-pointer">
+                                <button 
+                                    type="button" 
+                                    onClick={handleMicClick}
+                                    className={clsx(
+                                        "p-2.5 rounded-full transition-colors cursor-pointer",
+                                        isRecording ? "text-red-500 bg-red-100 hover:bg-red-200 animate-pulse" : "text-slate-500 hover:bg-[#dce3f1]"
+                                    )}
+                                >
                                     <Mic className="w-5 h-5" />
                                 </button>
                             </div>
 
                             <button 
                                 type="submit" 
-                                disabled={isLoading || !input.trim()}
+                                disabled={isLoading || (!input.trim() && !attachment)}
                                 onClick={() => console.log('Send button clicked!')}
                                 className={`
                                     w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300
-                                    ${input.trim() ? 'bg-[#0b57d0] text-white hover:bg-blue-700 cursor-pointer' : 'bg-transparent text-slate-400 cursor-default'}
+                                    ${(input.trim() || attachment) ? 'bg-[#0b57d0] text-white hover:bg-blue-700 cursor-pointer' : 'bg-transparent text-slate-400 cursor-default'}
                                 `}
                             >
                                 <ArrowUp className="w-5 h-5" />

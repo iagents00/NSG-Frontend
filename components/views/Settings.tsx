@@ -9,7 +9,7 @@ import { useAppStore } from "@/store/useAppStore";
 
 export default function Settings() {
   const { showToast } = useToast();
-  const { theme, setTheme } = useAppStore(); // Connect to store
+  const { theme, setTheme, userId } = useAppStore(); // Connect to store
   
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
@@ -55,6 +55,7 @@ export default function Settings() {
       formData.append('fileName', selectedFile.name);
       formData.append('fileSize', selectedFile.size.toString());
       formData.append('timestamp', new Date().toISOString());
+      formData.append('userId', userId);
 
       console.log('Uploading PDF (multipart):', selectedFile.name);
 

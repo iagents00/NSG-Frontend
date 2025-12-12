@@ -26,4 +26,26 @@ export const authService = {
     const response = await api.post<AuthResponse>('/auth/login', data);
     return response.data;
   },
+
+  verifySession: async () => {
+    if (typeof window !== 'undefined' && !localStorage.getItem('token')) {
+      return; 
+    }
+    try {
+      const response = await api.get('/auth/verify-token');
+      return response.data;
+    } catch (error: any) {
+      // Only remove token if the error is explicitly an authentication error (401)
+      if (typeof window !== 'undefined' && error.response && error.response.status === 401) {
+        localStorage.removeItem('token');
+      }
+      throw error;
+    }
+  },
+
+  logout: () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('token');
+    }
+  },
 };

@@ -16,6 +16,7 @@ interface AppState {
   isSidebarOpen: boolean;
   isContextCached: boolean;
   conversations: Record<Role, Message[]>;
+  userId: string;
   
   setRole: (role: Role) => void;
   setTheme: (theme: 'light' | 'dark' | 'neon' | 'system') => void;
@@ -38,6 +39,7 @@ export const useAppStore = create<AppState>()(
         manager: [],
         patient: [],
       },
+      userId: 'user_12345', // Default ID for demo/testing
 
       setRole: (role) => set({ currentRole: role }),
       setTheme: (theme) => set({ theme }),
@@ -61,7 +63,8 @@ export const useAppStore = create<AppState>()(
       partialize: (state) => ({ 
         currentRole: state.currentRole, 
         theme: state.theme,
-        conversations: state.conversations 
+        conversations: state.conversations,
+        userId: state.userId
       }),
     }
   )
