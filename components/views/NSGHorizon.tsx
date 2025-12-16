@@ -7,7 +7,7 @@ import {
   Layers, Calendar, Play, FileCheck, FileText, Zap, Cpu, 
   PenTool, ArrowUpRight, CheckSquare, ListTodo, PlusCircle,
   Folder, ArrowLeft, MoreHorizontal, ChevronRight,
-  Activity, Loader2
+  Activity, Loader2, CheckCircle
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -62,6 +62,7 @@ export default function NSGHorizon() {
   const [selectedFolder, setSelectedFolder] = useState<MeetingFolder | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [checkedItems, setCheckedItems] = useState<number[]>([]);
+  const [isConnected, setIsConnected] = useState(false);
 
   // Fetch Data on Mount
   useEffect(() => {
@@ -155,7 +156,16 @@ export default function NSGHorizon() {
     };
 
     fetchHorizonData();
+    fetchHorizonData();
   }, [userId]);
+
+  // Check connection status
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+        const connected = document.cookie.split('; ').some(row => row.startsWith('fathom_connected=true'));
+        setIsConnected(connected);
+    }
+  }, []);
 
   // Reset checked items when folder changes
   useEffect(() => {
@@ -205,15 +215,30 @@ export default function NSGHorizon() {
                 </p>
                 <div className="pt-2 flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                    <button 
-                     onClick={() => showToast('Conectando con Fathom...', 'info')}
-                     className="px-8 py-4 bg-white text-navy-900 rounded-2xl font-bold hover:bg-blue-50 transition transform hover:-translate-y-0.5 shadow-lg shadow-black/10 flex items-center gap-3 group"
+                     onClick={() => {
+                        if (isConnected) return;
+                        showToast('Redirigiendo a Fathom...', 'info');
+                        window.location.href = '/api/auth/fathom/connect';
+                     }}
+                     className={clsx(
+                       "px-8 py-4 rounded-2xl font-bold transition transform hover:-translate-y-0.5 shadow-lg flex items-center gap-3 group",
+                       isConnected 
+                        ? "bg-green-500 text-white hover:bg-green-600 shadow-green-200 cursor-default" 
+                        : "bg-white text-navy-900 hover:bg-blue-50 shadow-black/10"
+                     )}
                    >
-                     {/* Fathom Icon (Simulated) */}
-                     <div className="w-6 h-6 bg-gradient-to-tr from-orange-400 to-pink-500 rounded-lg flex items-center justify-center text-white">
-                        <Activity className="w-4 h-4" />
-                     </div>
-                     Conectar Fathom
-                     <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition" />
+                     {/* Fathom Icon or Check */}
+                     {isConnected ? (
+                        <CheckCircle className="w-6 h-6" />
+                     ) : (
+                        <div className="w-6 h-6 bg-gradient-to-tr from-orange-400 to-pink-500 rounded-lg flex items-center justify-center text-white">
+                            <Activity className="w-4 h-4" />
+                        </div>
+                     )}
+                     
+                     {isConnected ? "Fathom Conectado" : "Conectar Fathom"}
+                     
+                     {!isConnected && <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition" />}
                    </button>
                    <button className="px-6 py-4 bg-navy-800/50 text-white border border-white/10 rounded-2xl font-medium hover:bg-navy-800 transition">
                       Saber más

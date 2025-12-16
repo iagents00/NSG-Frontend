@@ -1,18 +1,20 @@
 import { NextResponse } from 'next/server';
 
+
 /**
  * Proxy for NSG Horizon Webhook
  * Path: /api/nsg-horizon
  */
-const BASE_URL = 'https://personal-n8n.suwsiw.easypanel.host';
-
-const getN8NUrl = (isTest: boolean) => 
-    `${BASE_URL}/${isTest ? 'webhook-test' : 'webhook'}/nsg-horizon`;
+const BASE_URL = process.env.NEXT_PUBLIC_N8N_WEBHOOK;
 
 export async function POST(req: Request) {
   try {
+    if (!BASE_URL) {
+      console.error("❌ CRITICAL: NEXT_PUBLIC_N8N_WEBHOOK is not defined in environment variables.");
+      return NextResponse.json({ error: "Server Configuration Error: Missing Webhook URL" }, { status: 500 });
+    }
+
     const body = await req.json();
-    
     // We expect { userId: string } in body, but pass whatever comes to n8n
     const fetchOptions: RequestInit = { 
         method: 'POST',
@@ -20,18 +22,11 @@ export async function POST(req: Request) {
         body: JSON.stringify(body)
     };
 
-    // Try Production URL first
-    const prodUrl = getN8NUrl(false);
-    console.log(`[NSG-Horizon Proxy] POST ${prodUrl}`);
+    // Use BASE_URL directly
+    const targetUrl = `${BASE_URL}/nsg-horizon`;
+    console.log(`[NSG-Horizon Proxy] POST ${targetUrl}`);
 
-    let response = await fetch(prodUrl, fetchOptions);
-
-    // If 404, try Test URL
-    if (response.status === 404) {
-        const testUrl = getN8NUrl(true);
-        console.warn(`[NSG-Horizon Proxy] Production 404. Retrying with Test Webhook: ${testUrl}`);
-        response = await fetch(testUrl, fetchOptions);
-    }
+    const response = await fetch(targetUrl, fetchOptions);
 
     if (!response.ok) {
         console.error(`[NSG-Horizon Proxy] N8N Error: ${response.status}`);

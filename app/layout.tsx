@@ -31,6 +31,10 @@ import TokenVerifier from "@/components/auth/TokenVerifier";
 
 // ... existing imports
 
+import { AuthProvider } from "@/components/providers/AuthProvider";
+
+// ... existing imports
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -40,9 +44,11 @@ export default function RootLayout({
     <html lang="es" className={`${inter.variable} ${jakarta.variable} ${mono.variable} antialiased h-full`} suppressHydrationWarning>
       <body className="h-full overflow-hidden font-sans selection:bg-blue-100 selection:text-blue-900" suppressHydrationWarning>
         <ThemeProvider>
-          <TokenVerifier>
-            <ToastProvider>{children}</ToastProvider>
-          </TokenVerifier>
+          <AuthProvider>
+            <TokenVerifier>
+              <ToastProvider>{children}</ToastProvider>
+            </TokenVerifier>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://nsg-backend.onrender.com',
+  baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -11,11 +11,8 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     // Log the request to the console
-    console.log(`API Request sent to ${config.url}:`, {
-      method: config.method,
-      data: config.data,
-      params: config.params,
-    });
+    // Simplified request logging
+    console.log(`🚀 Sending ${config.method?.toUpperCase()} request to ${config.url}`);
 
     // Add Authorization header if token exists
     if (typeof window !== 'undefined') {
@@ -34,6 +31,7 @@ api.interceptors.request.use(
 // Response interceptor
 api.interceptors.response.use(
   (response) => {
+    console.log(`API Response from ${response.config.url}:`, response.data);
     return response;
   },
   (error) => {

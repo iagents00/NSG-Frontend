@@ -4,14 +4,15 @@ import { NextResponse } from 'next/server';
  * Unified N8N Proxy Configuration
  * Centralizes connection logic for both Chat and Document services.
  */
-const BASE_URL = 'https://personal-n8n.suwsiw.easypanel.host';
-
-// Helper to construct URLs
-const getN8NUrl = (path: string, isTest: boolean) => 
-    `${BASE_URL}/${isTest ? 'webhook-test' : 'webhook'}/${path}`;
+const BASE_URL = process.env.NEXT_PUBLIC_N8N_WEBHOOK;
 
 export async function POST(req: Request) {
   try {
+    if (!BASE_URL) {
+      console.error("❌ CRITICAL: NEXT_PUBLIC_N8N_WEBHOOK is not defined in environment variables.");
+      return NextResponse.json({ error: "Server Configuration Error: Missing Webhook URL" }, { status: 500 });
+    }
+
     // 1. Determine Request Type & Target Path
     const contentType = req.headers.get('content-type') || '';
     const isMultipart = contentType.includes('multipart/form-data');
@@ -31,22 +32,13 @@ export async function POST(req: Request) {
         fetchOptions.headers = { 'Content-Type': 'application/json' };
     }
 
-    // 3. Execution with Fallback Strategy
-    // Strategy: Try Production Webhook first. If 404 (Inactive), try Test Webhook.
-    
-    const prodUrl = getN8NUrl(endpointPath, false);
-    console.log(`[Proxy] POST ${prodUrl} (${isMultipart ? 'Multipart' : 'JSON'})`);
+    // 3. Execution
+    // User manages the mode (test vs prod) via the env variable
+    // We expect BASE_URL to be the common path, e.g. "https://domain.com/webhook"
+    const targetUrl = `${BASE_URL}/${endpointPath}`;
+    console.log(`[Proxy] POST ${targetUrl}`);
 
-    let response = await fetch(prodUrl, fetchOptions);
-
-    if (response.status === 404) {
-        const testUrl = getN8NUrl(endpointPath, true);
-        console.warn(`[Proxy] Production 404. Retrying with Test Webhook: ${testUrl}`);
-        
-        // Clone options body if necessary (FormData is reusable in standard fetch, but good practice to be aware)
-        // In this context, re-using fetchOptions is safe.
-        response = await fetch(testUrl, fetchOptions);
-    }
+    const response = await fetch(targetUrl, fetchOptions);
 
     // 4. Handle Final Response
     if (!response.ok) {

@@ -54,7 +54,10 @@ export default function ChatInterface() {
   const [attachment, setAttachment] = useState<File | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+
+
 
   // Derived state for current view
   const messages = conversations[mode] || [];
@@ -74,6 +77,14 @@ export default function ChatInterface() {
   };
 
   const [input, setInput] = useState('');
+
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto'; // Reset to calculate shrinkage
+        textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`; // Limit max height
+    }
+  }, [input]);
   
   // Refs for scrolling
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -285,8 +296,12 @@ export default function ChatInterface() {
     <div className="flex flex-col h-full w-full relative">
       
       {/* --- LAYER 1: DYNAMIC ISLAND (Visuals) --- */}
-      <div className="absolute top-0 left-0 w-full flex justify-center pt-6 lg:pt-8 z-40 pointer-events-none">
-        <div className="pointer-events-auto">
+      {/* --- LAYER 1: DYNAMIC ISLAND (Visuals) --- */}
+      {/* Adjusted top padding to clear the "Volver" button on mobile */}
+      {/* Adjusted top padding to clear the "Volver" button on mobile */}
+      {/* Smooth transition for resize. md:pt-12 provides a bridge between mobile (20) and desktop (8) */}
+      <div className="absolute top-0 left-0 w-full flex justify-center pt-20 md:pt-12 lg:pt-8 z-40 pointer-events-none transition-all duration-500 ease-in-out">
+        <div className="pointer-events-auto w-full px-4 md:px-0 flex justify-center">
             <DynamicIsland 
                 currentMode={mode} 
                 setMode={setMode} 
@@ -297,7 +312,11 @@ export default function ChatInterface() {
       </div>
 
       {/* --- LAYER 2: CHAT BODY --- */}
-      <div className="flex-1 overflow-y-auto custom-scroll p-6 lg:p-12 pt-24 lg:pt-40 space-y-8">
+      {/* Increased top padding on mobile only. RESTORED PC: pt-24 (md) lg:pt-40 */}
+      {/* Added large bottom padding (pb-32/40) to allow scrolling above the fixed input bar */}
+      {/* Added large bottom padding (pb-32/40) to allow scrolling above the fixed input bar */}
+      {/* Adjusted top padding: Mobile (pt-60), Tablet (md:pt-44), PC (lg:pt-48) + Smooth Transition */}
+      <div className="flex-1 overflow-y-auto custom-scroll p-4 md:p-6 lg:p-12 pt-60 md:pt-44 lg:pt-48 pb-32 md:pb-40 space-y-6 md:space-y-8 transition-all duration-500 ease-in-out">
         
         {/* Messages List */}
         <div className="flex flex-col gap-8 max-w-3xl mx-auto w-full">
@@ -429,16 +448,17 @@ export default function ChatInterface() {
       </div>
 
       {/* --- LAYER 3: INPUT AREA (Stacked Gemini Style) --- */}
-      <div className="shrink-0 relative z-20 pt-6 pb-6 px-4">
+      {/* --- LAYER 3: INPUT AREA (Fixed Bottom Gemini Style) --- */}
+      <div className="absolute bottom-0 left-0 w-full z-40 px-4 pb-4 md:pb-6 pt-12 bg-gradient-to-t from-[#f0f4f9] via-[#f0f4f9] via-60% to-transparent">
         <div className="max-w-3xl mx-auto">
             {!isContextCached ? (
-                <div className="flex items-center justify-center gap-4 text-[15px] text-[#0b57d0] font-medium py-5 bg-[#f0f4f9] rounded-[24px] animate-pulse">
+                <div className="flex items-center justify-center gap-4 text-[15px] text-[#0b57d0] font-medium py-5 bg-white rounded-[24px] shadow-sm animate-pulse">
                     <Loader2 className="w-5 h-5 animate-spin" />
                     <span>Sincronizando Contexto de {currentRole?.toUpperCase()}...</span>
                 </div>
             ) : (
                 <form onSubmit={handleSubmit} className="relative group">
-                    <div className="relative flex flex-col bg-[#f0f4f9] rounded-[28px] hover:bg-[#e9eef6] transition-colors duration-200 border border-transparent focus-within:bg-white focus-within:shadow-md focus-within:border-slate-200">
+                    <div className="relative flex flex-col bg-white rounded-[28px] shadow-[0_4px_20px_rgba(0,0,0,0.08)] border border-slate-100 focus-within:shadow-[0_8px_30px_rgba(0,0,0,0.12)] focus-within:border-slate-200 transition-all duration-300">
                         {/* Attachment Preview */}
                         {attachment && (
                             <div className="px-6 pb-2 pt-0 flex">
@@ -456,14 +476,21 @@ export default function ChatInterface() {
                             </div>
                         )}
 
-                        {/* Top: Input */}
-                        <input 
+                        {/* Top: Input (Textarea for Multiline) */}
+                        <textarea
+                            ref={textareaRef}
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    handleSubmit(e as any);
+                                }
+                            }}
                             disabled={isLoading}
-                            className="w-full bg-transparent border-none pt-4 pb-2 px-6 font-normal text-[#1f1f1f] placeholder:text-slate-500 text-[16px] focus:ring-0 focus:outline-none disabled:opacity-50" 
+                            rows={1}
+                            className="w-full bg-transparent border-none pt-4 pb-2 px-6 font-normal text-[#1f1f1f] placeholder:text-slate-500 text-[16px] focus:ring-0 focus:outline-none disabled:opacity-50 resize-none custom-scroll" 
                             placeholder={isRecording ? "Grabando audio..." : (attachment ? "Añade un comentario..." : `Pregunta a ${currentRole || 'NSG'}...`)}
-                            autoComplete="off" 
                         />
 
                         {/* Hidden File Input */}

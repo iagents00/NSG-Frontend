@@ -32,12 +32,13 @@ export default function DynamicIsland({ currentMode, setMode, selectedModel, set
   return (
     <div className="relative z-50 flex flex-col items-center justify-center p-4 transition-all duration-500 ease-in-out gap-3" ref={containerRef}>
       
-      <div className="relative flex items-center justify-center w-full max-w-[calc(100vw-6rem)] md:max-w-3xl mx-auto">
+      <div className="relative flex items-center justify-center w-full max-w-[95vw] md:max-w-3xl mx-auto">
         <div className={clsx(
-            "flex flex-nowrap items-center p-2 gap-2 w-full",
+            "flex flex-nowrap items-center p-1.5 md:p-2 gap-1.5 md:gap-2 w-full md:w-auto",
             "bg-[#0F172A] backdrop-blur-xl border border-white/10",
-            "rounded-full shadow-lg shadow-blue-900/10",
-            "overflow-x-auto scrollbar-hide transition-all duration-500"
+            "rounded-2xl md:rounded-full shadow-lg shadow-blue-900/10",
+            "overflow-x-auto scrollbar-hide transition-all duration-500",
+            "justify-start" 
         )}>
            
            {allItems.map((item) => {
@@ -50,25 +51,24 @@ export default function DynamicIsland({ currentMode, setMode, selectedModel, set
                  key={item.id}
                  onClick={() => setMode(item.id)}
                  className={clsx(
-                    "flex items-center gap-2.5 px-5 py-2.5 rounded-full transition-all duration-300 ease-out whitespace-nowrap group relative shrink-0 cursor-pointer",
+                    "flex items-center gap-2 px-5 py-2.5 md:px-5 md:py-2.5 rounded-xl md:rounded-full transition-all duration-300 ease-out whitespace-nowrap group relative shrink-0 cursor-pointer",
                     isActive 
                         ? (isSpecial ? "bg-blue-600/10 text-blue-400" : "bg-blue-600/20 text-blue-400 ring-1 ring-blue-500/30") 
                         : "text-slate-400 hover:text-slate-200 hover:bg-white/5",
-                    // Increase prominence for active special item BUT NO EXTRA GLOW popups
-                    (isActive && isSpecial) && "px-6 py-3"
+                     (isActive && isSpecial) && "px-6 py-3 md:px-6 md:py-3"
                  )}
                >
                  <Icon className={clsx(
-                   "w-5 h-5 transition-colors shrink-0", 
+                   "w-5 h-5 md:w-5 md:h-5 transition-colors shrink-0", 
                    isActive ? "text-blue-400" : "text-slate-500 group-hover:text-slate-300"
                  )} />
-                 <span className="text-[14px] font-semibold tracking-wide">
+                 <span className="text-[14px] md:text-[14px] font-semibold tracking-wide">
                    {item.label}
                  </span>
                  
-                 {/* Subtle Active Glow Effect - Disabled for Special Item */}
+                 {/* Subtle Active Glow Effect */}
                  {isActive && !isSpecial && (
-                    <div className="absolute inset-0 rounded-full bg-blue-400/5 blur-md pointer-events-none" />
+                    <div className="absolute inset-0 rounded-xl md:rounded-full bg-blue-400/5 blur-md pointer-events-none" />
                  )}
                </button>
              );
@@ -87,7 +87,7 @@ export default function DynamicIsland({ currentMode, setMode, selectedModel, set
                         key={model}
                         onClick={() => setSelectedModel(model)}
                         className={clsx(
-                            "px-4 py-1.5 rounded-full text-[12px] font-medium transition-all duration-200 flex items-center gap-1.5",
+                            "px-5 py-2 rounded-full text-[13px] font-medium transition-all duration-200 flex items-center gap-1.5",
                             isModelActive 
                                 ? "bg-white text-[#0b57d0] shadow-sm ring-1 ring-slate-100" 
                                 : "text-slate-500 hover:bg-slate-100/50 hover:text-slate-700"
