@@ -8,20 +8,20 @@ import BrandAtom from "@/components/ui/BrandAtom";
 import clsx from "clsx";
 import { Lock, ChevronLeft } from "lucide-react";
 import { authService } from '@/lib/auth';
-import { useAuth } from '@/app/hooks/useAuth';
+
 
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const setRole = useAppStore((state) => state.setRole);
-  const setUserId = useAppStore((state) => state.setUserId);
+
   
   const [selectedRole, setSelectedRole] = useState<RoleType | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const { login } = useAuth();
+
   
   useEffect(() => {
     const roleParam = searchParams.get('role') as RoleType | null;
@@ -51,16 +51,8 @@ function LoginContent() {
         const data = await authService.login({ email, password });
         
         if (data.token) {
-            login(data.token);
-        }
-
-        if (data.user && data.user.id) {
-             console.log("Setting User ID from Login:", data.user.id);
-             setUserId(data.user.id);
-        } else {
-             console.warn("User ID not found in login response:", data);
-        }
-
+             localStorage.setItem('token', data.token);
+         }
         setRole(selectedRole);
         router.push("/dashboard");
     } catch (err: any) {

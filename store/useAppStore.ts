@@ -24,7 +24,7 @@ interface AppState {
   setContextCached: (cached: boolean) => void;
   addMessage: (role: Role, message: Message) => void;
   setMessages: (role: Role, messages: Message[]) => void;
-  setUserId: (id: string) => void;
+
 }
 
 export const useAppStore = create<AppState>()(
@@ -58,7 +58,7 @@ export const useAppStore = create<AppState>()(
           [role]: messages
         }
       })),
-      setUserId: (id: string) => set({ userId: id }),
+
     }),
     {
       name: 'nsg-storage',
