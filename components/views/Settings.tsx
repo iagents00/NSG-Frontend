@@ -6,6 +6,7 @@ import clsx from "clsx";
 import axios from "axios";
 
 import { useAppStore } from "@/store/useAppStore";
+import FathomConnection from "@/components/features/FathomConnection";
 
 export default function Settings() {
   const { showToast } = useToast();
@@ -199,7 +200,10 @@ export default function Settings() {
         </div>
       </div>
       
-      {/* 2. PDF Upload Card */}
+      {/* 2. Fathom Analytics Connection */}
+      <FathomConnection />
+
+      {/* 3. PDF Upload Card */}
       <div className="bg-white p-8 rounded-[2.5rem] shadow-card border border-slate-200">
         <h3 className="font-display font-bold text-xl text-navy-900 mb-6">Subir Documentos</h3>
         <p className="text-slate-500 text-sm mb-6">Sube archivos PDF para procesamiento y análisis</p>
@@ -267,7 +271,7 @@ export default function Settings() {
         </div>
       </div>
 
-      {/* 3. Data Zone Card */}
+      {/* 4. Data Zone Card */}
       <div className="bg-white p-8 rounded-[2.5rem] shadow-card border border-slate-200">
         <h3 className="font-display font-bold text-xl text-navy-900 mb-6">Zona de Datos</h3>
         <div className="flex flex-col sm:flex-row gap-4">
