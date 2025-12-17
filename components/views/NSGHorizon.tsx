@@ -10,6 +10,7 @@ import {
   Activity, Loader2, CheckCircle
 } from "lucide-react";
 import clsx from "clsx";
+import api from "@/lib/api";
 
 // --- Types ---
 interface TranscriptItem {
@@ -215,10 +216,20 @@ export default function NSGHorizon() {
                 </p>
                 <div className="pt-2 flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                    <button 
-                     onClick={() => {
+                     onClick={async () => {
                         if (isConnected) return;
-                        showToast('Redirigiendo a Fathom...', 'info');
-                        window.location.href = '/api/auth/fathom/connect';
+                        try {
+                            const response = await api.get('/fathom/connect');
+                            if (response.data && (response.data.url || typeof response.data === 'string')) {
+                                window.location.href = response.data.url || response.data;
+                            } else {
+                                console.error('Unexpected response:', response.data);
+                                showToast('Error al iniciar conexión', 'error');
+                            }
+                        } catch (error) {
+                            console.error('Error connecting to Fathom:', error);
+                            showToast('Error de conexión', 'error');
+                        }
                      }}
                      className={clsx(
                        "px-8 py-4 rounded-2xl font-bold transition transform hover:-translate-y-0.5 shadow-lg flex items-center gap-3 group",
