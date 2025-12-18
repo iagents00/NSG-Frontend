@@ -5,12 +5,12 @@ import { NextResponse } from 'next/server';
  * Proxy for NSG Horizon Webhook
  * Path: /api/nsg-horizon
  */
-const BASE_URL = "TU_N8N_WEBHOOK_URL";
+const BASE_URL = "https://personal-n8n.suwsiw.easypanel.host/webhook";
 
 export async function POST(req: Request) {
   try {
     if (!BASE_URL) {
-      console.error("❌ CRITICAL: NEXT_PUBLIC_N8N_WEBHOOK is not defined in environment variables.");
+      console.error("❌ CRITICAL: BASE_URL is not defined.");
       return NextResponse.json({ error: "Server Configuration Error: Missing Webhook URL" }, { status: 500 });
     }
 
