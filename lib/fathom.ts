@@ -16,10 +16,19 @@ export interface FathomStats {
 }
 
 export const fathomService = {
-  // Iniciar conexión OAuth (redirige al backend)
+  // Iniciar conexión OAuth (redirige al backend con el token JWT)
   connect: () => {
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000';
-    window.location.href = `${backendUrl}/fathom/connect`;
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      console.error('No hay token de autenticación');
+      window.location.href = '/auth/login';
+      return;
+    }
+    
+    // Redirigir al backend con el token en la URL (el backend lo validará)
+    window.location.href = `${backendUrl}/fathom/connect?token=${encodeURIComponent(token)}`;
   },
 
   // Verificar estado de conexión
@@ -62,9 +71,9 @@ export const fathomService = {
     aggregates?: string;
   }) => {
     try {
-      const queryParams = new URLSearchParams(params as any).toString();
+      const queryParams = new URLSearchParams(params as Record<string, string>).toString();
       const url = `/fathom/user/sites/${siteId}/stats${queryParams ? `?${queryParams}` : ''}`;
-      const response = await api.get<{ success: boolean; data: any }>(url);
+      const response = await api.get<{ success: boolean; data: unknown }>(url);
       return response.data.data;
     } catch (error) {
       console.error('Error fetching Fathom stats:', error);
@@ -75,7 +84,7 @@ export const fathomService = {
   // Obtener estadísticas resumidas para dashboard
   getDashboardStats: async (siteId: string, period: '24h' | '7d' | '30d' | '90d' = '7d') => {
     try {
-      const response = await api.get<{ success: boolean; data: any }>(`/fathom/user/sites/${siteId}/dashboard?period=${period}`);
+      const response = await api.get<{ success: boolean; data: FathomStats }>(`/fathom/user/sites/${siteId}/dashboard?period=${period}`);
       return response.data.data;
     } catch (error) {
       console.error('Error fetching Fathom dashboard stats:', error);
