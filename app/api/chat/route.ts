@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
  * Unified N8N Proxy Configuration
  * Centralizes connection logic for both Chat and Document services.
  */
-const BASE_URL = process.env.NEXT_PUBLIC_N8N_WEBHOOK;
+const BASE_URL = "TU_N8N_WEBHOOK_URL";
 
 export async function POST(req: Request) {
   try {

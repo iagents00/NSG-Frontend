@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server';
 import { Fathom } from 'fathom-typescript';
 import { cookies } from 'next/headers';
 
+const FATHOM_CLIENT_ID = "TU_FATHOM_CLIENT_ID";
+const FATHOM_CLIENT_SECRET = "TU_FATHOM_CLIENT_SECRET";
+const BASE_URL = "http://localhost:3001";
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const code = searchParams.get('code');
@@ -10,14 +14,10 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'No code provided' }, { status: 400 });
   }
 
-  const clientId = process.env.FATHOM_CLIENT_ID;
-  const clientSecret = process.env.FATHOM_CLIENT_SECRET;
-  
-  if (!clientId || !clientSecret) {
-      return NextResponse.json({ error: 'Fathom credentials not configured' }, { status: 500 });
-  }
+  const clientId = FATHOM_CLIENT_ID;
+  const clientSecret = FATHOM_CLIENT_SECRET;
 
-  const redirectUri = `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/fathom/callback`;
+  const redirectUri = `${BASE_URL}/api/auth/fathom/callback`;
 
   // Custom TokenStore to capture the access token
   let capturedToken: any = null;
@@ -60,14 +60,14 @@ export async function GET(req: Request) {
           
           if (tokenValue && typeof tokenValue === 'string') {
               cookieStore.set('fathom_access_token', tokenValue, { 
-                secure: process.env.NODE_ENV === 'production', 
+                secure: false, 
                 httpOnly: true,
                 maxAge: 60 * 60 * 24 * 7 // 1 week
               });
     
               // Set a visible cookie for the UI to know we are connected
               cookieStore.set('fathom_connected', 'true', { 
-                secure: process.env.NODE_ENV === 'production', 
+                secure: false, 
                 httpOnly: false,
                 maxAge: 60 * 60 * 24 * 7
               });

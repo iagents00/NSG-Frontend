@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const webhookUrl = process.env.N8N_WEBHOOK;
+    const webhookUrl = "TU_N8N_WEBHOOK_URL";
 
     if (!webhookUrl) {
       return NextResponse.json(

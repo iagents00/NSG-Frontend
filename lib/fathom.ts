@@ -18,7 +18,7 @@ export interface FathomStats {
 export const fathomService = {
   // Iniciar conexión OAuth (redirige al backend con el token JWT)
   connect: () => {
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000';
+    const backendUrl = 'https://nsg-backend.onrender.com';
     const token = localStorage.getItem('token');
     
     if (!token) {

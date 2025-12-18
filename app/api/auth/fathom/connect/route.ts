@@ -1,14 +1,12 @@
 import { NextResponse } from 'next/server';
 import { Fathom } from 'fathom-typescript';
 
-export async function GET() {
-  const clientId = process.env.FATHOM_CLIENT_ID;
-  const redirectUri = `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/fathom/callback`;
-  const clientSecret = process.env.FATHOM_CLIENT_SECRET; // SDK might need this even for Auth URL generation wrapper
+const FATHOM_CLIENT_ID = "TU_FATHOM_CLIENT_ID";
+const BASE_URL = "http://localhost:3001";
 
-  if (!clientId) {
-    return NextResponse.json({ error: 'FATHOM_CLIENT_ID is not configured' }, { status: 500 });
-  }
+export async function GET() {
+  const clientId = FATHOM_CLIENT_ID;
+  const redirectUri = `${BASE_URL}/api/auth/fathom/callback`;
 
   try {
     const url = Fathom.getAuthorizationUrl({

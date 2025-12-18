@@ -3,7 +3,7 @@ import { writeFile, unlink } from "fs/promises";
 import { join } from "path";
 import { tmpdir } from "os";
 
-const fileManager = new GoogleAIFileManager(process.env.GOOGLE_GENERATIVE_AI_API_KEY!);
+const fileManager = new GoogleAIFileManager("TU_GOOGLE_AI_API_KEY");
 
 export async function POST(request: Request) {
   try {

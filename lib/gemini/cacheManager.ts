@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GoogleAICacheManager } from "@google/generative-ai/server";
 import { SYSTEM_INSTRUCTIONS } from "./systemInstructions";
 
-const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY!;
+const apiKey = "TU_GOOGLE_AI_API_KEY";
 const cacheManager = new GoogleAICacheManager(apiKey);
 
 // Map to store active cache names in memory
