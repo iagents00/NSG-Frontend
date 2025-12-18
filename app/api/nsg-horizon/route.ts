@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
  * Proxy for NSG Horizon Webhook
  * Path: /api/nsg-horizon
  */
-const BASE_URL = "https://personal-n8n.suwsiw.easypanel.host/webhook";
+const BASE_URL = process.env.NEXT_PUBLIC_N8N_WEBHOOK || "https://personal-n8n.suwsiw.easypanel.host/webhook";
 
 export async function POST(req: Request) {
   try {

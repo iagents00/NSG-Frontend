@@ -16,6 +16,7 @@ interface TranscriptItem {
   speakerName: string;
   time: string;
   text: string;
+  isUser?: boolean;
 }
 
 interface ActionStep {
@@ -75,7 +76,11 @@ export default function NSGHorizon() {
           body: JSON.stringify({ userId: userId || 'user_guest' })
         });
 
-        if (!response.ok) throw new Error('Failed to fetch data');
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("NSG Horizon API Error:", response.status, errorText);
+            throw new Error(`Failed to fetch data: ${response.status} ${errorText}`);
+        }
 
         const jsonResponse = await response.json();
         console.log("NSG Horizon Data Received:", jsonResponse);
@@ -137,7 +142,9 @@ export default function NSGHorizon() {
                 transcripts: Array.isArray(tList) ? tList.map((t: any) => ({
                     speakerName: t.speaker?.display_name || "Desconocido",
                     time: t.timestamp || "",
-                    text: t.text || ""
+                    text: t.text || "",
+                    // Robust check: Look at root OR inside speaker object
+                    isUser: !!(t.matched_calendar_invitee_email || t.speaker?.matched_calendar_invitee_email)
                 })) : [],
 
                 // Map AI Info (Optional, structure depends on if it exists in this new format)
@@ -155,7 +162,6 @@ export default function NSGHorizon() {
       }
     };
 
-    fetchHorizonData();
     fetchHorizonData();
   }, [userId]);
 
@@ -396,38 +402,117 @@ export default function NSGHorizon() {
 
       {/* 2. MAIN GRID */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-0">
-        
-        {/* LEFT COLUMN: TRANSCRIPTION */}
+{/* LEFT COLUMN: TRANSCRIPTION */}
         <div className="lg:col-span-5 flex flex-col h-full min-h-[500px]">
-          <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-card flex flex-col h-full overflow-hidden">
-            <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center shrink-0">
-              <h4 className="font-bold text-navy-900 flex items-center gap-2">
-                <FileText className="w-4 h-4 text-slate-400" /> Transcripción
+          <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm flex flex-col h-full overflow-hidden">
+            <div className="px-8 py-5 border-b border-slate-100 flex justify-between items-center shrink-0 bg-white">
+              <h4 className="font-display font-bold text-lg text-slate-800 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-blue-600" /> 
+                Transcripción de la Sesión
               </h4>
-              <span className="text-[0.65rem] font-bold bg-blue-50 text-blue-600 px-2 py-1 rounded uppercase">Procesado</span>
+              <div className="flex items-center gap-2">
+                 <span className="text-[10px] font-bold bg-green-50 text-green-700 px-3 py-1.5 rounded-full border border-green-100 uppercase tracking-wide">
+                    Completado
+                 </span>
+              </div>
             </div>
             
-            <div className="flex-1 overflow-y-auto custom-scroll p-6 space-y-6 bg-slate-50/30">
-              {selectedFolder.transcripts?.map((item, index) => (
-                  <div key={index} className="flex gap-4">
-                       <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs shrink-0 uppercase tracking-tighter">
-                           {item.speakerName.substring(0, 2)}
-                       </div>
-                       <div className="space-y-1 text-left flex-1">
-                           <div className="flex items-center gap-2">
-                               <p className="text-xs font-bold text-navy-900">{item.speakerName}</p>
-                               <span className="text-[10px] text-slate-400">{item.time}</span>
-                           </div>
-                           <div className="p-4 rounded-2xl rounded-tl-none border border-slate-100 bg-white text-slate-700 text-sm leading-relaxed shadow-sm">
-                               "{item.text}"
-                           </div>
-                       </div>
-                  </div>
-              ))}
+            <div className="flex-1 overflow-y-auto custom-scroll p-6 space-y-6 bg-white">
+{selectedFolder.transcripts?.map((item, index) => {
+                  const isMe = item.isUser;
+
+                  // Professional Google-Tone Palette (Harmonious & Distinct)
+                  // Selected to ensure high contrast with white text and distinct user separation
+                  const otherColors = [
+                    "bg-[#1e88e5]", // Google Blue
+                    "bg-[#43a047]", // Google Green
+                    "bg-[#fb8c00]", // Google Orange
+                    "bg-[#e53935]", // Google Red
+                    "bg-[#8e24aa]", // Purple
+                    "bg-[#00897b]", // Teal
+                    "bg-[#3949ab]", // Indigo
+                    "bg-[#d81b60]", // Pink
+                    "bg-[#546e7a]", // Blue Grey
+                    "bg-[#fdd835].text-slate-800" // Yellow (Special handling if needed, but keeping list simple for now) -> swapped to Gold/Brown
+                  ]; 
+                  // Correction: Use darker Gold to keep white text valid or swap order
+                  const safeColors = [
+                     "bg-[#1976d2]", // Blue 700
+                     "bg-[#388e3c]", // Green 700
+                     "bg-[#f57c00]", // Orange 700
+                     "bg-[#d32f2f]", // Red 700
+                     "bg-[#7b1fa2]", // Purple 700
+                     "bg-[#00796b]", // Teal 700
+                     "bg-[#512da8]", // Deep Purple 700
+                     "bg-[#c2185b]", // Pink 700
+                     "bg-[#455a64]", // Blue Grey 700
+                     "bg-[#afb42b]", // Lime 800
+                  ];
+                  
+                  const getSpeakerColor = (name: string) => {
+                    let hash = 0;
+                    for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+                    return safeColors[Math.abs(hash) % safeColors.length];
+                  };
+                  const avatarColor = getSpeakerColor(item.speakerName);
+
+                  return (
+                    <div key={index} className={`flex w-full gap-3 ${isMe ? 'flex-row-reverse' : 'flex-row'} mb-4 animate-fade-in-up`}>
+                        {/* Avatar */}
+                        <div className={`
+                            w-9 h-9 rounded-full flex items-center justify-center font-bold text-[11px] shrink-0 
+                            select-none text-white shadow-sm ring-2 ring-white
+                            ${isMe ? 'bg-navy-900' : avatarColor}
+                        `}>
+                            {item.speakerName.substring(0, 1).toUpperCase()}
+                        </div>
+                        
+                        {/* Content Bubble */}
+                        <div className={`
+                           group relative max-w-[75%] px-5 py-4 shadow-sm hover:shadow-md transition-shadow duration-200
+                           ${isMe 
+                                ? 'bg-navy-900 text-white rounded-tr-none items-end' 
+                                : 'bg-white text-slate-800 rounded-tl-none border border-slate-100 items-start'
+                           }
+                        `}>
+                            {/* Header: Name */}
+                            {!isMe && (
+                                <div className="mb-1">
+                                    <span className={`text-xs font-bold ${isMe ? 'text-blue-100' : 'text-slate-900'}`}>
+                                        {item.speakerName}
+                                    </span>
+                                </div>
+                            )}
+
+                            {/* Text Content */}
+                            <p className={`
+                                text-[15px] leading-relaxed whitespace-pre-wrap font-normal
+                                ${isMe ? 'text-white' : 'text-slate-700'}
+                            `}>
+                                {item.text}
+                            </p>
+                            
+                            {/* Time Stamp (Bottom Right) */}
+                            <div className={`
+                                text-[10px] mt-2 flex
+                                ${isMe ? 'text-blue-100 justify-end opacity-80' : 'text-slate-400 justify-end'}
+                            `}>
+                                {item.time}
+                            </div>
+                        </div>
+                    </div>
+                  );
+              })}
               
               {!selectedFolder.transcripts?.length && (
-                  <div className="text-center text-slate-400 py-8">
-                      No hay transcripción disponible.
+                  <div className="flex flex-col items-center justify-center h-full text-slate-400 gap-4 mt-8">
+                      <div className="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center border border-slate-100 shadow-sm">
+                          <FileText className="w-8 h-8 text-slate-300 opacity-50" />
+                      </div>
+                      <div className="text-center">
+                          <p className="text-sm font-bold text-slate-500">Aún no hay transcripciones</p>
+                          <p className="text-xs text-slate-400 mt-1 max-w-[200px]">Las sesiones aparecen aquí.</p>
+                      </div>
                   </div>
               )}
             </div>
