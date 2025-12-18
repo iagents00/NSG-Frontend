@@ -1,0 +1,2 @@
+lib/gemini/cacheManager.ts(26,7): error TS2322: Type '{ parts: { text: string; }[]; }' is not assignable to type 'string | Part | Content'.
+  Property 'role' is missing in type '{ parts: { text: string; }[]; }' but required in type 'Content'.

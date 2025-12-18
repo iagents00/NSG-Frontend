@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="es" class="antialiased">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>NSG Intelligence | Deep Processing v14.6</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        navy: { 950: '#020617', 900: '#0B1121', 850: '#111827', 800: '#1f2937' },
+                        slate: { 850: '#1e293b', 900: '#0f172a' },
+                        deep: { 900: '#020410' }, // Nuevo color ultra oscuro para la isla
+                    },
+                    boxShadow: {
+                        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.05)',
+                        'sovereign': '0 25px 50px -12px rgba(2, 6, 23, 0.12), 0 0 1px rgba(2, 6, 23, 0.1)',
+                        'precision': '0 0 0 1px rgba(15, 23, 42, 0.05), 0 10px 30px -5px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 0 40px rgba(59, 130, 246, 0.25)',
+                        'island': '0 15px 40px -10px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08) inset',
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'slide-in-right': 'slideInRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'slide-up-toast': 'slideUpToast 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'slide-down': 'slideDown 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'pulse-slow': 'pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'breathing': 'deepBreath 10s ease-in-out infinite',
+                        'sound-wave': 'soundWave 1.2s ease-in-out infinite',
+                        'spin-slow': 'spin 6s linear infinite', 
+                        'spin-process': 'spin 3s linear infinite',
+                        'text-glow': 'textGlow 1.5s ease-in-out infinite alternate',
+                    },
+                    backgroundImage: {
+                        'grid-pattern': "linear-gradient(to right, rgba(15, 23, 42, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(15, 23, 42, 0.03) 1px, transparent 1px)",
+                    },
+                    keyframes: {
+                        fadeInUp: { from: { opacity: 0, transform: 'translateY(20px)' }, to: { opacity: 1, transform: 'translateY(0)' } },
+                        slideInRight: { from: { opacity: 0, transform: 'translateX(30px)' }, to: { opacity: 1, transform: 'translateX(0)' } },
+                        slideUpToast: { from: { opacity: 0, transform: 'translateY(50px) scale(0.9)' }, to: { opacity: 1, transform: 'translateY(0) scale(1)' } },
+                        slideDown: { from: { opacity: 0, transform: 'translateY(-20px) translateX(-50%)' }, to: { opacity: 1, transform: 'translateY(0) translateX(-50%)' } },
+                        deepBreath: { '0%, 100%': { transform: 'scale(0.92)', filter: 'drop-shadow(0 0 20px rgba(59, 130, 246, 0.1))' }, '50%': { transform: 'scale(1.08)', filter: 'drop-shadow(0 0 50px rgba(59, 130, 246, 0.3))' } },
+                        soundWave: { '0%, 100%': { height: '20%' }, '50%': { height: '80%' } },
+                        textGlow: { '0%': { opacity: '0.6', textShadow: '0 0 5px rgba(59, 130, 246, 0)' }, '100%': { opacity: '1', textShadow: '0 0 20px rgba(59, 130, 246, 0.6)' } }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* --- CORE --- */
+        html, body { height: 100%; overflow: hidden; } 
+        body { background-color: #F8FAFC; color: #0F172A; -webkit-font-smoothing: antialiased; letter-spacing: -0.01em; }
+        .hidden-view { display: none !important; }
+        
+        /* Smooth Scroll & Custom Bars */
+        .custom-scroll { overflow-y: auto; overflow-x: hidden; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+        .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 10px; transition: background 0.3s; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.6); }
+        
+        /* --- ATOM ENGINE (HD VERSION) --- */
+        .atom-container { display: flex; justify-content: center; align-items: center; overflow: visible; will-change: transform; transform: translate3d(0,0,0); }
+        .atom-breathe { transform-origin: center; animation: deepBreath 10s ease-in-out infinite; will-change: transform, filter; }
+        .morph-orbit { fill: none; stroke-linecap: round; vector-effect: non-scaling-stroke; transform-origin: center; will-change: transform; mix-blend-mode: screen; }
+        
+        /* HD Orbit Styles */
+        .landing-orbit { stroke-width: 1.5; stroke-opacity: 0.9; }
+        .sidebar-orbit { stroke-width: 2.5; stroke-opacity: 0.95; }
+        .ui-orbit { stroke-width: 2; stroke-opacity: 0.9; } 
+        
+        .orbit-1 { animation: fluidCycle1 14s ease-in-out infinite; }
+        .orbit-2 { animation: fluidCycle2 14s ease-in-out infinite; }
+        .orbit-3 { animation: fluidCycle3 14s ease-in-out infinite; }
+        @keyframes fluidCycle1 { 0% { transform: rotate(0deg) scaleY(0.45); } 50% { transform: rotate(180deg) scaleY(1); } 100% { transform: rotate(360deg) scaleY(0.45); } }
+        @keyframes fluidCycle2 { 0% { transform: rotate(60deg) scaleY(0.45); } 50% { transform: rotate(240deg) scaleY(1); } 100% { transform: rotate(420deg) scaleY(0.45); } }
+        @keyframes fluidCycle3 { 0% { transform: rotate(120deg) scaleY(0.45); } 50% { transform: rotate(300deg) scaleY(1); } 100% { transform: rotate(480deg) scaleY(0.45); } }
+        
+        /* --- COMPONENTS --- */
+        .sidebar-active { background: linear-gradient(90deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%); border-right: 3px solid #60A5FA; color: white !important; font-weight: 600; text-shadow: 0 0 20px rgba(96,165,250,0.5); }
+        .nsg-ios-btn { background: linear-gradient(135deg, rgba(30, 58, 138, 0.4) 0%, rgba(15, 23, 42, 0.3) 100%); border: 1px solid rgba(96, 165, 250, 0.3); box-shadow: 0 0 30px rgba(37, 99, 235, 0.15) inset; position: relative; overflow: hidden; }
+        .nsg-ios-btn::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 1px; background: linear-gradient(90deg, transparent, rgba(147, 197, 253, 0.6), transparent); }
+        
+        /* --- DYNAMIC ISLAND --- */
+        .dynamic-island { 
+            position: absolute; 
+            top: 20px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            background: #020410; 
+            border-radius: 28px; 
+            padding: 5px 6px; 
+            display: flex; 
+            gap: 4px; 
+            z-index: 50; 
+            box-shadow: 0 20px 60px -10px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.08) inset; 
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+            width: auto; 
+            max-width: 95%; 
+            overflow-x: auto; 
+            -ms-overflow-style: none; 
+            scrollbar-width: none; 
+        }
+        .dynamic-island::-webkit-scrollbar { display: none; }
+        .island-btn { 
+            padding: 8px 16px; 
+            border-radius: 20px; 
+            font-size: 0.75rem; 
+            font-weight: 600; 
+            color: #64748B; 
+            transition: all 0.3s ease; 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+            white-space: nowrap; 
+            flex-shrink: 0; 
+            cursor: pointer; 
+        }
+        .island-btn.active { 
+            background: rgba(59, 130, 246, 0.15); 
+            color: #60A5FA; 
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.1); 
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        .island-btn:hover:not(.active) { color: #E2E8F0; background: rgba(255,255,255,0.05); }
+
+        /* --- TOASTS --- */
+        #toast-container { position: fixed; bottom: 30px; right: 30px; z-index: 10000; pointer-events: none; display: flex; flex-direction: column; gap: 12px; align-items: flex-end; }
+        @media (max-width: 640px) { #toast-container { bottom: 20px; right: 0; left: 0; align-items: center; } }
+        .toast { pointer-events: auto; background: rgba(15, 23, 42, 0.95); color: white; padding: 14px 20px; border-radius: 16px; animation: slideUpToast 0.5s cubic-bezier(0.19, 1, 0.22, 1) forwards; display: flex; align-items: center; gap: 12px; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5); font-size: 0.85rem; font-weight: 600; backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); max-width: 90%; }
+
+        /* --- CALENDAR --- */
+        .calendar-cell { min-height: 100px; lg:min-height: 120px; transition: all 0.2s; border-right: 1px solid #F1F5F9; border-bottom: 1px solid #F1F5F9; padding: 6px; display: flex; flex-direction: column; gap: 4px; }
+        .calendar-cell:hover { background-color: #F8FAFC; }
+        .calendar-cell.today { background-color: rgba(59, 130, 246, 0.03); }
+        .event-pill { font-size: 0.65rem; padding: 4px 8px; border-radius: 6px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .event-strategy { background: #EFF6FF; color: #1E40AF; border-left: 3px solid #3B82F6; }
+
+        /* --- VISIBILITY & MARGINS FIX --- */
+        .safe-bottom-scroll { padding-bottom: calc(env(safe-area-inset-bottom) + 6rem) !important; }
+        .safe-pb-modal { padding-bottom: max(env(safe-area-inset-bottom), 1.5rem); }
+        .geo-container { width: 100%; max-width: 85rem; margin-left: auto; margin-right: auto; }
+        .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 1rem; }
+    </style>
+</head>
+<body class="flex flex-col overflow-hidden bg-slate-50 text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900 h-[100dvh]">
+
+    <div id="toast-container"></div>
+
+    <!-- VIEW 1: LANDING PAGE -->
+    <div id="view-landing" class="absolute inset-0 z-[60] flex flex-col min-h-[100dvh] bg-white custom-scroll w-full h-full">
+        <!-- BACKGROUND AMBIENCE -->
+        <div class="fixed inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-50/40 via-white to-white pointer-events-none"></div>
+        <div class="fixed top-[-20%] right-[-10%] w-[90vw] h-[90vw] bg-indigo-50/30 rounded-full blur-[150px] pointer-events-none animate-pulse-slow"></div>
+
+        <!-- TOP LEFT BRAND MARK -->
+        <div class="absolute top-6 left-6 md:top-8 md:left-10 z-50 flex items-center gap-4 opacity-100 cursor-default flex-nowrap min-w-max pointer-events-auto">
+            <div class="w-10 h-10 relative shrink-0 atom-container">
+                <div class="w-full h-full atom-breathe">
+                    <svg viewBox="0 0 100 100" class="w-full h-full overflow-visible drop-shadow-md">
+                        <defs><linearGradient id="brandAtomGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#2563EB" /><stop offset="100%" stop-color="#4F46E5" /></linearGradient></defs>
+                        <circle cx="50" cy="50" r="42" class="morph-orbit orbit-1 landing-orbit" stroke="url(#brandAtomGrad)" />
+                        <circle cx="50" cy="50" r="42" class="morph-orbit orbit-2 landing-orbit" stroke="url(#brandAtomGrad)" style="transform: rotate(60deg) scaleY(0.45);" />
+                        <circle cx="50" cy="50" r="42" class="morph-orbit orbit-3 landing-orbit" stroke="url(#brandAtomGrad)" style="transform: rotate(120deg) scaleY(0.45);" />
+                        <circle cx="50" cy="50" r="10" fill="#3B82F6" class="filter drop-shadow-md" />
+                        <circle cx="50" cy="50" r="4" fill="white" />
+                    </svg>
+                </div>
+            </div>
+            <div class="flex items-center shrink-0 h-10">
+                <span class="text-base font-display font-bold text-navy-950 tracking-tight leading-none whitespace-nowrap drop-shadow-sm">NSG Intelligence</span>
+            </div>
+        </div>
+
+        <!-- MAIN CONTENT CONTAINER -->
+        <div class="flex-1 flex flex-col items-center justify-start pt-32 pb-20 relative z-10 w-full max-w-5xl mx-auto px-6 lg:px-12 safe-bottom-scroll">
+            
+            <!-- 1. IDENTITY SECTION -->
+            <div class="w-full text-center flex flex-col items-center animate-fade-in-up">
+                
+                <!-- LANDING ATOM -->
+                <div class="w-40 h-40 md:w-56 md:h-56 lg:w-64 lg:h-64 mb-10 relative atom-container">
+                    <div class="absolute inset-0 bg-blue-600/5 blur-[80px] rounded-full scale-125 animate-pulse-slow"></div>
+                    <div class="w-full h-full atom-breathe">
+                        <svg viewBox="0 0 100 100" class="w-full h-full overflow-visible drop-shadow-2xl">
+                            <defs><linearGradient id="landingGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#2563EB" /><stop offset="100%" stop-color="#6366f1" /></linearGradient><radialGradient id="coreLanding" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FFFFFF" /><stop offset="100%" stop-color="#3B82F6" /></radialGradient></defs>
+                            <circle cx="50" cy="50" r="45" class="morph-orbit orbit-1 landing-orbit" stroke="url(#landingGrad)" />
+                            <circle cx="50" cy="50" r="45" class="morph-orbit orbit-2 landing-orbit" stroke="url(#landingGrad)" style="transform: rotate(60deg) scaleY(0.45);" />
+                            <circle cx="50" cy="50" r="45" class="morph-orbit orbit-3 landing-orbit" stroke="url(#landingGrad)" style="transform: rotate(120deg) scaleY(0.45);" />
+                            <circle cx="50" cy="50" r="10" fill="url(#coreLanding)" class="filter drop-shadow-lg" />
+                            <circle cx="50" cy="50" r="3" fill="white" opacity="0.8" />
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- PRECISE COPY -->
+                <div class="space-y-6 max-w-2xl mx-auto">
+                    <p class="text-[0.65rem] md:text-xs font-bold text-slate-400 tracking-[0.3em] uppercase pl-1">NSG SYSTEM OS • Enterprise</p>
+                    <h1 class="font-display text-4xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight text-navy-900 leading-[1.05]">
+                        Infraestructura cognitiva <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">de precisión.</span>
+                    </h1>
+                    <div class="relative pl-6 border-l-4 border-blue-100 text-left mx-auto max-w-md md:max-w-lg mt-6">
+                        <p class="text-lg md:text-xl text-slate-600 font-medium leading-relaxed italic">
+                            "Transformamos datos clínicos y corporativos en estrategias inteligentes."
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- CERTIFICATE -->
+                <div class="mt-14 w-full max-w-lg mx-auto transform transition-all hover:scale-[1.02] duration-500">
+                    <div class="bg-white/95 backdrop-blur-xl border border-slate-200/80 p-1 rounded-2xl shadow-sovereign w-full text-left">
+                        <div class="bg-gradient-to-br from-white to-slate-50 rounded-xl p-5 sm:p-6 flex flex-col sm:flex-row items-center gap-6 relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+                            <div class="relative shrink-0">
+                                <div class="w-14 h-14 rounded-full bg-gradient-to-br from-navy-900 to-blue-900 flex items-center justify-center shadow-lg shadow-navy-900/20"><i data-lucide="shield-check" class="w-7 h-7 text-white stroke-[1.5]"></i></div>
+                                <div class="absolute -bottom-1 -right-1 bg-emerald-500 text-white text-[0.4rem] font-bold px-1.5 py-0.5 rounded-full border-2 border-white flex items-center gap-0.5 shadow-sm"><i data-lucide="check" class="w-2 h-2"></i> ISO</div>
+                            </div>
+                            <div class="text-center sm:text-left flex-1">
+                                <p class="text-[0.55rem] font-bold text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100 inline-block mb-1">Officially Verified</p>
+                                <h3 class="text-sm text-navy-900 font-medium leading-tight mb-2">Verified by <span class="font-display font-bold text-navy-950">New Strategy Group</span></h3>
+                                <div class="flex gap-6 justify-center sm:justify-start pt-3 border-t border-slate-100">
+                                    <div class="text-center sm:text-left"><p class="text-lg font-display font-bold text-blue-600 leading-none">1,000+</p><p class="text-[0.5rem] font-bold text-slate-400 uppercase tracking-wide mt-0.5">Conversaciones</p></div>
+                                    <div class="text-center sm:text-left border-l border-slate-100 pl-6"><p class="text-lg font-display font-bold text-indigo-600 leading-none">100+</p><p class="text-[0.5rem] font-bold text-slate-400 uppercase tracking-wide mt-0.5">Reseñas Positivas</p></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 2. ROLE SELECTION -->
+            <div class="w-full animate-fade-in-up mt-16" style="animation-delay: 0.15s;">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full">
+                    <!-- Cards with consistent sizing -->
+                    <button onclick="selectProfile('consultor')" class="group bg-white p-7 rounded-[2rem] text-left border border-slate-100 hover:border-blue-200 hover:shadow-precision transition-all duration-500 transform hover:-translate-y-1">
+                        <div class="flex justify-between mb-6">
+                            <div class="w-14 h-14 bg-slate-50 text-navy-950 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:text-blue-600 group-hover:bg-blue-50"><i data-lucide="briefcase" class="w-7 h-7"></i></div>
+                            <i data-lucide="arrow-right" class="w-6 h-6 text-slate-300 group-hover:text-blue-600 transition-transform group-hover:translate-x-1"></i>
+                        </div>
+                        <h3 class="font-display font-bold text-lg text-navy-900">Consultor</h3>
+                        <p class="text-xs text-slate-500 mt-1 font-medium">Gestión de Activos & Data Strategy</p>
+                    </button>
+
+                    <button onclick="selectProfile('psicologo')" class="group bg-white p-7 rounded-[2rem] text-left border border-slate-100 hover:border-sky-200 hover:shadow-precision transition-all duration-500 transform hover:-translate-y-1">
+                        <div class="flex justify-between mb-6">
+                            <div class="w-14 h-14 bg-slate-50 text-navy-950 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:text-sky-600 group-hover:bg-sky-50"><i data-lucide="brain" class="w-7 h-7"></i></div>
+                            <i data-lucide="arrow-right" class="w-6 h-6 text-slate-300 group-hover:text-sky-600 transition-transform group-hover:translate-x-1"></i>
+                        </div>
+                        <h3 class="font-display font-bold text-lg text-navy-900">Psicólogo</h3>
+                        <p class="text-xs text-slate-500 mt-1 font-medium">Clínica & Análisis de Conducta</p>
+                    </button>
+
+                    <button onclick="selectProfile('directivo')" class="group bg-white p-7 rounded-[2rem] text-left border border-slate-100 hover:border-emerald-200 hover:shadow-precision transition-all duration-500 transform hover:-translate-y-1">
+                        <div class="flex justify-between mb-6">
+                            <div class="w-14 h-14 bg-slate-50 text-navy-950 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:text-emerald-600 group-hover:bg-emerald-50"><i data-lucide="building-2" class="w-7 h-7"></i></div>
+                            <i data-lucide="arrow-right" class="w-6 h-6 text-slate-300 group-hover:text-emerald-600 transition-transform group-hover:translate-x-1"></i>
+                        </div>
+                        <h3 class="font-display font-bold text-lg text-navy-900">CEO / Directivo</h3>
+                        <p class="text-xs text-slate-500 mt-1 font-medium">Inteligencia de Datos & KPIs</p>
+                    </button>
+
+                    <button onclick="selectProfile('paciente')" class="group bg-white p-7 rounded-[2rem] text-left border border-slate-100 hover:border-teal-200 hover:shadow-precision transition-all duration-500 transform hover:-translate-y-1">
+                        <div class="flex justify-between mb-6">
+                            <div class="w-14 h-14 bg-slate-50 text-navy-950 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:text-teal-600 group-hover:bg-teal-50"><i data-lucide="heart-pulse" class="w-7 h-7"></i></div>
+                            <i data-lucide="arrow-right" class="w-6 h-6 text-slate-300 group-hover:text-teal-600 transition-transform group-hover:translate-x-1"></i>
+                        </div>
+                        <h3 class="font-display font-bold text-lg text-navy-900">Paciente</h3>
+                        <p class="text-xs text-slate-500 mt-1 font-medium">Bienestar Integral & Tracking</p>
+                    </button>
+                </div>
+            </div>
+
+             <!-- FOOTER -->
+            <div class="mt-20 w-full pt-10 pb-8 text-center flex flex-col items-center gap-6 border-t border-slate-100/50">
+                <div><p class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-widest">&copy; 2024 NSG Intelligence. All rights reserved.</p></div>
+                <div class="flex items-center gap-6 text-[0.7rem] font-bold text-slate-500">
+                    <span class="hover:text-blue-600 cursor-pointer transition">Privacy Policy</span>
+                    <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                    <span class="hover:text-blue-600 cursor-pointer transition">Terms of Service</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW 3: MAIN DASHBOARD -->
+    <div id="view-dashboard" class="flex-1 flex overflow-hidden hidden-view bg-slate-50/50 w-full h-full relative">
+        <div id="mobile-overlay" class="fixed inset-0 bg-navy-950/80 z-[80] backdrop-blur-sm hidden opacity-0 transition-opacity duration-300" onclick="toggleSidebar()"></div>
+        
+        <!-- SIDEBAR -->
+        <aside id="sidebar-panel" class="fixed lg:static inset-y-0 left-0 w-72 bg-navy-950 flex flex-col text-slate-400 border-r border-navy-900 shadow-2xl z-[90] transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out h-full">
+            <div class="h-24 flex items-center px-6 border-b border-navy-900 justify-between bg-navy-950/50 backdrop-blur-md sticky top-0 z-10 shrink-0">
+                <div class="flex items-center gap-4 flex-nowrap overflow-hidden min-w-max">
+                    <div class="w-9 h-9 relative shrink-0 atom-container">
+                        <div class="w-full h-full atom-breathe">
+                            <svg viewBox="0 0 100 100" class="w-full h-full overflow-visible">
+                                <defs>
+                                    <linearGradient id="sidebarGrad" x1="0" y1="0" x2="100" y2="100"><stop offset="0" stop-color="#60A5FA"/><stop offset="1" stop-color="#FFFFFF"/></linearGradient>
+                                </defs>
+                                <circle cx="50" cy="50" r="42" class="morph-orbit orbit-1 sidebar-orbit" stroke="url(#sidebarGrad)" />
+                                <circle cx="50" cy="50" r="42" class="morph-orbit orbit-2 sidebar-orbit" stroke="url(#sidebarGrad)" style="transform: rotate(60deg) scaleY(0.45);" />
+                                <circle cx="50" cy="50" r="42" class="morph-orbit orbit-3 sidebar-orbit" stroke="url(#sidebarGrad)" style="transform: rotate(120deg) scaleY(0.45);" />
+                                <circle cx="50" cy="50" r="10" fill="#FFFFFF"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="flex flex-col justify-center">
+                        <span class="font-display font-bold text-white text-lg tracking-tight whitespace-nowrap leading-none">NSG <span class="font-normal text-blue-400">Intelligence</span></span>
+                    </div>
+                </div>
+                <button class="lg:hidden p-2 text-slate-400 hover:text-white transition" onclick="toggleSidebar()"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            
+            <div class="p-6 shrink-0"><div class="flex items-center gap-3 bg-navy-850 p-4 rounded-2xl border border-white/5 shadow-inner group transition-all hover:bg-navy-800 cursor-pointer"><div id="sidebar-avatar" class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-lg border border-white/10 group-hover:scale-105 transition-transform">US</div><div class="overflow-hidden"><p id="sidebar-name" class="text-sm font-bold text-white truncate leading-tight">Usuario</p><div class="flex items-center gap-1.5 mt-0.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span><p id="sidebar-role" class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-widest truncate">Rol</p></div></div></div></div>
+            
+            <nav id="sidebar-menu" class="flex-1 px-4 space-y-2 overflow-y-auto custom-scroll pb-10"></nav>
+            
+            <div class="p-6 border-t border-navy-900 space-y-3 bg-navy-950 shrink-0 safe-bottom-scroll"><div class="flex items-center justify-between px-3.5 py-2.5 text-[0.65rem] font-bold text-slate-500 uppercase tracking-widest bg-navy-900/50 rounded-lg border border-white/5"><span>Precision Status</span><span class="text-emerald-500 font-bold flex items-center gap-1"><i data-lucide="activity" class="w-3 h-3"></i> Optimal</span></div><button onclick="logout()" class="flex items-center gap-3 text-sm font-medium hover:text-white transition w-full p-2.5 rounded-lg hover:bg-white/5 text-slate-400 group"><i data-lucide="log-out" class="w-4 h-4 group-hover:text-red-400 transition"></i> Cerrar Sesión</button></div>
+        </aside>
+        
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-1 flex flex-col relative overflow-hidden bg-[#F8FAFC] w-full h-full">
+            <header class="h-20 lg:h-24 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 flex items-center justify-between px-4 sm:px-6 lg:px-10 sticky top-0 z-40 shrink-0 shadow-sm transition-all duration-300">
+                <div class="flex items-center gap-4">
+                    <button class="lg:hidden p-2 -ml-2 text-navy-900 hover:bg-slate-100 rounded-lg transition" onclick="toggleSidebar()"><i data-lucide="menu" class="w-6 h-6"></i></button>
+                    <div><h2 id="page-title" class="font-display text-lg lg:text-2xl font-bold text-navy-900 truncate max-w-[180px] lg:max-w-none tracking-tight">Dashboard</h2><p id="page-subtitle" class="text-xs font-bold text-slate-500 uppercase tracking-widest mt-0.5 hidden sm:block">Resumen Ejecutivo</p></div>
+                </div>
+                <div class="flex items-center gap-3 lg:gap-6">
+                    <div class="relative">
+                        <button onclick="toggleNotifications()" class="w-10 h-10 lg:w-11 lg:h-11 rounded-full bg-white flex items-center justify-center text-slate-600 hover:bg-slate-50 hover:text-navy-900 transition relative border border-slate-200 shadow-sm hover:shadow-md"><i data-lucide="bell" class="w-5 h-5"></i><span class="absolute top-2.5 right-3 w-2 h-2 bg-red-500 rounded-full border border-white"></span></button>
+                        <div id="notification-panel" class="absolute right-0 top-14 w-80 bg-white/95 backdrop-blur-xl rounded-2xl shadow-sovereign border border-slate-100 p-4 hidden animate-fade-in-up origin-top-right z-50">
+                            <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-100"><h4 class="font-bold text-navy-900 text-sm">Notificaciones</h4><span class="text-[0.6rem] font-bold text-blue-600 cursor-pointer">Marcar leídas</span></div>
+                            <div class="space-y-2"><div class="flex gap-3 p-3 bg-slate-50/50 rounded-xl hover:bg-slate-100 transition cursor-pointer border border-transparent hover:border-slate-200"><div class="p-2 bg-blue-100 text-blue-600 rounded-lg h-fit"><i data-lucide="file-text" class="w-4 h-4"></i></div><div><p class="text-xs font-bold text-navy-900">Nuevo Reporte</p><p class="text-[0.65rem] text-slate-500 mt-0.5">Post-Consulta lista para revisión.</p></div></div></div>
+                        </div>
+                    </div>
+                    <button onclick="openAI('standard')" class="group flex items-center justify-center gap-3 bg-navy-950 text-white pl-4 pr-6 py-2.5 rounded-full text-xs lg:text-sm font-bold shadow-2xl hover:bg-navy-900 transition-all transform hover:-translate-y-0.5 border border-navy-800 hover:shadow-glow relative overflow-hidden"><div class="w-5 h-5 relative shrink-0 atom-container"><div class="w-full h-full atom-breathe"><svg viewBox="0 0 100 100" class="w-full h-full text-blue-300 group-hover:text-white transition-colors"><circle cx="50" cy="50" r="42" class="morph-orbit orbit-1 ui-orbit" stroke="currentColor"/><circle cx="50" cy="50" r="42" class="morph-orbit orbit-2 ui-orbit" stroke="currentColor"/><circle cx="50" cy="50" r="42" class="morph-orbit orbit-3 ui-orbit" stroke="currentColor"/><circle cx="50" cy="50" r="14" fill="white"/></svg></div></div><span class="hidden sm:inline tracking-tight">NSG <span class="text-blue-200 group-hover:text-white">Intelligence</span></span></button>
+                </div>
+            </header>
+            
+            <!-- CONTENT AREA with Safe Bottom Scroll -->
+            <div id="workspace-content" class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 custom-scroll safe-bottom-scroll scroll-smooth w-full"></div>
+        </main>
+    </div>
+
+    <!-- MODAL & SLIDEOVERS -->
+    <div id="day-detail-panel" class="fixed inset-y-0 right-0 w-full sm:w-[450px] bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-[110] border-l border-slate-200 flex flex-col h-full">
+        <div class="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50 shrink-0"><div><h3 class="font-display font-bold text-2xl text-navy-900">Agenda Diaria</h3><p class="text-sm text-slate-500 font-medium mt-1" id="detail-date">Fecha</p></div><button onclick="closeDayDetail()" class="p-2 hover:bg-slate-200 rounded-full transition"><i data-lucide="x" class="w-6 h-6 text-slate-500"></i></button></div>
+        <div class="flex-1 p-8 overflow-y-auto custom-scroll space-y-8 safe-bottom-scroll"><div><div class="flex justify-between items-center mb-4"><h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Cronograma</h4><span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">2 Eventos</span></div><div class="space-y-4" id="detail-events"></div></div><div><h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Notas & Objetivos</h4><textarea class="w-full h-40 p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 resize-none transition" placeholder="Escribe notas estratégicas para este día..."></textarea></div></div>
+        <div class="p-6 border-t border-slate-100 bg-white shrink-0 safe-bottom-scroll"><button class="w-full py-4 bg-navy-900 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition flex items-center justify-center gap-2 shadow-lg"><i data-lucide="plus" class="w-4 h-4"></i> Añadir Nuevo Evento</button></div>
+    </div>
+    <div id="day-detail-overlay" class="fixed inset-0 bg-navy-950/20 z-[105] hidden backdrop-blur-sm" onclick="closeDayDetail()"></div>
+
+    <!-- REFACTORED AI MODAL FOR PERFECT MOBILE/DESKTOP ALIGNMENT -->
+    <div id="ai-modal" class="fixed inset-0 z-[120] hidden flex items-center justify-center">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-navy-950/60 backdrop-blur-xl" onclick="closeAI()"></div>
+        
+        <!-- Modal Container: h-full for mobile (dvh), centered card for desktop -->
+        <div class="bg-slate-50 w-full h-[100dvh] lg:h-[85vh] lg:max-w-5xl lg:rounded-[2.5rem] shadow-2xl flex flex-col relative z-10 overflow-hidden lg:border lg:border-white/40 lg:ring-1 lg:ring-white/50 transition-all duration-300">
+            
+            <!-- Close Button (Mobile safe area friendly) -->
+            <button onclick="closeAI()" class="absolute top-6 right-6 lg:top-8 lg:right-8 p-2.5 bg-white/60 hover:bg-white rounded-full transition shadow-sm z-50 backdrop-blur-md group border border-white/20">
+                <i data-lucide="x" class="w-5 h-5 text-slate-500 group-hover:text-red-500 transition-colors"></i>
+            </button>
+
+            <!-- Dynamic Island Header -->
+            <div class="absolute top-0 left-0 w-full flex justify-center pt-6 lg:pt-8 z-40 pointer-events-none">
+                <div class="dynamic-island pointer-events-auto animate-slide-down" id="dynamic-island-container">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+
+            <!-- Chat Body (Scrollable Area) -->
+            <!-- pt-32 mobile / pt-40 desktop ensures content clears the dynamic island -->
+            <div id="ai-chat-body" class="flex-1 overflow-y-auto custom-scroll p-6 lg:p-12 pt-32 lg:pt-40 space-y-8 scroll-smooth w-full">
+                <!-- Content injected via JS -->
+            </div>
+
+            <!-- Input Area (Sticky Bottom) -->
+            <div class="shrink-0 relative z-20 safe-pb-modal bg-white/80 backdrop-blur-xl border-t border-slate-200">
+                <div class="p-4 sm:p-6 lg:p-8">
+                    <form onsubmit="handleAIChat(event)" class="relative max-w-4xl mx-auto group">
+                        <!-- Glow Effect -->
+                        <div class="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl blur-lg opacity-0 group-focus-within:opacity-100 transition-opacity duration-500 pointer-events-none transform scale-95"></div>
+                        
+                        <!-- Input Wrapper -->
+                        <div class="relative flex items-center bg-white border border-slate-200 rounded-3xl shadow-sm focus-within:shadow-md focus-within:border-blue-300 focus-within:ring-4 focus-within:ring-blue-100 transition-all duration-300">
+                            <!-- Tools (Left) -->
+                            <div class="flex gap-1 pl-3 text-slate-400">
+                                <button type="button" class="p-2.5 hover:bg-slate-100 rounded-xl hover:text-blue-600 transition tooltip"><i data-lucide="mic" class="w-5 h-5"></i></button>
+                                <button type="button" class="p-2.5 hover:bg-slate-100 rounded-xl hover:text-blue-600 transition tooltip"><i data-lucide="paperclip" class="w-5 h-5"></i></button>
+                            </div>
+                            
+                            <!-- Input Field -->
+                            <input id="ai-input" type="text" class="flex-1 bg-transparent border-none py-4 px-3 font-medium text-navy-900 focus:ring-0 placeholder-slate-400 text-base" placeholder="Escribe tu consulta o comando..." autocomplete="off">
+                            
+                            <!-- Submit Button (Right) -->
+                            <div class="pr-2">
+                                <button type="submit" class="p-3 bg-navy-900 text-white rounded-2xl hover:bg-blue-600 transition shadow-lg hover:shadow-blue-500/30 active:scale-95 flex items-center justify-center">
+                                    <i data-lucide="arrow-up" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="patient-files-panel" class="fixed inset-0 z-[130] hidden">
+        <div class="absolute inset-0 bg-navy-950/40 backdrop-blur-sm" onclick="togglePatientFiles()"></div>
+        <div class="absolute inset-y-0 right-0 w-full max-w-2xl bg-white shadow-2xl flex flex-col transform transition-transform duration-300 translate-x-full h-full" id="files-drawer">
+            <div class="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50 shrink-0"><div><h3 class="font-display font-bold text-2xl text-navy-900">Biblioteca de Expedientes</h3><p class="text-sm text-slate-500">Gestión centralizada de historiales clínicos.</p></div><button onclick="togglePatientFiles()" class="p-2 hover:bg-slate-200 rounded-full transition"><i data-lucide="x" class="w-6 h-6 text-slate-500"></i></button></div>
+            <div class="p-6 border-b border-slate-100 bg-white shrink-0"><div class="relative"><i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i><input id="files-search" onkeyup="filterPatients()" type="text" placeholder="Buscar paciente por nombre o ID..." class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"></div></div>
+            <div class="flex-1 overflow-y-auto custom-scroll p-6 space-y-3 safe-bottom-scroll" id="patient-list-container">
+                <!-- Patient Items -->
+                <div class="patient-item flex items-center justify-between p-4 bg-white border border-blue-200 rounded-2xl shadow-sm hover:shadow-md transition cursor-pointer group relative overflow-hidden" data-name="javier m">
+                    <div class="absolute left-0 top-0 w-1 h-full bg-blue-500"></div><div class="flex items-center gap-4"><div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-md">JM</div><div><h4 class="font-bold text-navy-900">Javier M.</h4><p class="text-xs text-slate-500">Última sesión: Hoy</p></div></div><button class="px-4 py-2 bg-slate-50 text-blue-600 text-xs font-bold rounded-lg group-hover:bg-blue-600 group-hover:text-white transition">Ver Activo</button>
+                </div>
+                <div class="patient-item flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl hover:border-blue-200 hover:shadow-md transition cursor-pointer group" data-name="ana r">
+                    <div class="flex items-center gap-4"><div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">AR</div><div><h4 class="font-bold text-navy-900">Ana R.</h4><p class="text-xs text-slate-500">Última sesión: Ayer</p></div></div><button class="px-4 py-2 bg-slate-50 text-slate-600 text-xs font-bold rounded-lg group-hover:bg-blue-50 group-hover:text-blue-600 transition">Abrir</button>
+                </div>
+                <div class="patient-item flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl hover:border-blue-200 hover:shadow-md transition cursor-pointer group" data-name="carlos d">
+                    <div class="flex items-center gap-4"><div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold">CD</div><div><h4 class="font-bold text-navy-900">Carlos D.</h4><p class="text-xs text-slate-500">Última sesión: 10 Nov</p></div></div><button class="px-4 py-2 bg-slate-50 text-slate-600 text-xs font-bold rounded-lg group-hover:bg-blue-50 group-hover:text-blue-600 transition">Abrir</button>
+                </div>
+            </div>
+            <div class="p-6 border-t border-slate-100 bg-slate-50 shrink-0 safe-bottom-scroll"><button class="w-full py-3 bg-navy-900 text-white rounded-xl font-bold hover:bg-blue-700 transition flex items-center justify-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> Nuevo Expediente</button></div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        lucide.createIcons();
+        let currentRole = 'consultor';
+        let chartInstance = null;
+        let chartInstance2 = null; // Secondary chart instance
+        let currentAiMode = 'standard';
+        let currentMonthIndex = 10; // Nov
+        const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+
+        // --- CONTEXT ---
+        const CONTEXT = {
+            consultor: { 
+                name: "Dr. Arriaga", 
+                avatar: "DA", 
+                roleDesc: "Senior Consultant", 
+                menu: [
+                    { id: 'nsg_ios', label: 'NSG Intelligence', icon: 'cpu', special: true },
+                    { id: 'nsg_news', label: 'NSG News', icon: 'newspaper' },
+                    { id: 'nsg_clarity', label: 'NSG Clarity', icon: 'target' },
+                    { id: 'nsg_horizon', label: 'NSG Horizon', icon: 'sunrise' },
+                    { id: 'portfolio', label: 'Cartera de Activos', icon: 'briefcase' },
+                    { id: 'calendar', label: 'Agenda Maestra', icon: 'calendar' },
+                    { id: 'reports', label: 'Inteligencia de Datos', icon: 'bar-chart-2' },
+                    { id: 'settings', label: 'Configuración', icon: 'settings' }
+                ] 
+            },
+            psicologo: { name: "Lic. Sofia", avatar: "LS", roleDesc: "Clinical Lead", menu: [ { id: 'nsg_ios', label: 'NSG Intelligence', icon: 'cpu', special: true }, { id: 'nsg_news', label: 'NSG News', icon: 'newspaper' }, { id: 'nsg_clarity', label: 'NSG Clarity', icon: 'target' }, { id: 'nsg_horizon', label: 'NSG Horizon', icon: 'sunrise' }, { id: 'clinical_radar', label: 'Análisis Multiaxial', icon: 'hexagon' }, { id: 'calendar', label: 'Agenda Maestra', icon: 'calendar' }, { id: 'patients', label: 'Pacientes', icon: 'users' }, { id: 'library', label: 'Biblioteca', icon: 'book-open' } ] },
+            directivo: { name: "Roberto V.", avatar: "RV", roleDesc: "CEO", menu: [ { id: 'nsg_ios', label: 'NSG Intelligence', icon: 'cpu', special: true }, { id: 'nsg_news', label: 'NSG News', icon: 'newspaper' }, { id: 'nsg_clarity', label: 'NSG Clarity', icon: 'target' }, { id: 'nsg_horizon', label: 'NSG Horizon', icon: 'sunrise' }, { id: 'calendar', label: 'Agenda Maestra', icon: 'calendar' }, { id: 'metrics', label: 'P&L Financiero', icon: 'pie-chart' }, { id: 'strategy', label: 'M&A Pipeline', icon: 'trello' }, { id: 'reports', label: 'Reportes Board', icon: 'file-spreadsheet' } ] },
+            paciente: { name: "Javier M.", avatar: "JM", roleDesc: "Paciente Activo", menu: [ { id: 'nsg_ios', label: 'NSG Intelligence', icon: 'cpu', special: true }, { id: 'nsg_news', label: 'NSG News', icon: 'newspaper' }, { id: 'nsg_clarity', label: 'NSG Clarity', icon: 'target' }, { id: 'calendar', label: 'Mi Agenda', icon: 'calendar' }, { id: 'deliverables', label: 'Mis Planes', icon: 'file-heart' }, { id: 'wellness', label: 'Bienestar', icon: 'heart-pulse' }, { id: 'journal', label: 'Diario Notion', icon: 'book' } ] }
+        };
+
+        // --- INIT ---
+        function selectProfile(role) {
+            currentRole = role; 
+            document.getElementById('view-landing').classList.add('hidden-view'); 
+            document.getElementById('view-dashboard').classList.remove('hidden-view'); 
+            initDashboard(role); 
+            showToast(`Sesión Iniciada: ${CONTEXT[role].name}`, 'success');
+            setTimeout(() => showToast("🔔 NSG Clarity: Sesión de las 8:00 AM pendiente.", 'info'), 5000);
+        }
+
+        function initDashboard(role) {
+            const config = CONTEXT[role];
+            document.getElementById('sidebar-name').innerText = config.name; 
+            document.getElementById('sidebar-role').innerText = config.roleDesc; 
+            document.getElementById('sidebar-avatar').innerText = config.avatar;
+            const menuContainer = document.getElementById('sidebar-menu'); menuContainer.innerHTML = ''; 
+            config.menu.forEach((item) => {
+                const btn = document.createElement('button');
+                if (item.special) {
+                    btn.className = `sidebar-item w-full flex items-center gap-3 px-4 py-4 rounded-xl text-sm font-bold transition-all nsg-ios-btn text-blue-300 sidebar-active`;
+                    btn.innerHTML = `<div class="w-5 h-5 relative shrink-0 atom-container"><div class="w-full h-full atom-breathe"><svg viewBox="0 0 100 100" class="w-full h-full text-blue-300 group-hover:text-white"><circle cx="50" cy="50" r="42" class="morph-orbit orbit-1 ui-orbit" stroke="currentColor"/><circle cx="50" cy="50" r="42" class="morph-orbit orbit-2 ui-orbit" stroke="currentColor"/><circle cx="50" cy="50" r="42" class="morph-orbit orbit-3 ui-orbit" stroke="currentColor"/><circle cx="50" cy="50" r="14" fill="white"/></svg></div></div> ${item.label}`;
+                } else {
+                    btn.className = `sidebar-item w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium transition-all mb-1 text-slate-400 hover:bg-white/5 hover:text-white hover:translate-x-1`;
+                    btn.innerHTML = `<i data-lucide="${item.icon}" class="w-5 h-5"></i> ${item.label}`;
+                }
+                btn.onclick = () => { loadView(item.id, btn, item.special); if(window.innerWidth < 1024) toggleSidebar(); };
+                menuContainer.appendChild(btn);
+            });
+            lucide.createIcons(); loadView('nsg_ios', menuContainer.firstChild, true); 
+        }
+
+        function loadView(viewId, activeBtn, isSpecial = false) {
+            document.querySelectorAll('#sidebar-menu button').forEach(b => { 
+                if (b.classList.contains('nsg-ios-btn')) { b.classList.remove('sidebar-active', 'shadow-md', 'text-white'); b.classList.add('text-blue-300'); } 
+                else { b.className = 'sidebar-item w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium transition-all mb-1 text-slate-400 hover:bg-white/5 hover:text-white hover:translate-x-1'; }
+            });
+            if(activeBtn) {
+                if (isSpecial) { activeBtn.classList.add('sidebar-active', 'text-white'); activeBtn.classList.remove('text-blue-300'); } 
+                else { activeBtn.className = 'sidebar-item w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium transition-all mb-1 sidebar-active shadow-md'; }
+            }
+
+            const container = document.getElementById('workspace-content'); container.innerHTML = ''; 
+            if(chartInstance) { chartInstance.destroy(); chartInstance = null; }
+            if(chartInstance2) { chartInstance2.destroy(); chartInstance2 = null; }
+            
+            const renderFn = VIEW_RENDERERS[viewId] || VIEW_RENDERERS['nsg_ios'];
+            const titleMap = { nsg_ios: "Core System", calendar: "Agenda Inteligente", nsg_news: "Power Intelligence", nsg_clarity: "Clarity & Focus", strategy: "Pipeline M&A", reports: "Data Center", nsg_horizon: "NSG Horizon", settings: "Configuración", patients: "Gestión Pacientes", library: "Recursos Clínicos", metrics: "P&L Financiero", wellness: "Salud y Biometría", journal: "Diario Reflexivo", tasks: "Gestión de Tareas", portfolio: "Cartera Activa", clinical_radar: "Análisis Multiaxial", deliverables: "Mis Entregables" };
+            
+            document.getElementById('page-subtitle').innerText = titleMap[viewId] || "Vista del Sistema";
+            document.getElementById('page-title').innerText = activeBtn ? activeBtn.innerText.trim() : "NSG iOS";
+            
+            container.innerHTML = `<div class="animate-fade-in-up h-full geo-container pb-8">${renderFn()}</div>`;
+            lucide.createIcons();
+            
+            // Re-initialize charts if needed
+            if (viewId === 'clinical_radar') setTimeout(() => initRadarChart(), 100);
+            if (viewId === 'metrics') setTimeout(() => initFinanceChart(), 100);
+            if (viewId === 'wellness') setTimeout(() => initWellnessChart(), 100);
+        }
+
+        // --- NEWS ANALYZER FUNCTION ---
+        function analyzeNews(title, tag) {
+            openAI('research');
+            
+            const chatBody = document.getElementById('ai-chat-body');
+            
+            // 1. User Intent Message
+            chatBody.innerHTML += `
+                <div class="flex justify-end gap-3 mt-8 animate-fade-in-up">
+                    <div class="bg-blue-600 text-white px-6 py-4 rounded-[1.5rem] rounded-tr-none text-sm font-medium max-w-[85%] shadow-lg">
+                        Analizar impacto de: <strong>"${title}"</strong>
+                    </div>
+                </div>
+            `;
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            // 2. Trigger Processing State
+            const { id, interval } = showProcessingState(chatBody);
+            
+            // 3. Final Result after delay
+            setTimeout(() => {
+                clearInterval(interval);
+                const el = document.getElementById(id);
+                if(el) el.remove();
+
+                let roleContext = "";
+                if(currentRole === 'directivo') roleContext = "Impacto en Estrategia Corporativa & Ventaja Competitiva.";
+                else if(currentRole === 'paciente') roleContext = "Optimización de Bienestar Personal & Rutinas.";
+                else roleContext = "Aplicación Clínica & Desarrollo Profesional.";
+
+                const resultHTML = `
+                    <div class="flex gap-4 mt-4 animate-fade-in-up justify-start w-full group">
+                        <div class="w-9 h-9 bg-navy-950 rounded-2xl flex items-center justify-center shrink-0 shadow-lg text-white mt-auto mb-1 group-hover:scale-110 transition-transform">
+                            <i data-lucide="brain-circuit" class="w-4 h-4"></i>
+                        </div>
+                        <div class="bg-white p-0 rounded-[2rem] rounded-tl-none text-base text-slate-700 max-w-[92%] shadow-sovereign border border-slate-100 overflow-hidden">
+                            <div class="bg-slate-50/80 p-5 border-b border-slate-100 flex justify-between items-center">
+                                <span class="text-[0.6rem] font-bold text-blue-600 uppercase tracking-widest bg-blue-50 px-2 py-1 rounded border border-blue-100">NSG Intelligence Report</span>
+                                <span class="text-[0.6rem] font-bold text-slate-400 uppercase">${tag}</span>
+                            </div>
+                            <div class="p-6 space-y-6">
+                                <div>
+                                    <h4 class="font-display font-bold text-lg text-navy-900 mb-2">Análisis de Contexto</h4>
+                                    <p class="text-sm text-slate-600 leading-relaxed">
+                                        He cruzado esta noticia con tu perfil actual. <strong>${roleContext}</strong>. Esta información es crítica para tu objetivo de Q4.
+                                    </p>
+                                </div>
+                                
+                                <div class="bg-indigo-50 p-5 rounded-2xl border border-indigo-100">
+                                    <h5 class="font-bold text-indigo-900 text-sm flex items-center gap-2 mb-3">
+                                        <i data-lucide="zap" class="w-4 h-4"></i> Oportunidad Detectada
+                                    </h5>
+                                    <p class="text-sm text-indigo-800 font-medium">
+                                        Puedes apalancar esta tendencia para reducir la fricción operativa un 15% si aplicas la metodología inversa sugerida.
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <h4 class="font-bold text-navy-900 text-sm mb-3">Protocolo de Acción Inmediata</h4>
+                                    <div class="space-y-3">
+                                        <div class="flex items-start gap-3">
+                                            <div class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">1</div>
+                                            <p class="text-sm text-slate-600">Revisar métricas actuales afectadas por esta regulación/tendencia.</p>
+                                        </div>
+                                        <div class="flex items-start gap-3">
+                                            <div class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">2</div>
+                                            <p class="text-sm text-slate-600">Agendar sesión de "Deep Dive" con el equipo técnico mañana a las 10 AM.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <button onclick="showToast('Plan Ejecutado con éxito', 'success')" class="w-full py-3 bg-navy-900 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition shadow-lg flex items-center justify-center gap-2 active:scale-95">
+                                    <i data-lucide="play" class="w-4 h-4"></i> Ejecutar Plan de Acción
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                chatBody.innerHTML += resultHTML;
+                lucide.createIcons();
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }, 2500);
+        }
+
+        // --- INTERACTIVE FEATURES ---
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar-panel');
+            const overlay = document.getElementById('mobile-overlay');
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full'); overlay.classList.remove('hidden'); setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            } else {
+                sidebar.classList.add('-translate-x-full'); overlay.classList.add('opacity-0'); setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
+        }
+        function toggleNotifications() { document.getElementById('notification-panel').classList.toggle('hidden'); }
+        function logout() { window.location.reload(); }
+        function showToast(msg, type) {
+            const t = document.createElement('div'); t.className = 'toast';
+            const icon = type==='success'?'check-circle':(type==='info'?'bell':'alert-circle');
+            t.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5 text-${type==='success'?'emerald':(type==='info'?'blue':'red')}-400"></i> ${msg}`;
+            document.getElementById('toast-container').appendChild(t); lucide.createIcons();
+            setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(50px) scale(0.9)'; setTimeout(() => t.remove(), 400); }, 4000);
+        }
+
+        // --- CALENDAR LOGIC ---
+        function changeMonth(delta) {
+            currentMonthIndex = (currentMonthIndex + delta + 12) % 12;
+            document.getElementById('calendar-month-title').innerText = `${months[currentMonthIndex]} 2024`;
+            const cells = document.querySelectorAll('.calendar-cell');
+            cells.forEach(c => {
+                c.classList.remove('today');
+                c.querySelectorAll('.event-pill').forEach(p => p.remove());
+                if(Math.random() > 0.85) {
+                    const pill = document.createElement('div'); pill.className = 'event-pill event-strategy'; pill.innerText = 'Reunión';
+                    c.appendChild(pill);
+                }
+            });
+        }
+        function openDayDetail(date, day) {
+            document.getElementById('day-detail-panel').classList.remove('translate-x-full');
+            document.getElementById('day-detail-overlay').classList.remove('hidden');
+            document.getElementById('detail-date').innerText = `${day} ${months[currentMonthIndex]}, 2024`;
+            document.getElementById('detail-events').innerHTML = `
+                <div class="flex gap-4 p-4 bg-white border border-slate-100 rounded-2xl shadow-sm">
+                    <div class="flex flex-col items-center justify-center px-2 border-r border-slate-100"><span class="text-xs font-bold text-slate-400">09:00</span><span class="text-xs font-bold text-slate-400">AM</span></div>
+                    <div><h4 class="font-bold text-navy-900 text-sm">Revisión Trimestral</h4><p class="text-xs text-slate-500 mt-1">Estrategia • Virtual</p></div>
+                </div>`;
+        }
+        function closeDayDetail() {
+            document.getElementById('day-detail-panel').classList.add('translate-x-full');
+            document.getElementById('day-detail-overlay').classList.add('hidden');
+        }
+
+        // --- FILES & SEARCH ---
+        function togglePatientFiles() {
+            const panel = document.getElementById('patient-files-panel');
+            const drawer = document.getElementById('files-drawer');
+            if (panel.classList.contains('hidden')) { panel.classList.remove('hidden'); setTimeout(() => drawer.classList.remove('translate-x-full'), 10); } 
+            else { drawer.classList.add('translate-x-full'); setTimeout(() => panel.classList.add('hidden'), 300); }
+        }
+        function filterPatients() {
+            const query = document.getElementById('files-search').value.toLowerCase();
+            const items = document.querySelectorAll('.patient-item');
+            items.forEach(item => {
+                const name = item.getAttribute('data-name');
+                if(name.includes(query)) item.style.display = 'flex'; else item.style.display = 'none';
+            });
+        }
+
+        // --- AI MODAL & PROCESSING ---
+        function openAI(mode = 'standard') { 
+            document.getElementById('ai-modal').classList.remove('hidden'); 
+            
+            const container = document.getElementById('dynamic-island-container');
+            container.innerHTML = ''; 
+            
+            const baseBtn = document.createElement('button');
+            baseBtn.className = `island-btn ${mode==='standard'?'active':''}`;
+            baseBtn.innerHTML = `<i data-lucide="message-circle" class="w-4 h-4"></i> Chat`;
+            baseBtn.onclick = () => switchAIMode('standard');
+            container.appendChild(baseBtn);
+
+            const currentMenu = CONTEXT[currentRole].menu;
+            currentMenu.forEach(item => {
+                if (item.id === 'nsg_ios') return; 
+                const btn = document.createElement('button');
+                btn.className = `island-btn ${mode===item.id?'active':''}`;
+                btn.innerHTML = `<i data-lucide="${item.icon}" class="w-4 h-4"></i> ${item.label}`;
+                btn.onclick = () => switchAIMode(item.id);
+                container.appendChild(btn);
+            });
+            lucide.createIcons();
+            
+            switchAIMode(mode); 
+        }
+        
+        function closeAI() { document.getElementById('ai-modal').classList.add('hidden'); }
+        
+        function switchAIMode(mode) {
+            currentAiMode = mode; 
+            
+            document.querySelectorAll('#dynamic-island-container .island-btn').forEach(b => {
+                 b.classList.remove('active');
+                 if(b.onclick.toString().includes(`'${mode}'`)) b.classList.add('active');
+            });
+
+            const chatBody = document.getElementById('ai-chat-body');
+            let content = '';
+            const chatAtom = `<div class="w-10 h-10 relative shrink-0 atom-container"><div class="w-full h-full atom-breathe"><svg viewBox="0 0 100 100" class="w-full h-full text-navy-900"><circle cx="50" cy="50" r="42" class="morph-orbit orbit-1 ui-orbit" stroke="currentColor"/><circle cx="50" cy="50" r="42" class="morph-orbit orbit-2 ui-orbit" stroke="currentColor"/><circle cx="50" cy="50" r="42" class="morph-orbit orbit-3 ui-orbit" stroke="currentColor"/><circle cx="50" cy="50" r="14" fill="#3B82F6"/></svg></div></div>`;
+            
+            let title = "NSG Intelligence";
+            let subtitle = "Infraestructura cognitiva activa.";
+            let colorClass = "text-navy-900";
+            
+            if(mode === 'standard') {
+                title = "NSG Neural Core v14.6";
+                subtitle = "Asistente general activo.";
+            } else {
+                const menuItems = CONTEXT[currentRole].menu;
+                const item = menuItems.find(i => i.id === mode);
+                if(item) {
+                    title = `Módulo: ${item.label}`;
+                    subtitle = `Contexto cargado: ${currentRole.toUpperCase()} > ${item.label}. Listo para análisis.`;
+                    colorClass = "text-blue-700";
+                }
+            }
+
+            // More spacing for desktop
+            content = `<div class="bg-white p-6 lg:p-8 rounded-[2rem] shadow-sovereign max-w-[95%] lg:max-w-[85%] border border-slate-100 flex gap-6 items-start animate-fade-in-up mx-auto">
+                ${chatAtom}
+                <div>
+                    <p class="text-sm font-bold ${colorClass} mb-2">${title}</p>
+                    <p class="text-sm text-slate-600 leading-relaxed">${subtitle}</p>
+                </div>
+            </div>`;
+            
+            chatBody.innerHTML = `<div class="flex justify-center w-full pt-4">${content}</div>`; 
+            lucide.createIcons();
+        }
+        
+        // Processing Animation Function
+        function showProcessingState(chatBody) {
+            const id = 'proc-' + Date.now();
+            const phrases = [
+                "Decodificando Patrones...", 
+                "Optimizando Vectores...", 
+                "Sincronizando Contexto...", 
+                "Generando Insight..."
+            ];
+            let phraseIdx = 0;
+            
+            chatBody.innerHTML += `
+                <div id="${id}" class="flex flex-col items-center justify-center mt-8 animate-fade-in-up gap-6 w-full">
+                    <div class="w-16 h-16 relative atom-container">
+                         <div class="absolute inset-0 bg-blue-500/10 blur-2xl rounded-full scale-150"></div>
+                         <div class="w-full h-full animate-spin-process">
+                            <svg viewBox="0 0 100 100" class="w-full h-full overflow-visible drop-shadow-md">
+                                <defs>
+                                    <linearGradient id="processGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#3B82F6" /><stop offset="100%" stop-color="#60A5FA" /></linearGradient>
+                                </defs>
+                                <circle cx="50" cy="50" r="42" class="morph-orbit" stroke="url(#processGrad)" stroke-width="2" fill="none" />
+                                <circle cx="50" cy="50" r="42" class="morph-orbit" stroke="url(#processGrad)" stroke-width="2" fill="none" style="transform: rotate(60deg) scaleY(0.45);" />
+                                <circle cx="50" cy="50" r="42" class="morph-orbit" stroke="url(#processGrad)" stroke-width="2" fill="none" style="transform: rotate(120deg) scaleY(0.45);" />
+                                <circle cx="50" cy="50" r="8" fill="#3B82F6" />
+                            </svg>
+                        </div>
+                    </div>
+                    <p id="${id}-text" class="text-xs font-bold text-blue-500 tracking-widest uppercase animate-text-glow transition-all duration-500">${phrases[0]}</p>
+                </div>
+            `;
+            
+            const interval = setInterval(() => {
+                phraseIdx = (phraseIdx + 1) % phrases.length;
+                const el = document.getElementById(`${id}-text`);
+                if(el) {
+                    el.innerText = phrases[phraseIdx];
+                } else {
+                    clearInterval(interval);
+                }
+            }, 800); 
+            
+            chatBody.scrollTop = chatBody.scrollHeight;
+            return { id, interval };
+        }
+
+        function handleAIChat(e) { 
+            e.preventDefault(); 
+            const i=document.getElementById('ai-input'); 
+            if(!i.value.trim())return; 
+            
+            const chatBody = document.getElementById('ai-chat-body');
+            
+            chatBody.innerHTML+=`
+                <div class="flex justify-end gap-3 mt-8 animate-fade-in-up">
+                    <div class="bg-blue-600 text-white px-6 py-4 rounded-[1.5rem] rounded-tr-none text-sm font-medium max-w-[85%] shadow-lg leading-relaxed">
+                        ${i.value}
+                    </div>
+                </div>`; 
+            i.value=''; 
+            
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            const { id, interval } = showProcessingState(chatBody);
+
+            setTimeout(()=>{ 
+                clearInterval(interval);
+                const el = document.getElementById(id);
+                if(el) el.remove();
+
+                chatBody.innerHTML+=`
+                <div class="flex gap-4 mt-4 animate-fade-in-up justify-start w-full group">
+                    <div class="w-9 h-9 bg-navy-950 rounded-2xl flex items-center justify-center shrink-0 shadow-lg text-white mt-auto mb-1 group-hover:scale-110 transition-transform">
+                        <i data-lucide="sparkles" class="w-4 h-4"></i>
+                    </div>
+                    <div class="bg-white p-6 rounded-[1.5rem] rounded-tl-none text-sm text-slate-700 max-w-[85%] shadow-card border border-slate-100">
+                        <p class="leading-relaxed">Entendido. Basado en tu contexto actual, he preparado el siguiente análisis...</p>
+                    </div>
+                </div>`; 
+                lucide.createIcons();
+                chatBody.scrollTop=chatBody.scrollHeight; 
+            }, 3000); 
+        }
+        
+        function copyToClipboard(id) { navigator.clipboard.writeText(document.getElementById(id).innerText).then(()=>showToast("Texto copiado","success")); }
+        function toggleCheck(el) { el.classList.toggle('bg-emerald-50'); el.querySelector('i').classList.toggle('text-emerald-500'); showToast("Estado actualizado", "success"); }
+        
+        // --- VIEW RENDERERS ---
+        const VIEW_RENDERERS = {
+            nsg_ios: () => {
+                const userFirstName = CONTEXT[currentRole].name.split(' ')[0];
+                let content = `
+                <div class="animate-fade-in-up">
+                    <div class="relative overflow-hidden bg-navy-950 text-white p-8 lg:p-12 rounded-[2.5rem] shadow-2xl mb-10 group transition-all hover:shadow-sovereign">
+                        <div class="absolute inset-0 bg-grid-pattern opacity-10"></div>
+                        <div class="absolute -right-20 -top-20 w-96 h-96 bg-blue-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
+                        
+                        <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+                            <div>
+                                <div class="flex items-center gap-3 mb-3">
+                                    <div class="bg-white/10 p-1.5 rounded-lg border border-white/10 backdrop-blur-md">
+                                        <i data-lucide="sparkles" class="w-5 h-5 text-blue-300"></i>
+                                    </div>
+                                    <h2 class="text-3xl lg:text-4xl font-display font-bold tracking-tight">Hola, <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">${userFirstName}</span></h2>
+                                </div>
+                                <p class="text-slate-400 max-w-lg text-sm lg:text-base leading-relaxed font-medium">
+                                    Bienvenido a tu NSG Intelligence. La infraestructura cognitiva está optimizada y lista para potenciar tus objetivos hoy.
+                                </p>
+                            </div>
+                            <div class="flex gap-3">
+                                <button onclick="openAI('standard')" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-4 rounded-2xl text-sm font-bold transition shadow-lg hover:shadow-blue-500/25 flex items-center gap-2 hover:-translate-y-0.5 active:scale-95 group/btn">
+                                    <i data-lucide="mic" class="w-4 h-4 group-hover/btn:scale-110 transition-transform"></i> Dictado de Voz
+                                </button>
+                                <button onclick="openAI('research')" class="bg-white/10 hover:bg-white/20 text-white px-6 py-4 rounded-2xl text-sm font-bold transition flex items-center gap-2 backdrop-blur-md border border-white/5 hover:-translate-y-0.5 active:scale-95 hover:shadow-lg">
+                                    <i data-lucide="search" class="w-4 h-4"></i> Deep Search
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NSG HORIZON: LAST SESSION CARD -->
+                    <div class="mb-8" onclick="loadView('nsg_horizon', document.querySelectorAll('#sidebar-menu button')[3])">
+                        <div class="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 p-[1px] rounded-[2.5rem] shadow-glow cursor-pointer group hover:shadow-glow-subtle transition-all duration-500 transform hover:scale-[1.005]">
+                            <div class="bg-white rounded-[2.4rem] p-8 lg:p-10 relative overflow-hidden h-full flex flex-col md:flex-row gap-8 items-center">
+                                <div class="absolute right-0 top-0 w-64 h-64 bg-blue-50/80 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-blue-100/80 transition-colors duration-500"></div>
+                                <div class="relative shrink-0">
+                                    <div class="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center relative z-10 group-hover:bg-blue-600 transition-colors duration-500 shadow-sm">
+                                        <i data-lucide="play-circle" class="w-10 h-10 text-blue-600 group-hover:text-white transition-colors duration-500"></i>
+                                    </div>
+                                    <div class="absolute inset-0 bg-blue-200 blur-xl opacity-0 group-hover:opacity-40 transition-opacity duration-500"></div>
+                                </div>
+                                <div class="relative z-10 flex-1 text-center md:text-left">
+                                    <div class="flex flex-col md:flex-row items-center md:items-baseline gap-3 mb-2">
+                                        <h3 class="font-display font-bold text-2xl text-navy-900 group-hover:text-blue-700 transition-colors">Mi Última Sesión</h3>
+                                        <span class="text-xs font-bold bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full border border-emerald-100 uppercase tracking-wide">Lista para Procesar</span>
+                                    </div>
+                                    <p class="text-slate-600 max-w-xl text-sm lg:text-base font-medium leading-relaxed">
+                                        Sesión del 28 de Octubre • "Estrategia de Cierre Q4". <br>
+                                        <span class="text-blue-600 font-bold">Haz clic para desglosar metodologías y personalizar tu plan de acción.</span>
+                                    </p>
+                                </div>
+                                <div class="hidden sm:flex shrink-0 items-center justify-center">
+                                    <div class="w-12 h-12 rounded-full border-2 border-slate-100 flex items-center justify-center group-hover:border-blue-500 transition-colors">
+                                        <i data-lucide="arrow-right" class="w-6 h-6 text-slate-300 group-hover:text-blue-600 transition-colors"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        ${_card("Valor Cartera", "$4.2M", "trending-up", "bg-white hover:border-blue-200", "text-blue-600")}
+                        ${_card("Empresas", "14", "building", "bg-white hover:border-indigo-200", "text-indigo-600")}
+                        ${_card("Riesgo", "2", "alert-triangle", "bg-white border-l-4 border-red-500 hover:shadow-red-100", "text-red-500")}
+                        ${_card("Eficiencia", "94%", "activity", "bg-white hover:border-emerald-200", "text-emerald-500")}
+                    </div>
+                </div>`;
+                return content;
+            },
+            nsg_horizon: () => {
+                const subject = currentRole === 'consultor' ? 'Cliente Corporativo' : 'Paciente';
+                return `
+                <div class="flex flex-col h-full gap-6 animate-fade-in-up">
+                    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 bg-navy-950 rounded-2xl flex items-center justify-center text-white shrink-0 shadow-lg"><i data-lucide="layers" class="w-7 h-7"></i></div>
+                            <div><h3 class="font-display font-bold text-2xl text-navy-900">Workspace de Sesión</h3><p class="text-sm text-slate-500 font-medium flex items-center gap-2"><i data-lucide="calendar" class="w-3 h-3"></i> 28 Octubre 2024 • <span class="text-blue-600 font-bold">Análisis Estratégico Activo</span></p></div>
+                        </div>
+                        <div class="flex gap-3 w-full lg:w-auto">
+                            <button onclick="showToast('Reproduciendo Audio...', 'info')" class="flex-1 lg:flex-none px-6 py-3 bg-slate-50 text-navy-900 font-bold rounded-xl hover:bg-slate-100 transition border border-slate-200 flex items-center justify-center gap-2"><i data-lucide="play" class="w-4 h-4"></i> Reproducir Audio</button>
+                            <button onclick="showToast('Exportando PDF...', 'success')" class="flex-1 lg:flex-none px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-500 transition shadow-lg shadow-blue-200 flex items-center justify-center gap-2"><i data-lucide="file-check" class="w-4 h-4"></i> Exportar Plan PDF</button>
+                        </div>
+                    </div>
+                    <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-0">
+                        <div class="lg:col-span-5 flex flex-col h-full min-h-[500px]">
+                            <div class="bg-white rounded-[2.5rem] border border-slate-200 shadow-card flex flex-col h-full overflow-hidden">
+                                <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                                    <h4 class="font-bold text-navy-900 flex items-center gap-2"><i data-lucide="file-text" class="w-4 h-4 text-slate-400"></i> Transcripción</h4>
+                                    <span class="text-[0.65rem] font-bold bg-blue-50 text-blue-600 px-2 py-1 rounded uppercase">Procesado</span>
+                                </div>
+                                <div class="flex-1 overflow-y-auto custom-scroll p-6 space-y-6 bg-slate-50/30">
+                                    <div class="flex gap-4"><div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs shrink-0">YO</div><div class="space-y-1"><p class="text-xs font-bold text-slate-400">04:12</p><div class="bg-white p-4 rounded-2xl rounded-tl-none border border-slate-100 shadow-sm text-sm text-slate-700 leading-relaxed">"...siento que pierdo el foco cuando hay demasiadas reuniones operativas. Necesito una forma de blindar mi tiempo estratégico."</div></div></div>
+                                    <div class="flex flex-row-reverse gap-4"><div class="w-10 h-10 rounded-xl bg-navy-900 text-white flex items-center justify-center font-bold text-xs shrink-0">NSG</div><div class="space-y-1 text-right"><p class="text-xs font-bold text-slate-400">04:15</p><div class="bg-blue-50 p-4 rounded-2xl rounded-tr-none border border-blue-100 text-sm text-navy-900 font-medium leading-relaxed text-left">"Entiendo. Aquí es donde debemos aplicar la técnica de 'Time Blocking' pero adaptada a tu ritmo circadiano."</div></div></div>
+                                    <div class="mx-auto w-fit bg-yellow-50 text-yellow-700 px-4 py-1 rounded-full text-xs font-bold border border-yellow-100 flex items-center gap-2"><i data-lucide="zap" class="w-3 h-3"></i> Insight Clave Detectado</div>
+                                    <div class="flex gap-4"><div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs shrink-0">YO</div><div class="space-y-1"><p class="text-xs font-bold text-slate-400">04:45</p><div class="bg-white p-4 rounded-2xl rounded-tl-none border border-slate-100 shadow-sm text-sm text-slate-700 leading-relaxed">"Exacto, en las mañanas es cuando más lúcido estoy. Pero siempre me ponen las revisiones de KPIs a esa hora."</div></div></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-7 flex flex-col gap-6 h-full overflow-y-auto custom-scroll pr-1 pb-4">
+                            <div class="bg-navy-950 text-white p-8 rounded-[2.5rem] relative overflow-hidden shadow-2xl shrink-0">
+                                <div class="absolute inset-0 bg-grid-pattern opacity-10"></div>
+                                <div class="absolute right-0 top-0 w-64 h-64 bg-blue-600/30 rounded-full blur-[80px]"></div>
+                                <div class="relative z-10">
+                                    <h4 class="font-display font-bold text-xl mb-4 flex items-center gap-3"><div class="p-1.5 bg-blue-500 rounded-lg"><i data-lucide="cpu" class="w-4 h-4 text-white"></i></div> NSG Context Engine</h4>
+                                    <p class="text-blue-100 text-sm mb-6 max-w-lg">Hemos analizado tu sesión. Tu principal desafío es la <span class="text-white font-bold border-b border-blue-400">gestión de energía cognitiva</span> frente a la demanda operativa.</p>
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                        <div class="bg-white/10 p-4 rounded-xl border border-white/10 backdrop-blur-sm"><p class="text-[0.6rem] font-bold text-blue-300 uppercase mb-1">Punto de Dolor</p><p class="text-sm font-bold">Fuga de Foco AM</p></div>
+                                        <div class="bg-white/10 p-4 rounded-xl border border-white/10 backdrop-blur-sm"><p class="text-[0.6rem] font-bold text-emerald-300 uppercase mb-1">Oportunidad</p><p class="text-sm font-bold">Bloqueo Estratégico</p></div>
+                                        <div class="bg-white/10 p-4 rounded-xl border border-white/10 backdrop-blur-sm"><p class="text-[0.6rem] font-bold text-purple-300 uppercase mb-1">Herramienta</p><p class="text-sm font-bold">Deep Work Protocol</p></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 shrink-0">
+                                <div class="bg-white p-6 rounded-[2.5rem] border border-slate-200 shadow-sm hover:shadow-md transition group">
+                                    <div class="flex items-center justify-between mb-4"><div class="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600"><i data-lucide="pen-tool" class="w-6 h-6"></i></div><i data-lucide="arrow-up-right" class="w-5 h-5 text-slate-300 group-hover:text-purple-600 transition"></i></div>
+                                    <h5 class="font-bold text-navy-900 text-lg mb-2">Metodología Sugerida</h5><p class="text-sm text-slate-500 mb-4 line-clamp-3">Aplicar el principio de "Eat the Frog" pero invertido para creativos: Estrategia primero, operación después.</p>
+                                    <button class="w-full py-2.5 bg-slate-50 text-purple-700 font-bold text-xs rounded-xl hover:bg-purple-100 transition">Ver Guía de Implementación</button>
+                                </div>
+                                <div class="bg-white p-6 rounded-[2.5rem] border border-slate-200 shadow-sm hover:shadow-md transition group">
+                                    <div class="flex items-center justify-between mb-4"><div class="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600"><i data-lucide="check-square" class="w-6 h-6"></i></div><i data-lucide="arrow-up-right" class="w-5 h-5 text-slate-300 group-hover:text-emerald-600 transition"></i></div>
+                                    <h5 class="font-bold text-navy-900 text-lg mb-2">Estrategia Táctica</h5><p class="text-sm text-slate-500 mb-4 line-clamp-3">Reagendar reuniones de KPIs a las 3:00 PM. Utilizar las mañanas (8am - 11am) exclusivamente para diseño de visión.</p>
+                                    <button class="w-full py-2.5 bg-slate-50 text-emerald-700 font-bold text-xs rounded-xl hover:bg-emerald-100 transition">Añadir a Calendario</button>
+                                </div>
+                            </div>
+                            <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-card flex-1">
+                                <h4 class="font-bold text-navy-900 text-xl mb-6 flex items-center gap-3"><i data-lucide="list-todo" class="w-6 h-6 text-blue-600"></i> Plan de Acción Inmediata</h4>
+                                <div class="space-y-4">
+                                    <div class="flex items-start gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:bg-white hover:shadow-sm transition cursor-pointer group" onclick="toggleCheck(this)"><div class="mt-1 w-5 h-5 rounded-full border-2 border-slate-300 bg-white group-hover:border-blue-500 transition"></div><div><p class="font-bold text-navy-900 text-sm">Bloquear calendario Lunes a Jueves</p><p class="text-xs text-slate-500 mt-1">De 08:00 AM a 11:00 AM como "No Disponible".</p></div></div>
+                                    <div class="flex items-start gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:bg-white hover:shadow-sm transition cursor-pointer group" onclick="toggleCheck(this)"><div class="mt-1 w-5 h-5 rounded-full border-2 border-slate-300 bg-white group-hover:border-blue-500 transition"></div><div><p class="font-bold text-navy-900 text-sm">Comunicar cambio al equipo</p><p class="text-xs text-slate-500 mt-1">Enviar memo sobre nuevas ventanas de disponibilidad.</p></div></div>
+                                </div>
+                                <button onclick="showToast('Personalizando...', 'info')" class="w-full mt-6 py-3 bg-navy-900 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition shadow-lg flex items-center justify-center gap-2"><i data-lucide="plus-circle" class="w-4 h-4"></i> Personalizar más acciones con AI</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+                return content;
+            },
+            nsg_news: () => `<div class="max-w-7xl mx-auto"><div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-10 gap-4"><div><h3 class="font-display font-bold text-3xl lg:text-4xl text-navy-900">NSG Hyper-News</h3><p class="text-slate-500 mt-2 text-base lg:text-lg">Inteligencia de mercado curada algorítmicamente para acelerar tus objetivos.</p></div><span class="text-sm font-bold bg-blue-50 text-blue-600 px-4 py-2 rounded-xl border border-blue-100 flex items-center gap-2 w-full sm:w-auto justify-center"><i data-lucide="zap" class="w-4 h-4"></i> Precision Filter Active</span></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">${_newsCard("TechCrunch", "AI en Salud Mental", "Tendencia", "blue", "Nuevos algoritmos predictivos reducen recaídas un 30%.", "15m")}${_newsCard("Harvard Business", "Liderazgo Adaptativo", "Estrategia", "purple", "Cómo los CEOs gestionan la incertidumbre en 2025.", "1h")}${_newsCard("NSG Internal", "Benchmark Q3", "Reporte", "emerald", "Tu rendimiento supera al promedio del sector en un 12%.", "2h")}${_newsCard("Global Markets", "Fusiones Tech", "M&A", "orange", "Oportunidades emergentes en el sector SaaS LATAM.", "4h")}${_newsCard("BioHack Daily", "Ritmos Circadianos", "Wellness", "sky", "Optimización del sueño para alto rendimiento ejecutivo.", "5h")}</div></div>`,
+            nsg_clarity: () => `
+                <div class="max-w-6xl mx-auto h-full flex flex-col">
+                    <div class="mb-10 flex flex-col md:flex-row justify-between items-center gap-8">
+                        <div class="flex-1"><div class="flex flex-wrap items-center gap-4 mb-3"><div class="w-12 h-12 bg-navy-950 rounded-2xl flex items-center justify-center shadow-lg"><i data-lucide="target" class="w-6 h-6 text-white"></i></div><div><h3 class="font-display font-bold text-3xl lg:text-4xl text-navy-900 tracking-tight leading-none">NSG Clarity</h3><p class="text-[0.65rem] font-bold text-blue-600 uppercase tracking-widest mt-1">Strategic Alignment Protocol</p></div></div><p class="text-slate-500 max-w-md text-sm lg:text-base leading-relaxed font-medium mt-2">Sincronización neuronal activa. Tu ecosistema de productividad circadiana conectado en tiempo real.</p></div>
+                        <div class="w-full md:w-auto"><div class="bg-navy-950 rounded-2xl p-5 text-white shadow-2xl flex items-center gap-6 min-w-[280px] relative overflow-hidden group hover:scale-[1.02] transition"><div class="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 opacity-50 animate-pulse-slow"></div><div class="relative z-10 text-right flex-1"><p class="text-[0.6rem] font-bold text-blue-300 uppercase tracking-widest mb-0.5">Próxima Sesión</p><div class="flex items-baseline justify-end gap-1"><span class="text-3xl font-display font-bold">08:00</span><span class="text-xs font-bold text-blue-400">PM</span></div></div><div class="relative z-10 w-12 h-12 rounded-full border-2 border-blue-500/30 flex items-center justify-center shrink-0"><div class="w-12 h-12 border-2 border-t-blue-400 border-transparent rounded-full animate-spin-slow absolute inset-0"></div><div class="w-2 h-2 bg-white rounded-full shadow-[0_0_15px_white]"></div></div></div></div>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
+                        <div class="lg:col-span-2 space-y-6">
+                             ${_timelineItem("08:00 AM", "Morning Clarity", "Completado", "emerald", "Definición de intención estratégica. Foco en Q3.", true)}
+                             ${_timelineItem("01:00 PM", "Power Check", "Pendiente", "blue", "Recalibración de medio día (7 min).", false)}
+                             ${_timelineItem("08:00 PM", "Next Day Planning", "Bloqueado", "slate", "Diseño del éxito para mañana.", false, true)}
+                        </div>
+                        <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-card h-fit sticky top-8">
+                            <div class="flex items-center justify-between mb-6"><h4 class="font-bold text-navy-900 text-lg flex items-center gap-3"><div class="p-2 bg-blue-50 rounded-xl text-blue-600"><i data-lucide="message-circle" class="w-5 h-5"></i></div>Sync History</h4><span class="text-[0.65rem] font-bold bg-slate-100 text-slate-500 px-2 py-1 rounded">Telegram</span></div>
+                            <div class="space-y-4 relative">
+                                <div class="absolute left-[19px] top-4 bottom-4 w-0.5 bg-slate-100 z-0"></div>
+                                <div class="relative z-10"><div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 hover:bg-white hover:shadow-sm transition group ml-2 hover:translate-x-1"><div class="flex items-center gap-2 mb-2"><div class="w-2 h-2 rounded-full bg-blue-500"></div><p class="text-xs font-bold text-blue-600">08:05 AM</p></div><p class="text-sm text-slate-600 leading-relaxed font-medium">"Objetivo principal: Cerrar el acuerdo con TechCorp antes de las 4pm."</p></div></div>
+                                <div class="relative z-10"><div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 hover:bg-white hover:shadow-sm transition group ml-2 hover:translate-x-1"><div class="flex items-center gap-2 mb-2"><div class="w-2 h-2 rounded-full bg-slate-300"></div><p class="text-xs font-bold text-slate-400">Ayer 08:30 PM</p></div><p class="text-sm text-slate-500 leading-relaxed">"Planificación completada. 3 tareas prioritarias asignadas."</p></div></div>
+                            </div>
+                            <button class="w-full mt-8 py-3.5 text-xs font-bold text-slate-600 hover:text-white border border-slate-200 hover:border-navy-900 hover:bg-navy-900 rounded-xl transition-all duration-300 shadow-sm flex items-center justify-center gap-2 active:scale-95">Ver Historial Completo <i data-lucide="arrow-right" class="w-3 h-3"></i></button>
+                        </div>
+                    </div>
+                </div>
+            `,
+            calendar: () => {
+                let days = ''; for(let i=1; i<=30; i++) { const hasEvent = [2,5,12,15].includes(i); let pills = ''; if(i===12) pills = `<div class="event-pill event-strategy">Board Meeting</div>`; days += `<div onclick="openDayDetail('Nov ${i}', ${i})" class="calendar-cell group cursor-pointer ${i===13 ? 'today' : ''}"><span class="text-xs font-bold ${i===13 ? 'text-white bg-blue-600 w-6 h-6 flex items-center justify-center rounded-full shadow-md' : 'text-slate-400'} mb-2 block">${i}</span>${pills}</div>`; }
+                return `<div class="h-full flex flex-col"><div class="flex justify-between items-center mb-6"><div><h3 class="font-display font-bold text-3xl text-navy-900" id="calendar-month-title">Noviembre 2024</h3></div><div class="flex gap-2"><button onclick="changeMonth(-1)" class="p-2 bg-white rounded-lg border hover:bg-slate-50 active:scale-95 transition"><i data-lucide="chevron-left" class="w-4 h-4"></i></button><button onclick="changeMonth(1)" class="p-2 bg-white rounded-lg border hover:bg-slate-50 active:scale-95 transition"><i data-lucide="chevron-right" class="w-4 h-4"></i></button><button class="px-4 bg-blue-600 text-white text-xs font-bold rounded-lg active:scale-95 transition hover:bg-blue-500" onclick="showToast('Nuevo Evento','info')">+ Evento</button></div></div><div class="bg-white rounded-[2rem] shadow-card border border-slate-200 overflow-hidden flex-1 flex flex-col"><div class="grid grid-cols-7 bg-slate-50/50 border-b border-slate-200 py-3">${['L','M','M','J','V','S','D'].map(d => `<div class="text-center text-[0.65rem] font-bold text-slate-400 uppercase tracking-widest">${d}</div>`).join('')}</div><div class="grid grid-cols-7 flex-1 bg-white overflow-y-auto custom-scroll">${days}</div></div></div>`;
+            },
+            settings: () => {
+                return `<div class="max-w-4xl mx-auto space-y-8 animate-fade-in-up">
+                    <div class="bg-white p-8 rounded-[2.5rem] shadow-card border border-slate-200">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+                            <div><h3 class="font-display font-bold text-2xl text-navy-900">Configuración del Sistema</h3><p class="text-slate-500 text-sm mt-1">Administra tus preferencias y seguridad.</p></div>
+                            <span class="bg-blue-50 text-blue-600 px-4 py-1.5 rounded-full text-xs font-bold border border-blue-100">Versión 14.4.0</span>
+                        </div>
+                        <div class="flex flex-col sm:flex-row items-center gap-6 mb-10 p-6 bg-slate-50 rounded-[2rem] border border-slate-100">
+                            <div class="relative group cursor-pointer">
+                                <div class="w-24 h-24 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-3xl shadow-lg group-hover:scale-105 transition-transform duration-300"><span class="relative z-10">US</span><div class="absolute inset-0 bg-white/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div></div>
+                                <div class="absolute -bottom-2 -right-2 bg-white p-1.5 rounded-full shadow-md border border-slate-100"><div class="bg-emerald-500 w-4 h-4 rounded-full border-2 border-white"></div></div>
+                            </div>
+                            <div class="text-center sm:text-left"><h4 class="font-bold text-xl text-navy-900">Usuario Activo</h4><p class="text-slate-500 text-sm mb-3">ID: NSG-8821-X • <span class="text-emerald-600 font-medium">Online</span></p><button onclick="showToast('Perfil actualizado', 'success')" class="text-xs font-bold text-white bg-navy-900 px-4 py-2 rounded-lg hover:bg-blue-600 transition shadow-md">Editar Perfil</button></div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-5 bg-white rounded-2xl border border-slate-200 hover:border-blue-300 transition-colors group cursor-pointer" onclick="showToast('Notificaciones actualizadas', 'info')"><div class="flex items-center gap-4"><div class="p-3 bg-blue-50 text-blue-600 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-colors"><i data-lucide="bell" class="w-5 h-5"></i></div><div><p class="font-bold text-navy-900 text-sm">Notificaciones Inteligentes</p><p class="text-xs text-slate-500">Alertas basadas en contexto y prioridad.</p></div></div><div class="relative w-12 h-6 bg-emerald-500 rounded-full transition-colors cursor-pointer"><div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform"></div></div></div>
+                            <div class="flex items-center justify-between p-5 bg-white rounded-2xl border border-slate-200 hover:border-purple-300 transition-colors group cursor-pointer" onclick="showToast('Privacidad activada', 'info')"><div class="flex items-center gap-4"><div class="p-3 bg-purple-50 text-purple-600 rounded-xl group-hover:bg-purple-600 group-hover:text-white transition-colors"><i data-lucide="shield" class="w-5 h-5"></i></div><div><p class="font-bold text-navy-900 text-sm">Modo Privacidad Avanzada</p><p class="text-xs text-slate-500">Ocultar datos sensibles en dashboard compartido.</p></div></div><div class="relative w-12 h-6 bg-slate-300 rounded-full transition-colors cursor-pointer"><div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform"></div></div></div>
+                            <div class="flex items-center justify-between p-5 bg-white rounded-2xl border border-slate-200 hover:border-orange-300 transition-colors group cursor-pointer" onclick="showToast('Tema sincronizado', 'info')"><div class="flex items-center gap-4"><div class="p-3 bg-orange-50 text-orange-600 rounded-xl group-hover:bg-orange-600 group-hover:text-white transition-colors"><i data-lucide="moon" class="w-5 h-5"></i></div><div><p class="font-bold text-navy-900 text-sm">Modo Oscuro Automático</p><p class="text-xs text-slate-500">Sincronizar con el sistema operativo.</p></div></div><div class="relative w-12 h-6 bg-emerald-500 rounded-full transition-colors cursor-pointer"><div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm"></div></div></div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-8 rounded-[2.5rem] shadow-card border border-slate-200">
+                        <h3 class="font-display font-bold text-xl text-navy-900 mb-6">Zona de Datos</h3>
+                        <div class="flex flex-col sm:flex-row gap-4"><button onclick="showToast('Iniciando descarga...', 'success')" class="flex-1 px-6 py-4 bg-slate-50 text-navy-900 font-bold rounded-2xl border border-slate-200 hover:bg-white hover:shadow-md transition-all flex items-center justify-center gap-3 group"><i data-lucide="download" class="w-5 h-5 text-slate-400 group-hover:text-blue-600 transition-colors"></i> Exportar Todo (JSON)</button><button onclick="showToast('Cache eliminado', 'success')" class="flex-1 px-6 py-4 bg-red-50 text-red-600 font-bold rounded-2xl border border-red-100 hover:bg-red-100 hover:shadow-md transition-all flex items-center justify-center gap-3 group"><i data-lucide="trash-2" class="w-5 h-5 group-hover:scale-110 transition-transform"></i> Limpiar Cache Local</button></div>
+                    </div>
+                </div>`;
+            },
+            clinical_radar: () => {
+                return `<div class="max-w-6xl mx-auto h-full flex flex-col gap-6"><div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full min-h-[500px]"><div class="lg:col-span-2 bg-white p-8 rounded-[2.5rem] shadow-card border border-slate-200 flex flex-col"><h3 class="font-display font-bold text-2xl text-navy-900 mb-6 flex items-center gap-3"><i data-lucide="hexagon" class="w-6 h-6 text-blue-600"></i> Evaluación Multiaxial</h3><div class="flex-1 relative w-full h-full min-h-[300px]"><canvas id="radarChart"></canvas></div></div><div class="bg-white p-8 rounded-[2.5rem] shadow-card border border-slate-200 flex flex-col gap-6"><h3 class="font-display font-bold text-xl text-navy-900">Resumen Clínico</h3><div class="space-y-4 flex-1 overflow-y-auto custom-scroll p-1">${_statItem("Eje I: Clínico", "Ansiedad G.", "text-red-500", "bg-red-50")}${_statItem("Eje II: Personalidad", "Rasgos Obsesivos", "text-orange-500", "bg-orange-50")}${_statItem("Eje III: Médico", "Sin Hallazgos", "text-emerald-500", "bg-emerald-50")}${_statItem("Eje IV: Psicosocial", "Estrés Laboral", "text-blue-500", "bg-blue-50")}${_statItem("Eje V: GAF", "75/100", "text-indigo-500", "bg-indigo-50")}</div><button onclick="showToast('Métricas actualizadas', 'success')" class="w-full py-3 bg-navy-950 text-white rounded-xl font-bold hover:bg-blue-700 transition">Actualizar Métricas</button></div></div></div>`;
+            },
+            metrics: () => {
+                return `<div class="max-w-7xl mx-auto flex flex-col gap-6"><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">${_card("Revenue YTD", "$2.4M", "dollar-sign", "bg-white", "text-emerald-600")}${_card("EBITDA", "32%", "percent", "bg-white", "text-blue-600")}${_card("Burn Rate", "$45k", "flame", "bg-white", "text-orange-500")}${_card("Runway", "18m", "calendar", "bg-white", "text-indigo-600")}</div><div class="grid grid-cols-1 lg:grid-cols-3 gap-6"><div class="lg:col-span-2 bg-white p-6 rounded-[2.5rem] shadow-card border border-slate-200"><h3 class="font-bold text-navy-900 mb-4">Proyección Financiera</h3><div class="h-80"><canvas id="financeChart"></canvas></div></div><div class="bg-white p-6 rounded-[2.5rem] shadow-card border border-slate-200"><h3 class="font-bold text-navy-900 mb-4">Transacciones Recientes</h3><div class="space-y-3 overflow-y-auto h-80 custom-scroll">${_transaction("Stripe Inc.", "+$12,450", "Ingreso")}${_transaction("AWS Cloud", "-$2,100", "Gasto")}${_transaction("Consultoría", "+$8,500", "Ingreso")}${_transaction("Nómina", "-$15,000", "Gasto")}</div></div></div></div>`;
+            },
+            strategy: () => {
+                return `<div class="h-full flex flex-col"><div class="flex justify-between items-center mb-6"><h3 class="font-display font-bold text-2xl text-navy-900">M&A Pipeline</h3><button onclick="showToast('Formulario nuevo deal abierto', 'info')" class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-blue-500 transition">+ Nuevo Deal</button></div><div class="flex-1 overflow-x-auto pb-4"><div class="flex gap-6 min-w-[1000px] h-full">${_kanbanColumn("Scouting", 3, "blue", [["TechCorp SA", "$5M", "SaaS B2B"], ["LogiTrans", "$2M", "Logística"]])}${_kanbanColumn("Due Diligence", 1, "orange", [["HealthPlus", "$12M", "Salud"]])}${_kanbanColumn("Negociación", 2, "purple", [["FinTech One", "$8M", "Finanzas"]])}${_kanbanColumn("Cerrado", 4, "emerald", [["AgroFuture", "$3M", "Agro"]])}</div></div></div>`;
+            },
+            wellness: () => {
+                return `<div class="max-w-4xl mx-auto"><div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8"><div class="bg-white p-8 rounded-[2.5rem] shadow-card border border-slate-200 flex flex-col items-center justify-center text-center"><div class="w-48 h-48 relative mb-6"><svg viewBox="0 0 100 100" class="w-full h-full transform -rotate-90"><circle cx="50" cy="50" r="45" stroke="#F1F5F9" stroke-width="8" fill="none"/><circle cx="50" cy="50" r="45" stroke="#10B981" stroke-width="8" fill="none" stroke-dasharray="283" stroke-dashoffset="70" stroke-linecap="round"/></svg><div class="absolute inset-0 flex flex-col items-center justify-center"><span class="text-4xl font-display font-extrabold text-navy-900">85</span><span class="text-xs font-bold text-slate-400 uppercase">Sleep Score</span></div></div><p class="text-slate-600 font-medium">Calidad de sueño óptima. Recuperación profunda detectada.</p></div><div class="grid grid-cols-2 gap-4">${_cardSmall("HRV", "42ms", "heart", "bg-red-50 text-red-600")}${_cardSmall("Pasos", "8,240", "footprints", "bg-blue-50 text-blue-600")}${_cardSmall("Calorías", "2,100", "flame", "bg-orange-50 text-orange-600")}${_cardSmall("Oxígeno", "98%", "activity", "bg-sky-50 text-sky-600")}</div></div><div class="bg-white p-8 rounded-[2.5rem] shadow-card border border-slate-200"><h3 class="font-bold text-navy-900 mb-4">Tendencia Semanal</h3><div class="h-64 w-full"><canvas id="wellnessChart"></canvas></div></div></div>`;
+            },
+            library: () => {
+                 return `<div class="h-full flex flex-col"><div class="flex justify-between items-center mb-6"><h3 class="font-display font-bold text-2xl text-navy-900">Biblioteca de Recursos</h3><div class="relative"><i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i><input type="text" placeholder="Buscar artículo..." class="pl-9 pr-4 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"></div></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-6">${_resourceCard("Ansiedad Cognitiva", "Protocolo TCC estándar.", "file-text", "blue")}${_resourceCard("Meditación Guiada", "Audio MP3 - 15 min.", "headphones", "purple")}${_resourceCard("Lectura: Hábitos", "PDF - Atomic Habits.", "book", "emerald")}${_resourceCard("Journal Template", "Plantilla Notion.", "layout", "orange")}</div></div>`;
+            },
+            journal: () => {
+                return `<div class="max-w-4xl mx-auto h-full flex flex-col"><div class="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm flex-1 flex flex-col mb-6"><textarea class="flex-1 w-full resize-none focus:outline-none text-lg text-slate-700 placeholder-slate-300 p-2" placeholder="¿Qué tienes en mente hoy? Escribe libremente..."></textarea><div class="flex justify-between items-center border-t border-slate-100 pt-4 mt-4"><div class="flex gap-2 text-slate-400"><button class="p-2 hover:bg-slate-50 rounded-lg transition"><i data-lucide="image" class="w-5 h-5"></i></button><button class="p-2 hover:bg-slate-50 rounded-lg transition"><i data-lucide="mic" class="w-5 h-5"></i></button></div><button onclick="showToast('Entrada guardada', 'success')" class="bg-navy-900 text-white px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-700 transition">Guardar Entrada</button></div></div><h3 class="font-bold text-navy-900 mb-4 px-2">Entradas Anteriores</h3><div class="space-y-3 pb-6">${_journalEntry("Reflexión Semanal", "Me sentí más enfocado durante...", "Hoy, 10:00 AM")}${_journalEntry("Notas de Sesión", "Importante recordar la técnica de...", "Ayer, 4:30 PM")}</div></div>`;
+            },
+            portfolio: () => {
+                return `<div class="h-full flex flex-col"><h3 class="font-display font-bold text-2xl text-navy-900 mb-6">Cartera de Activos</h3><div class="bg-white rounded-[2rem] shadow-card border border-slate-200 overflow-hidden"><div class="table-container"><table class="w-full text-left text-sm"><thead class="bg-slate-50 text-slate-500 font-bold uppercase text-xs"><tr><th class="p-6">Activo</th><th class="p-6">Sector</th><th class="p-6">Participación</th><th class="p-6">Valor Actual</th><th class="p-6">Rendimiento</th></tr></thead><tbody class="divide-y divide-slate-100">${_portfolioRow("TechGlobal", "Tecnología", "15%", "$1.2M", "+12%", "text-emerald-500")}${_portfolioRow("GreenEnergy", "Energía", "25%", "$800k", "+5%", "text-emerald-500")}${_portfolioRow("UrbanReal", "Inmobiliario", "100%", "$2.2M", "+8%", "text-emerald-500")}</tbody></table></div></div></div>`;
+            },
+            reports: () => {
+                 return `<div class="h-full"><h3 class="font-display font-bold text-2xl text-navy-900 mb-6">Reportes & Data</h3><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">${_reportCard("Q3 Financials", "PDF • 2.4MB", "file-text", "red")}${_reportCard("User Growth", "XLS • 1.1MB", "table", "emerald")}${_reportCard("Risk Analysis", "PDF • 5.2MB", "shield", "blue")}${_reportCard("Team Performance", "PPT • 8.5MB", "presentation", "orange")}</div></div>`;
+            },
+            patients: () => {
+                return `<div class="h-full flex flex-col"><div class="flex justify-between items-center mb-6"><h3 class="font-display font-bold text-2xl text-navy-900">Gestión de Pacientes</h3><button onclick="showToast('Añadir paciente...', 'info')" class="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg hover:bg-blue-500 transition flex items-center gap-2"><i data-lucide="user-plus" class="w-4 h-4"></i> Nuevo Ingreso</button></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto custom-scroll pb-6">${_patientCard("Javier M.", "Ansiedad G.", "Activo", "blue")}${_patientCard("Ana R.", "Depresión Leve", "Revisión", "emerald")}${_patientCard("Carlos D.", "Estrés Laboral", "Pausado", "orange")}${_patientCard("Luisa P.", "TDAH Adulto", "Activo", "blue")}</div></div>`;
+            },
+            deliverables: () => {
+                return `<div class="h-full flex flex-col"><h3 class="font-display font-bold text-2xl text-navy-900 mb-6">Mis Entregables</h3><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">${_fileCard("Plan de Acción Q4", "Estrategia Personal", "PDF", "2.1 MB")}${_fileCard("Rutina de Sueño", "Wellness", "PDF", "0.8 MB")}${_fileCard("Reporte Progreso", "Mensual", "DOCX", "1.5 MB")}</div></div>`;
+            }
+        };
+
+        // --- COMPONENT HELPERS ---
+        function _card(t, v, i, bg, tx) { return `<div class="${bg} p-8 rounded-[2.5rem] shadow-card border border-slate-100 flex flex-col justify-between h-48 transition-all duration-500 hover:shadow-xl cursor-default hover:scale-[1.02] group"><div class="flex justify-between"><p class="text-[0.65rem] font-bold uppercase tracking-widest opacity-60">${t}</p><i data-lucide="${i}" class="w-6 h-6 opacity-50 group-hover:scale-110 transition-transform duration-300"></i></div><p class="text-4xl font-display font-extrabold ${tx}">${v}</p></div>`; }
+        function _cardSmall(t, v, i, bg) { return `<div class="bg-white p-5 rounded-[1.5rem] shadow-sm border border-slate-100 flex items-center justify-between"><div class="flex flex-col"><p class="text-[0.6rem] font-bold uppercase text-slate-400 tracking-widest">${t}</p><p class="text-xl font-bold text-navy-900 mt-1">${v}</p></div><div class="p-2 rounded-xl ${bg}"><i data-lucide="${i}" class="w-5 h-5"></i></div></div>`; }
+        function _timelineItem(time, title, status, color, desc, active, locked) { const opacity = locked ? 'opacity-50' : 'opacity-100'; const border = active ? `border-${color}-500 ring-4 ring-${color}-500/10` : `border-${color}-200`; return `<div class="flex gap-6 ${opacity} relative group cursor-pointer" onclick="toggleCheck(this)"><div class="flex flex-col items-center"><span class="text-xs font-bold text-slate-400 mb-2">${time}</span><div class="w-4 h-4 rounded-full bg-${active?color+'-500':'white'} border-4 border-${active?'white':color+'-200'} z-10 shadow-sm transition-colors group-hover:scale-110"></div><div class="w-0.5 h-full bg-slate-100 -mt-2"></div></div><div class="flex-1 bg-white p-6 rounded-3xl border ${border} shadow-sm relative overflow-hidden transition hover:-translate-y-1 hover:shadow-md hover:scale-[1.01]">${active ? `<div class="absolute top-0 left-0 w-1.5 h-full bg-${color}-500"></div>` : ''}<div class="flex justify-between items-start mb-2"><h4 class="font-bold text-lg text-navy-900">${title}</h4>${locked ? '<i data-lucide="lock" class="w-4 h-4 text-slate-400"></i>' : `<i data-lucide="${active?'circle':'check-circle'}" class="w-4 h-4 text-${color}-500"></i>`}</div><p class="text-sm text-slate-600 leading-relaxed">${desc}</p></div></div>`; }
+        function _newsCard(src, title, tag, col, desc, time) { 
+            return `<div onclick="analyzeNews('${title}', '${tag}')" class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-card hover:shadow-2xl transition-all cursor-pointer hover:-translate-y-2 duration-500 group hover:scale-[1.01] relative overflow-hidden">
+                <div class="absolute inset-0 bg-blue-50/0 group-hover:bg-blue-50/50 transition-colors duration-500"></div>
+                <div class="relative z-10">
+                    <div class="flex justify-between mb-4">
+                        <span class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-widest">${src}</span>
+                        <span class="text-[0.6rem] font-bold bg-${col}-50 text-${col}-600 px-3 py-1 rounded-full border border-${col}-100 group-hover:scale-105 transition-transform">${tag}</span>
+                    </div>
+                    <h4 class="font-display font-bold text-xl text-navy-900 mb-3 leading-tight group-hover:text-blue-700 transition">${title}</h4>
+                    <p class="text-sm text-slate-500 line-clamp-2 mb-6 leading-relaxed">${desc}</p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2 text-xs font-medium text-slate-400"><i data-lucide="clock" class="w-4 h-4"></i> ${time}</div>
+                        <div class="text-blue-600 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 transform translate-x-2 group-hover:translate-x-0 duration-300">
+                            Analizar <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>`; 
+        }
+        function _statItem(label, value, color, bg) { return `<div class="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100"><div class="flex items-center gap-3"><div class="w-2 h-2 rounded-full ${color.replace('text', 'bg')}"></div><span class="text-sm font-bold text-slate-500 uppercase tracking-wide">${label}</span></div><span class="text-sm font-bold ${color} ${bg} px-3 py-1 rounded-lg">${value}</span></div>`; }
+        function _transaction(name, val, type) { const col = type === 'Ingreso' ? 'text-emerald-600' : 'text-slate-600'; return `<div class="flex justify-between items-center p-4 hover:bg-slate-50 rounded-xl transition cursor-pointer group"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-xs text-slate-500 group-hover:bg-white group-hover:shadow-sm">${name.substring(0,2)}</div><div><p class="font-bold text-navy-900 text-sm">${name}</p><p class="text-xs text-slate-400">${type}</p></div></div><p class="font-bold text-sm ${col}">${val}</p></div>`; }
+        function _kanbanColumn(title, count, color, items) { 
+            let cards = items.map(i => `<div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm cursor-pointer hover:shadow-md hover:-translate-y-1 transition group"><div class="flex justify-between mb-2"><span class="text-[0.6rem] font-bold bg-slate-50 text-slate-500 px-2 py-1 rounded uppercase tracking-wider">${i[2]}</span></div><h4 class="font-bold text-navy-900 mb-1">${i[0]}</h4><p class="text-sm text-slate-500 font-medium">${i[1]}</p></div>`).join('');
+            return `<div class="w-72 bg-slate-50/50 rounded-[2rem] p-4 flex flex-col h-full border border-slate-100"><div class="flex justify-between items-center mb-4 px-2"><h4 class="font-bold text-navy-900 text-sm">${title}</h4><span class="text-xs font-bold text-${color}-600 bg-${color}-50 px-2 py-0.5 rounded-full">${count}</span></div><div class="flex-1 space-y-3 overflow-y-auto custom-scroll pr-1">${cards}</div></div>`;
+        }
+        function _resourceCard(title, desc, icon, color) { return `<div class="bg-white p-6 rounded-[2rem] border border-slate-200 hover:border-${color}-200 hover:shadow-lg transition cursor-pointer group flex items-center gap-4 hover:-translate-y-1"><div class="w-14 h-14 rounded-2xl bg-${color}-50 text-${color}-600 flex items-center justify-center shrink-0"><i data-lucide="${icon}" class="w-7 h-7"></i></div><div><h4 class="font-bold text-navy-900 text-lg group-hover:text-${color}-600 transition">${title}</h4><p class="text-xs text-slate-500 mt-1">${desc}</p></div></div>`; }
+        function _journalEntry(title, preview, time) { return `<div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 hover:bg-white hover:shadow-sm transition cursor-pointer"><div class="flex justify-between mb-1"><h4 class="font-bold text-navy-900 text-sm">${title}</h4><span class="text-xs text-slate-400">${time}</span></div><p class="text-xs text-slate-500 line-clamp-1">${preview}</p></div>`; }
+        function _portfolioRow(name, sec, share, val, perf, col) { return `<tr class="border-b border-slate-50 hover:bg-slate-50/50 transition group"><td class="p-6 font-bold text-navy-900">${name}</td><td class="p-6 text-slate-500">${sec}</td><td class="p-6 text-slate-500">${share}</td><td class="p-6 font-bold text-navy-900">${val}</td><td class="p-6 font-bold ${col}">${perf}</td></tr>`; }
+        function _reportCard(name, meta, icon, col) { return `<div class="bg-white p-6 rounded-[2rem] border border-slate-200 hover:shadow-md transition cursor-pointer flex flex-col items-center text-center gap-4 group hover:-translate-y-1"><div class="w-16 h-16 rounded-full bg-${col}-50 text-${col}-600 flex items-center justify-center group-hover:scale-110 transition"><i data-lucide="${icon}" class="w-8 h-8"></i></div><div><h4 class="font-bold text-navy-900">${name}</h4><p class="text-xs text-slate-400 mt-1 font-bold uppercase tracking-wide">${meta}</p></div><button class="text-xs font-bold text-${col}-600 bg-${col}-50 px-4 py-2 rounded-lg hover:bg-${col}-100 transition w-full">Descargar</button></div>`; }
+        function _patientCard(name, dx, status, col) { return `<div class="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm flex flex-col gap-4 hover:shadow-md transition hover:-translate-y-1 group"><div class="flex justify-between items-start"><div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center font-bold text-slate-500">${name.substring(0,2)}</div><span class="text-[0.6rem] font-bold bg-${col}-50 text-${col}-600 px-2 py-1 rounded-lg uppercase tracking-wider">${status}</span></div><div><h4 class="font-bold text-navy-900 text-lg">${name}</h4><p class="text-sm text-slate-500">${dx}</p></div><button class="w-full py-2 bg-slate-50 text-slate-600 font-bold text-xs rounded-xl hover:bg-navy-900 hover:text-white transition">Ver Expediente</button></div>`; }
+        function _fileCard(title, type, ext, size) { return `<div class="bg-white p-6 rounded-[2rem] border border-slate-200 hover:border-blue-200 transition group cursor-pointer hover:-translate-y-1"><div class="flex items-center gap-4 mb-4"><div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center"><i data-lucide="file-text" class="w-6 h-6"></i></div><div><h4 class="font-bold text-navy-900">${title}</h4><p class="text-xs text-slate-500">${type}</p></div></div><div class="flex justify-between items-center border-t border-slate-50 pt-3"><span class="text-xs font-bold text-slate-400">${ext} • ${size}</span><i data-lucide="download-cloud" class="w-4 h-4 text-blue-500"></i></div></div>`; }
+
+        // --- CHART INITIALIZERS ---
+        function initRadarChart() {
+            const ctx = document.getElementById('radarChart');
+            if(!ctx) return;
+            if(chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Clínico', 'Personalidad', 'Médico', 'Psicosocial', 'Funcionalidad'],
+                    datasets: [{ label: 'Paciente JM', data: [80, 65, 20, 70, 75], backgroundColor: 'rgba(37, 99, 235, 0.2)', borderColor: '#2563EB', pointBackgroundColor: '#2563EB', pointBorderColor: '#fff', pointHoverBackgroundColor: '#fff', pointHoverBorderColor: '#2563EB' }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { r: { angleLines: { display: false }, suggestedMin: 0, suggestedMax: 100, grid: { color: 'rgba(0,0,0,0.05)' }, pointLabels: { font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: 'bold' }, color: '#64748B' }, ticks: { display: false, backdropColor: 'transparent' } } }, plugins: { legend: { display: false } } }
+            });
+        }
+        function initFinanceChart() {
+            const ctx = document.getElementById('financeChart');
+            if(!ctx) return;
+            if(chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+                    datasets: [{ label: 'Ingresos', data: [65, 59, 80, 81, 56, 95], backgroundColor: '#3B82F6', borderRadius: 6 }, { label: 'Gastos', data: [28, 48, 40, 19, 36, 27], backgroundColor: '#E2E8F0', borderRadius: 6 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { borderDash: [2, 4], color: '#F1F5F9' }, ticks: { font: { family: "'Inter', sans-serif" } } }, x: { grid: { display: false }, ticks: { font: { family: "'Inter', sans-serif" } } } }, plugins: { legend: { position: 'bottom', labels: { font: { family: "'Plus Jakarta Sans', sans-serif" }, usePointStyle: true } } } }
+            });
+        }
+        function initWellnessChart() {
+             const ctx = document.getElementById('wellnessChart');
+            if(!ctx) return;
+            if(chartInstance2) chartInstance2.destroy();
+            chartInstance2 = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['L', 'M', 'M', 'J', 'V', 'S', 'D'],
+                    datasets: [{ label: 'Nivel Energía', data: [70, 75, 60, 80, 85, 90, 88], borderColor: '#10B981', backgroundColor: 'rgba(16, 185, 129, 0.1)', tension: 0.4, fill: true, pointRadius: 4, borderWidth: 3 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false, min: 0, max: 100 }, x: { grid: { display: false } } } }
+            });
+        }
+    </script>
+</body>
+</html>

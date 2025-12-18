@@ -1,0 +1,2 @@
+lib/gemini/cacheManager.ts(23,45): error TS2345: Argument of type '{ model: string; displayName: string; systemInstruction: string; ttlSeconds: number; }' is not assignable to parameter of type 'CachedContentCreateParams'.
+  Property 'contents' is missing in type '{ model: string; displayName: string; systemInstruction: string; ttlSeconds: number; }' but required in type 'CachedContentCreateParams'.

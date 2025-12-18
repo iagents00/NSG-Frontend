@@ -1,0 +1,31 @@
+   ▲ Next.js 16.0.6 (Turbopack)
+   - Environments: .env.local
+   - Experiments (use with caution):
+     · serverActions
+
+   Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack build failed with 1 errors:
+./components/chat/ChatInterface.tsx:3:1
+Module not found: Can't resolve 'ai/react'
+[0m [90m 1 |[39m [32m"use client"[39m[33m;[39m
+ [90m 2 |[39m
+[31m[1m>[22m[39m[90m 3 |[39m [36mimport[39m { useChat } [36mfrom[39m [32m'ai/react'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 4 |[39m [36mimport[39m { useEffect[33m,[39m useState } [36mfrom[39m [32m'react'[39m[33m;[39m
+ [90m 5 |[39m [36mimport[39m { useAppStore } [36mfrom[39m [32m'@/store/useAppStore'[39m[33m;[39m
+ [90m 6 |[39m [36mimport[39m { [33mSend[39m[33m,[39m [33mPaperclip[39m[33m,[39m [33mLoader2[39m } [36mfrom[39m [32m'lucide-react'[39m[33m;[39m[0m
+
+
+
+Import trace:
+  Server Component:
+    ./components/chat/ChatInterface.tsx
+    ./app/chat/page.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+    at <unknown> (./components/chat/ChatInterface.tsx:3:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
