@@ -3,7 +3,7 @@ import { Fathom } from 'fathom-typescript';
 import { cookies } from 'next/headers';
 
 const FATHOM_CLIENT_ID = "NrRk5m9NohU_t6nODvkSZD-sufh9cRp4Nh_gsRe9--U";
-const FATHOM_CLIENT_SECRET = "TU_FATHOM_CLIENT_SECRET"; // Necesitas obtener este valor de Fathom
+const FATHOM_CLIENT_SECRET = "c7U-cAJU1auZLWMJDZkxmDLQOlz7k5GCmvfzF3rB7OQ"; // Necesitas obtener este valor de Fathom
 const BASE_URL = "https://nsg-backend.onrender.com";
 
 export async function GET(req: Request) {
