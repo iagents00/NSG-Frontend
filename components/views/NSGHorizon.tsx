@@ -462,7 +462,7 @@ export default function NSGHorizon() {
                         <div className={`
                             w-9 h-9 rounded-full flex items-center justify-center font-bold text-[11px] shrink-0 
                             select-none text-white shadow-sm ring-2 ring-white
-                            ${isMe ? 'bg-navy-900' : avatarColor}
+                            ${isMe ? 'bg-blue-600' : avatarColor}
                         `}>
                             {item.speakerName.substring(0, 1).toUpperCase()}
                         </div>
@@ -471,8 +471,8 @@ export default function NSGHorizon() {
                         <div className={`
                            group relative max-w-[75%] px-5 py-4 shadow-sm hover:shadow-md transition-shadow duration-200
                            ${isMe 
-                                ? 'bg-navy-900 text-white rounded-tr-none items-end' 
-                                : 'bg-white text-slate-800 rounded-tl-none border border-slate-100 items-start'
+                                ? 'bg-blue-600 text-white rounded-2xl items-end' 
+                                : 'bg-white text-slate-800 rounded-2xl border border-slate-100 items-start'
                            }
                         `}>
                             {/* Header: Name */}

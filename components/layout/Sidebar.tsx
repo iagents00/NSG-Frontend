@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { useUIStore } from "@/store/useUIStore"; // Imported for mobile toggling
 import { CONTEXT } from "@/data/context";
@@ -17,9 +18,26 @@ export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   
+  const [username, setUsername] = useState<string | null>(null);
+
   // Safety check: fallback to 'paciente' or handle null if store is empty initially
   const roleKey = currentRole || 'paciente';
   const config = CONTEXT[roleKey];
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const data = await authService.verifySession();
+        // Correctly access 'user' (lowercase) based on API response
+        if (data?.user?.username) {
+          setUsername(data.user.username);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user info", error);
+      }
+    };
+    fetchUser();
+  }, []);
 
   return (
     <>
@@ -73,7 +91,7 @@ export default function Sidebar() {
                {config?.avatar || 'US'} 
              </div>
              <div className="overflow-hidden">
-                <p className="text-sm font-bold text-white truncate leading-tight">{config?.name || 'Usuario'}</p>
+                <p className="text-sm font-bold text-white truncate leading-tight">{username || 'Usuario'}</p>
                 <div className="flex items-center gap-1.5 mt-0.5">
                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                    <p className="text-[0.65rem] font-bold text-slate-400 uppercase tracking-widest truncate">{config?.roleDesc || 'GUEST'}</p>

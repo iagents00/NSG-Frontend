@@ -7,11 +7,29 @@ import axios from "axios";
 
 import { useAppStore } from "@/store/useAppStore";
 import FathomConnection from "@/components/features/FathomConnection";
+import { authService } from "@/lib/auth"; // Import authService
 
 export default function Settings() {
   const { showToast } = useToast();
   const { theme, setTheme, userId } = useAppStore(); // Connect to store
   
+  const [username, setUsername] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const data = await authService.verifySession();
+        if (data?.user?.username) {
+            setUsername(data.user.username);
+        }
+      } catch (error) {
+        // Silent fail or log
+        console.error("Settings: Failed to fetch user session", error);
+      }
+    };
+    fetchUser();
+  }, []);
+
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(newTheme);
@@ -150,7 +168,7 @@ export default function Settings() {
         <div className="flex flex-col sm:flex-row items-center gap-6 mb-10 p-6 bg-slate-50 rounded-[2rem] border border-slate-100">
           <div className="relative group cursor-pointer">
             <div className="w-24 h-24 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-3xl shadow-lg group-hover:scale-105 transition-transform duration-300">
-                <span className="relative z-10">US</span>
+                <span className="relative z-10">{username ? username.substring(0, 2).toUpperCase() : 'US'}</span>
                 <div className="absolute inset-0 bg-white/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </div>
             <div className="absolute -bottom-2 -right-2 bg-white p-1.5 rounded-full shadow-md border border-slate-100">
@@ -158,7 +176,7 @@ export default function Settings() {
             </div>
           </div>
           <div className="text-center sm:text-left">
-            <h4 className="font-bold text-xl text-navy-900">Usuario Activo</h4>
+            <h4 className="font-bold text-xl text-navy-900">{username || 'Usuario Activo'}</h4>
             <p className="text-slate-500 text-sm mb-3">
                 ID: NSG-8821-X • <span className="text-emerald-600 font-medium">Online</span>
             </p>

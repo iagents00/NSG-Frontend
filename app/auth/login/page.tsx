@@ -82,7 +82,7 @@ function LoginContent() {
                 
                 <div className="space-y-1">
                     <h1 className="font-display font-medium text-slate-900 text-2xl tracking-tight">
-                        {`Hola, ${CONTEXT[selectedRole].name}`}
+                        Bienvenido
                     </h1>
                     <p className="text-slate-500 text-sm font-medium">
                         Ingresa tus credenciales para continuar
