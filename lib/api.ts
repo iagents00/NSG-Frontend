@@ -1,5 +1,11 @@
 import axios from 'axios';
 
+const appBackendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+if (!appBackendUrl) {
+  console.warn("⚠️ NOTICE: NEXT_PUBLIC_BACKEND_URL is not defined in your environment variables. API requests will default to the current origin, which may cause 404 or 405 errors if the routes do not exist locally.");
+}
+
 const api = axios.create({
   baseURL: 'https://nsg-backend.onrender.com',
   headers: {
