@@ -67,10 +67,10 @@ export default function JarvisAssistant() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: `British elegance, dry wit: ${text}` }] }],
+          contents: [{ parts: [{ text: text }] }], // Removed English prompt to ensure natural Spanish
           generationConfig: {
             responseModalities: ["AUDIO"],
-            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Charon" } } }
+            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Fenrir" } } } // Fenrir: Deep, elegant, warm
           }
         })
       });
@@ -91,12 +91,19 @@ export default function JarvisAssistant() {
       }
     } catch (e) { 
       console.error("TTS API failed, switching to system voice:", e);
-      // Fallback: Browser Native TTS
+      // Fallback: Browser Native TTS with Voice Selection
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 1.0;
-      utterance.pitch = 1.0;
+      const voices = window.speechSynthesis.getVoices();
+      // Try to find a high-quality Spanish voice (Google or Microsoft)
+      const preferredVoice = voices.find(v => v.lang.includes('es') && (v.name.includes('Google') || v.name.includes('Microsoft'))) ||
+                             voices.find(v => v.lang.includes('es'));
+      
+      if (preferredVoice) utterance.voice = preferredVoice;
+      
+      utterance.rate = 0.9; // Slightly slower for elegance
+      utterance.pitch = 0.9; // Slightly deeper
       utterance.volume = 1.0;
-      utterance.lang = "es-ES"; // Default to Spanish as per user context
+      utterance.lang = "es-ES";
       utterance.onend = () => setStatus('IDLE');
       window.speechSynthesis.speak(utterance);
     }
