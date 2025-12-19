@@ -110,7 +110,7 @@ export default function JarvisAssistant() {
             return;
         }
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-001:generateContent?key=${apiKey}`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -469,7 +469,7 @@ export default function JarvisAssistant() {
               <div className="flex justify-between items-start mb-3 relative z-10">
                  <div className="flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">System Response</span>
+                    <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">Respuesta del Sistema</span>
                  </div>
                  <button onClick={() => setShowNotification(false)} className="text-slate-500 hover:text-white transition-colors"><X size={14} /></button>
               </div>
