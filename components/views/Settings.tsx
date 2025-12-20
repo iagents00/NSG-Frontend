@@ -6,7 +6,7 @@ import clsx from "clsx";
 import axios from "axios";
 
 import { useAppStore } from "@/store/useAppStore";
-import FathomConnection from "@/components/features/FathomConnection";
+
 import { authService } from "@/lib/auth"; // Import authService
 
 export default function Settings() {
@@ -219,7 +219,7 @@ export default function Settings() {
       </div>
       
       {/* 2. Fathom Analytics Connection */}
-      <FathomConnection />
+      {/* Fathom Connection Removed */}
 
       {/* 3. PDF Upload Card */}
       <div className="bg-white p-8 rounded-[2.5rem] shadow-card border border-slate-200">

@@ -3,11 +3,12 @@
 import { useState, useEffect } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { useToast } from "@/components/ui/ToastProvider";
+import FathomTokenModal from "@/components/features/FathomTokenModal";
 import { 
-  Layers, Calendar, Play, FileCheck, FileText, Zap, Cpu, 
+  Layers, Calendar, Play, FileCheck, FileText, Cpu, 
   PenTool, ArrowUpRight, CheckSquare, ListTodo, PlusCircle,
-  Folder, ArrowLeft, MoreHorizontal, ChevronRight,
-  Activity, Loader2, CheckCircle
+  Folder, ArrowLeft, MoreHorizontal, Loader2,
+  Zap, Activity, ChevronRight, CheckCircle, Trash2
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -55,7 +56,7 @@ interface MeetingFolder {
 }
 
 export default function NSGHorizon() {
-  const { currentRole, userId } = useAppStore();
+  const { userId } = useAppStore();
   const { showToast } = useToast();
   
   // State
@@ -63,7 +64,36 @@ export default function NSGHorizon() {
   const [selectedFolder, setSelectedFolder] = useState<MeetingFolder | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [checkedItems, setCheckedItems] = useState<number[]>([]);
+  const [showFathomModal, setShowFathomModal] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
+
+  const [fathomToken, setFathomToken] = useState<string | null>(null);
+
+  // Check initial connection
+  useEffect(() => {
+     if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('fathom_token');
+        if (token) {
+            setFathomToken(token);
+            setIsConnected(true);
+        }
+     }
+  }, []);
+
+  const handleConnectFathom = (token: string) => {
+      localStorage.setItem('fathom_token', token);
+      setFathomToken(token);
+      setIsConnected(true);
+      setShowFathomModal(false);
+      showToast('Fathom conectado exitosamente', 'success');
+  };
+
+  const handleDisconnectFathom = () => {
+      localStorage.removeItem('fathom_token');
+      setFathomToken(null);
+      setIsConnected(false);
+      showToast('Fathom desconectado', 'info');
+  };
 
   // Fetch Data on Mount
   useEffect(() => {
@@ -83,7 +113,6 @@ export default function NSGHorizon() {
         }
 
         const jsonResponse = await response.json();
-        console.log("NSG Horizon Data Received:", jsonResponse);
         
         // Helper to format date and time
         const formatDateTime = (isoString: string) => {
@@ -122,7 +151,6 @@ export default function NSGHorizon() {
 
         const mappedFolders: MeetingFolder[] = meetingsArray.map((item: any, index: number) => {
             // Handle structure where item itself might be the meeting or it wraps meeting_data
-            // The user screenshot shows: { meeting_data: {...}, transcription_list: [...] }
             const mData = item.meeting_data || item; 
             const tList = item.transcription_list || [];
 
@@ -131,7 +159,7 @@ export default function NSGHorizon() {
             return {
                 id: mData.recording_id || `meeting-${index}`,
                 title: mData.title || mData.meeting_title || "Nueva Sesión",
-                description: mData.default_summary || "Sesión registrada en Fathom.",
+                description: mData.default_summary || "Sesión registrada.",
                 date: formatted.date,
                 timeStr: formatted.time,
                 shareUrl: mData.share_url || "#",
@@ -147,7 +175,7 @@ export default function NSGHorizon() {
                     isUser: !!(t.matched_calendar_invitee_email || t.speaker?.matched_calendar_invitee_email)
                 })) : [],
 
-                // Map AI Info (Optional, structure depends on if it exists in this new format)
+                // Map AI Info (Optional)
                 aiInfo: undefined 
             };
         });
@@ -163,15 +191,7 @@ export default function NSGHorizon() {
     };
 
     fetchHorizonData();
-  }, [userId]);
-
-  // Check connection status
-  useEffect(() => {
-    if (typeof document !== 'undefined') {
-        const connected = document.cookie.split('; ').some(row => row.startsWith('fathom_connected=true'));
-        setIsConnected(connected);
-    }
-  }, []);
+  }, [userId, showToast]);
 
   // Reset checked items when folder changes
   useEffect(() => {
@@ -201,8 +221,8 @@ export default function NSGHorizon() {
     return (
       <div className="flex flex-col h-full gap-8 animate-fade-in-up pb-8">
         
-        {/* HERO: JOIN FATHOM */}
-        <div className="w-full bg-gradient-to-r from-navy-900 via-navy-800 to-blue-900 rounded-[2.5rem] p-8 sm:p-12 text-white relative overflow-hidden shadow-xl border border-navy-700/50">
+        {/* HERO: JOIN FATHOM (Visual Only) */}
+        <div className="w-full bg-linear-to-r from-navy-900 via-navy-800 to-blue-900 rounded-[2.5rem] p-8 sm:p-12 text-white relative overflow-hidden shadow-xl border border-navy-700/50">
            {/* Decorational Elements */}
            <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
            <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3 pointer-events-none"></div>
@@ -214,39 +234,48 @@ export default function NSGHorizon() {
                   Potenciado por AI
                 </div>
                 <h2 className="text-3xl sm:text-4xl font-display font-bold leading-tight">
-                  Conecta tus reuniones con <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-white">Fathom</span>
+                  Conecta tus reuniones con <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-200 to-white">Fathom</span>
                 </h2>
                 <p className="text-blue-100/80 text-lg leading-relaxed max-w-xl mx-auto md:mx-0">
                   Sincroniza automáticamente tus grabaciones, transcribimos y analizamos cada detalle para generar insights estratégicos al instante.
                 </p>
                 <div className="pt-2 flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                   <button 
-                     onClick={() => {
-                        if (isConnected) return;
-                        showToast('Redirigiendo a Fathom...', 'info');
-                        window.location.href = '/api/auth/fathom/connect';
-                     }}
-                     className={clsx(
-                       "px-8 py-4 rounded-2xl font-bold transition transform hover:-translate-y-0.5 shadow-lg flex items-center gap-3 group",
-                       isConnected 
-                        ? "bg-green-500 text-white hover:bg-green-600 shadow-green-200 cursor-default" 
-                        : "bg-white text-navy-900 hover:bg-blue-50 shadow-black/10"
-                     )}
-                   >
-                     {/* Fathom Icon or Check */}
-                     {isConnected ? (
-                        <CheckCircle className="w-6 h-6" />
-                     ) : (
-                        <div className="w-6 h-6 bg-gradient-to-tr from-orange-400 to-pink-500 rounded-lg flex items-center justify-center text-white">
+
+                   {isConnected && fathomToken ? (
+                       <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm p-1.5 pr-4 rounded-2xl border border-white/20">
+                            <div className="bg-emerald-500/20 text-emerald-300 p-2 rounded-xl">
+                                <CheckCircle className="w-5 h-5" />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-[10px] uppercase font-bold text-blue-200 tracking-wider">Token Activo</span>
+                                <span className="text-sm font-mono text-white font-bold max-w-[120px] truncate">
+                                    {fathomToken}
+                                </span>
+                            </div>
+                            <button 
+                                onClick={handleDisconnectFathom}
+                                className="ml-2 p-2 hover:bg-white/10 rounded-lg text-red-300 hover:text-red-200 transition cursor-pointer"
+                                title="Desconectar y eliminar token"
+                            >
+                                <Trash2 className="w-5 h-5" />
+                            </button>
+                       </div>
+                   ) : (
+                       <button 
+                         onClick={() => setShowFathomModal(true)}
+                         className="px-8 py-4 rounded-2xl font-bold transition transform hover:-translate-y-0.5 shadow-lg flex items-center gap-3 group bg-white text-navy-900 hover:bg-blue-50 shadow-black/10 cursor-pointer"
+                       >
+                         <div className="w-6 h-6 bg-linear-to-tr from-orange-400 to-pink-500 rounded-lg flex items-center justify-center text-white">
                             <Activity className="w-4 h-4" />
-                        </div>
-                     )}
-                     
-                     {isConnected ? "Fathom Conectado" : "Conectar Fathom"}
-                     
-                     {!isConnected && <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition" />}
-                   </button>
-                   <button className="px-6 py-4 bg-navy-800/50 text-white border border-white/10 rounded-2xl font-medium hover:bg-navy-800 transition">
+                         </div>
+                         
+                         Conectar Fathom
+                         
+                         <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition" />
+                       </button>
+                   )}
+
+                   <button className="px-6 py-4 bg-navy-800/50 text-white border border-white/10 rounded-2xl font-medium hover:bg-navy-800 transition cursor-pointer">
                       Saber más
                    </button>
                 </div>
@@ -351,6 +380,11 @@ export default function NSGHorizon() {
             </div>
            )}
         </div>
+        <FathomTokenModal 
+            isOpen={showFathomModal} 
+            onClose={() => setShowFathomModal(false)} 
+            onConnect={handleConnectFathom}
+        />
       </div>
     );
   }
@@ -418,24 +452,9 @@ export default function NSGHorizon() {
             </div>
             
             <div className="flex-1 overflow-y-auto custom-scroll p-6 space-y-6 bg-white">
-{selectedFolder.transcripts?.map((item, index) => {
+               {selectedFolder.transcripts?.map((item, index) => {
                   const isMe = item.isUser;
-
-                  // Professional Google-Tone Palette (Harmonious & Distinct)
-                  // Selected to ensure high contrast with white text and distinct user separation
-                  const otherColors = [
-                    "bg-[#1e88e5]", // Google Blue
-                    "bg-[#43a047]", // Google Green
-                    "bg-[#fb8c00]", // Google Orange
-                    "bg-[#e53935]", // Google Red
-                    "bg-[#8e24aa]", // Purple
-                    "bg-[#00897b]", // Teal
-                    "bg-[#3949ab]", // Indigo
-                    "bg-[#d81b60]", // Pink
-                    "bg-[#546e7a]", // Blue Grey
-                    "bg-[#fdd835].text-slate-800" // Yellow (Special handling if needed, but keeping list simple for now) -> swapped to Gold/Brown
-                  ]; 
-                  // Correction: Use darker Gold to keep white text valid or swap order
+                  
                   const safeColors = [
                      "bg-[#1976d2]", // Blue 700
                      "bg-[#388e3c]", // Green 700
@@ -594,7 +613,6 @@ export default function NSGHorizon() {
                 </div>
             )}
           </div>
-
           {/* Action Plan Checklist */}
           {selectedFolder.aiInfo?.actionPlan && selectedFolder.aiInfo.actionPlan.length > 0 && (
             <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-card flex-1">
@@ -640,6 +658,11 @@ export default function NSGHorizon() {
           )}
         </div>
       </div>
+      <FathomTokenModal 
+        isOpen={showFathomModal} 
+        onClose={() => setShowFathomModal(false)} 
+        onConnect={handleConnectFathom}
+      />
     </div>
   );
 }
