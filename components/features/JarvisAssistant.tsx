@@ -233,10 +233,16 @@ export default function NsgAssistant() {
         setIsListening(false); 
       };
       recognition.onerror = (e: any) => {
+          if (e.error === 'no-speech' || e.error === 'aborted') {
+            console.warn("Speech recognition stopped (silence or aborted).");
+            setStatus('IDLE');
+            setIsListening(false);
+            return;
+          }
           console.error("Speech Error:", e);
           setStatus('IDLE');
           setIsListening(false);
-          showToast("Error de reconocimiento de voz", "error");
+          showToast(`Error de voz: ${e.error || 'Desconocido'}`, "error");
       };
       recognition.onend = () => { 
         if (status !== 'THINKING' && status !== 'SPEAKING') setStatus('IDLE'); 
