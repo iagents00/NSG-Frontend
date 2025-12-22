@@ -357,7 +357,7 @@ export default function NSGClarity() {
       title: "Morning Clarity",
       status: "Completado",
       color: "emerald" as const,
-      desc: "Definición de intención estratégica. Foco en Q3.",
+      desc: "Definición de intención estratégica.",
       locked: false,
       isChecked: true
     },
@@ -367,7 +367,7 @@ export default function NSGClarity() {
       title: "Power Check",
       status: "Pendiente",
       color: "blue" as const,
-      desc: "Recalibración de medio día (7 min).",
+      desc: "Recalibración de medio día.",
       locked: false,
       isChecked: false
     },
