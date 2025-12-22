@@ -9,7 +9,7 @@ import { CONTEXT, RoleType } from "@/data/context";
 // Lazy load components map
 const Views: Record<string, any> = {
   // Main System
-  nsg_ios: dynamic(() => import("@/components/views/NSGSystem")),
+  nsg_intelligence: dynamic(() => import("@/components/views/NSGIntelligence")),
   
   // Modules
   nsg_news: dynamic(() => import("@/components/views/NSGNews")),
@@ -34,10 +34,10 @@ const Views: Record<string, any> = {
 
 // Define which views are available for each role
 const RoleViewAccess: Record<RoleType, string[]> = {
-  consultant: ['nsg_ios', 'nsg_news', 'nsg_clarity', 'nsg_horizon', 'portfolio', 'calendar', 'reports', 'settings'],
-  psychologist: ['nsg_ios', 'nsg_news', 'nsg_clarity', 'nsg_horizon', 'clinical_radar', 'calendar', 'patients', 'library', 'settings'],
-  manager: ['nsg_ios', 'nsg_news', 'nsg_clarity', 'nsg_horizon', 'calendar', 'metrics', 'strategy', 'reports', 'portfolio', 'settings'],
-  patient: ['nsg_ios', 'nsg_clarity', 'nsg_news', 'wellness', 'calendar', 'settings'],
+  consultant: ['nsg_intelligence', 'nsg_news', 'nsg_clarity', 'nsg_horizon', 'portfolio', 'calendar', 'reports', 'settings'],
+  psychologist: ['nsg_intelligence', 'nsg_news', 'nsg_clarity', 'nsg_horizon', 'clinical_radar', 'calendar', 'patients', 'library', 'settings'],
+  manager: ['nsg_intelligence', 'nsg_news', 'nsg_clarity', 'nsg_horizon', 'calendar', 'metrics', 'strategy', 'reports', 'portfolio', 'settings'],
+  patient: ['nsg_intelligence', 'nsg_clarity', 'nsg_news', 'wellness', 'calendar', 'settings'],
 };
 
 interface PageProps {

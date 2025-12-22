@@ -6,7 +6,7 @@ export const CONTEXT = {
         avatar: "DA", 
         roleDesc: "Senior Consultant", 
         menu: [
-            { id: 'nsg_ios', label: 'NSG Intelligence', subtitle: 'Sistema Central de Inteligencia', icon: Cpu, special: true },
+            { id: 'nsg_intelligence', label: 'NSG Intelligence', subtitle: 'Sistema Central de Inteligencia', icon: Cpu, special: true },
             { id: 'nsg_news', label: 'NSG News', subtitle: 'Actualidad y Análisis Global', icon: Newspaper },
             { id: 'nsg_clarity', label: 'NSG Clarity', subtitle: 'Claridad en tus Objetivos', icon: Target },
             { id: 'nsg_horizon', label: 'NSG Horizon', subtitle: 'Planificación y Proyección', icon: Sunrise },
@@ -21,7 +21,7 @@ export const CONTEXT = {
         avatar: "LS", 
         roleDesc: "Clinical Lead", 
         menu: [ 
-            { id: 'nsg_ios', label: 'NSG Intelligence', subtitle: 'Sistema Central de Inteligencia', icon: Cpu, special: true }, 
+            { id: 'nsg_intelligence', label: 'NSG Intelligence', subtitle: 'Sistema Central de Inteligencia', icon: Cpu, special: true }, 
             { id: 'nsg_news', label: 'NSG News', subtitle: 'Actualidad y Análisis Global', icon: Newspaper }, 
             { id: 'nsg_clarity', label: 'NSG Clarity', subtitle: 'Claridad en tus Objetivos', icon: Target }, 
             { id: 'nsg_horizon', label: 'NSG Horizon', subtitle: 'Planificación y Proyección', icon: Sunrise }, 
@@ -38,7 +38,7 @@ export const CONTEXT = {
         avatar: "RV", 
         roleDesc: "CEO", 
         menu: [ 
-            { id: 'nsg_ios', label: 'NSG Intelligence', subtitle: 'Sistema Central de Inteligencia', icon: Cpu, special: true }, 
+            { id: 'nsg_intelligence', label: 'NSG Intelligence', subtitle: 'Sistema Central de Inteligencia', icon: Cpu, special: true }, 
             { id: 'nsg_news', label: 'NSG News', subtitle: 'Actualidad y Análisis Global', icon: Newspaper }, 
             { id: 'nsg_clarity', label: 'NSG Clarity', subtitle: 'Claridad en tus Objetivos', icon: Target }, 
             { id: 'nsg_horizon', label: 'NSG Horizon', subtitle: 'Planificación y Proyección', icon: Sunrise }, 
@@ -55,7 +55,7 @@ export const CONTEXT = {
         avatar: "PA",
         roleDesc: "Patient",
         menu: [
-            { id: 'nsg_ios', label: 'NSG Intelligence', subtitle: 'Sistema Central de Inteligencia', icon: Cpu, special: true },
+            { id: 'nsg_intelligence', label: 'NSG Intelligence', subtitle: 'Sistema Central de Inteligencia', icon: Cpu, special: true },
             { id: 'nsg_clarity', label: 'NSG Clarity', subtitle: 'Claridad en tus Objetivos', icon: Target },
             { id: 'nsg_news', label: 'NSG News', subtitle: 'Actualidad y Análisis Global', icon: Newspaper }, 
             { id: 'wellness', label: 'Bienestar', subtitle: 'Salud y Balance Integral', icon: HeartPulse },

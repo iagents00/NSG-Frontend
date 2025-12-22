@@ -26,7 +26,7 @@ export default function DynamicIsland({ currentMode, setMode, selectedModel, set
   // Combine Standard + Menu Items (excluding NSG Intelligence)
   const allItems = [
     { id: 'standard', label: 'Standard', icon: Activity },
-    ...menuItems.filter(item => item.id !== 'nsg_ios')
+    ...menuItems.filter(item => item.id !== 'nsg_intelligence')
   ];
 
   return (
@@ -43,7 +43,7 @@ export default function DynamicIsland({ currentMode, setMode, selectedModel, set
            
            {allItems.map((item) => {
              const isActive = currentMode === item.id;
-             const isSpecial = item.id === 'nsg_ios';
+             const isSpecial = item.id === 'nsg_intelligence';
              const Icon = item.icon;
 
              return (

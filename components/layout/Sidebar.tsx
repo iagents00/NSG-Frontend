@@ -122,7 +122,7 @@ export default function Sidebar() {
                         "focus:outline-none focus-visible:outline-none active:scale-[0.98]",
                         
                         // 1. NSG Intelligence Style (Always applies to this specific ID)
-                        item.id === 'nsg_ios'
+                        item.id === 'nsg_intelligence'
                           ? "bg-gradient-to-r from-blue-900/40 to-navy-900/40 border border-blue-500/30 text-blue-300 shadow-glass hover:text-white"
                           : isActive
                               // 2. Active Style for other items (Transparent + Soft White Left Light + Thin Vivid Blue Right)
@@ -131,7 +131,7 @@ export default function Sidebar() {
                               : "text-slate-400 hover:bg-white/5 hover:text-white hover:translate-x-1 border border-transparent"
                       )}
                   >
-                      {item.id === 'nsg_ios' ? (
+                      {item.id === 'nsg_intelligence' ? (
                         <BrandAtom className="w-5 h-5" />
                       ) : (
                         <Icon className={clsx(
