@@ -85,9 +85,9 @@ export default function LandingPage() {
 
                 {/* PRECISE COPY - Strengthened Title */}
                 <div className="space-y-6 lg:space-y-6 max-w-3xl lg:max-w-4xl mx-auto">
-                    <p className="text-[0.65rem] md:text-xs lg:text-xs font-system font-medium text-slate-400 tracking-[0.3em] uppercase pl-1">NSG SYSTEM OS • Enterprise</p>
-                    <h1 className="font-system text-5xl sm:text-6xl lg:text-7xl font-semibold tracking-tight text-navy-950 leading-[1.05] drop-shadow-sm">
-                        Sistema Personalizado de <br/><span className="text-blue-600">Inteligencia Profesional.</span>
+                    <p className="text-[0.65rem] md:text-xs lg:text-xs font-bold text-slate-400 tracking-[0.3em] uppercase pl-1">NSG SYSTEM OS • Enterprise</p>
+                    <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-black tracking-tighter text-navy-950 leading-[1.05] drop-shadow-sm">
+                        Sistema personalizado <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">de inteligencia profesional.</span>
                     </h1>
                     <div className="relative pl-6 border-l-4 border-blue-100 text-left mx-auto max-w-md md:max-w-lg lg:max-w-xl mt-6 lg:mt-8">
                         <p className="text-lg md:text-xl lg:text-xl text-slate-600 font-system font-normal leading-relaxed italic">
