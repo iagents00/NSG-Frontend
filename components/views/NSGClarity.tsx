@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import clsx from "clsx";
 import { useToast } from "@/components/ui/ToastProvider";
-import JarvisAssistant from "@/components/features/JarvisAssistant";
+
 import confetti from "canvas-confetti";
 
 // --- AUDIO ENGINE: HIGH DOPAMINE ---
@@ -458,8 +458,7 @@ export default function NSGClarity() {
             }
         `}</style>
       
-      {/* 0. JARVIS ASSISTANT */}
-      <JarvisAssistant />
+
 
       {/* 1. Header Section */}
       <div className="mb-8 flex flex-col md:flex-row justify-between items-center gap-8">
