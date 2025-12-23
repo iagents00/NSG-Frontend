@@ -20,18 +20,8 @@ export default function NSGIntelligence() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] w-full max-w-7xl mx-auto px-4 animate-fade-in-up">
       
-      {/* 1. Header Section */}
-      <div className="text-center mb-12 mt-10">
-        <h1 className="text-5xl md:text-6xl font-medium tracking-tight text-slate-800 mb-4 font-display">
-          NSG Intelligence
-        </h1>
-        <p className="text-xl text-slate-500 font-light">
-          Más inteligencia en cada decisión
-        </p>
-      </div>
-
       {/* 2. Jarvis Assistant Hero */}
-      <div className="w-full max-w-4xl mb-12 relative z-20">
+      <div className="w-full max-w-7xl mb-12 relative z-20">
          <JarvisAssistant />
       </div>
 

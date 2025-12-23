@@ -1,39 +1,52 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Volume2, 
-  VolumeX,
-  Cpu,
-  Zap,
   Loader2,
-  Bell,
-  X
+  X,
+  Mic,
+  Send,
+  Bot,
+  Wifi, 
+  Battery, 
+  Volume2, 
+  Search, 
+  Cpu
 } from 'lucide-react';
 import clsx from 'clsx';
 import { useToast } from "@/components/ui/ToastProvider";
-import { authService } from "@/lib/auth"; // Import authService
-import { useEffect } from 'react';
+import { authService } from "@/lib/auth";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // --- CONFIGURATION ---
-const BASE_SYSTEM_PROMPT = `Eres NSG. Tu personalidad es culta, profesional y eficiente. 
-Tus respuestas deben ser brillantes y breves.`;
+const BASE_SYSTEM_PROMPT = `Eres NSG Intelligence. Tu personalidad es sofisticada, estratégica y ejecutiva. 
+Tus respuestas deben ser brillantes, concisas y orientadas a la acción, usando formato markdown (negritas, listas, etc.) para mayor claridad.
+Usas un tono 'Apple Pro': minimalista pero poderoso.`;
 
 export default function JarvisAssistant() {
+  // --- LOGIC STATES ---
   const [input, setInput] = useState('');
   const [lastResponse, setLastResponse] = useState<string | null>(null);
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [status, setStatus] = useState<'IDLE' | 'LISTENING' | 'THINKING' | 'SPEAKING'>('IDLE');
-
+  
   const [showNotification, setShowNotification] = useState(false);
-  const [username, setUsername] = useState<string>("Usuario"); // Default to Usuario
+  const [username, setUsername] = useState<string>("Executive");
   const { showToast } = useToast();
   
+  const inputRef = useRef<HTMLInputElement>(null);
+  const recognitionRef = useRef<any>(null); 
+  const containerRef = useRef(null);
   const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || ""; 
 
-  // Fetch Username Effect
+  // --- VISUAL STATES (From new design) ---
+  const isActive = status !== 'IDLE';
+  const [isHovered, setIsHovered] = useState(false);
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -42,7 +55,7 @@ export default function JarvisAssistant() {
           setUsername(data.user.username);
         }
       } catch (error) {
-        console.error("Failed to fetch user info for Jarvis", error);
+        console.error("Failed to fetch user info for Intelligence Core", error);
       }
     };
     fetchUser();
@@ -76,20 +89,15 @@ export default function JarvisAssistant() {
     if (isMuted) return;
     setStatus('SPEAKING');
     try {
-      if (!apiKey) {
-        showToast("Falta la API Key de Gemini", "error");
-        setStatus('IDLE');
-        return;
-      }
-
+      const plainText = text.replace(/[*_#`]/g, '');
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: text }] }],
+          contents: [{ parts: [{ text: plainText }] }],
           generationConfig: {
             responseModalities: ["AUDIO"],
-            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Aoede" } } } // Aoede: Deep, confident (1.5 variant)
+            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Aoede" } } }
           }
         })
       });
@@ -106,30 +114,18 @@ export default function JarvisAssistant() {
         audio.onended = () => setStatus('IDLE');
         await audio.play();
       } else { 
-        // Silently switch to fallback without throwing logic error
-        console.warn("Gemini TTS returned no audio, switching to fallback.");
-        fallbackSpeak(text);
+        fallbackSpeak(plainText);
       }
     } catch (e) { 
-      console.warn("TTS API connection failed:", e);
       fallbackSpeak(text);
     }
   };
 
   const fallbackSpeak = (text: string) => {
-      showToast("Usando voz del sistema (Conexión inestable)", "error");
       const utterance = new SpeechSynthesisUtterance(text);
       const voices = window.speechSynthesis.getVoices();
-      const preferredVoice = voices.find(v => v.name.includes("Google Español")) ||
-                             voices.find(v => v.lang === "es-ES" && v.name.includes("Google")) ||
-                             voices.find(v => v.lang.includes("es") && !v.name.includes("Microsoft"));
-
+      const preferredVoice = voices.find(v => v.lang === "es-ES" && v.name.includes("Google")) || voices[0];
       if (preferredVoice) utterance.voice = preferredVoice;
-      
-      utterance.rate = 1.0; 
-      utterance.pitch = 1.0; 
-      utterance.volume = 1.0;
-      utterance.lang = "es-ES";
       utterance.onend = () => setStatus('IDLE');
       window.speechSynthesis.speak(utterance);
   };
@@ -140,45 +136,21 @@ export default function JarvisAssistant() {
     setShowNotification(false);
     setIsProcessing(true);
     setStatus('THINKING');
+    setInput(''); 
 
     try {
-        if (!apiKey) {
-            showToast("Clave API de Gemini no configurada", "error");
-            setIsProcessing(false);
-            setStatus('IDLE');
-            return;
-        }
-
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: userQuery }] }],
-          systemInstruction: { parts: [{ text: `${BASE_SYSTEM_PROMPT} Te diriges al usuario como "${username}".` }] }
+          systemInstruction: { parts: [{ text: `${BASE_SYSTEM_PROMPT} Te diriges al ejecutivo "${username}".` }] }
         })
       });
       const data = await response.json();
-      
-      if (data.error) {
-        console.error("Gemini API Error:", data.error);
-        const errorMessage = `Error del sistema: ${data.error.message || "Fallo desconocido"}`;
-        setLastResponse(errorMessage);
-        setShowNotification(true);
-        setIsProcessing(false);
-        speak("Se ha detectado un error en el sistema.");
-        return;
-      }
-
       const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text;
       
-      if (!aiText) {
-          console.error("No content in response:", data);
-          setLastResponse("Protocolo de error: Respuesta vacía del servidor.");
-          setShowNotification(true);
-          setIsProcessing(false);
-          speak("No he recibido datos.");
-          return;
-      }
+      if (!aiText) throw new Error("Empty Response");
       
       setLastResponse(aiText);
       setShowNotification(true);
@@ -186,7 +158,7 @@ export default function JarvisAssistant() {
       speak(aiText);
     } catch (e) {
       console.error(e);
-      setLastResponse("Error crítico de conexión.");
+      setLastResponse("Protocol Failure. Connection terminated.");
       setShowNotification(true);
       setIsProcessing(false);
       setStatus('IDLE');
@@ -194,11 +166,12 @@ export default function JarvisAssistant() {
   };
 
   const toggleListening = () => {
-    if (status === 'LISTENING') return;
+    if (status === 'LISTENING') return; // Avoid double triggering
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     
     if (SpeechRecognition) {
       const recognition = new SpeechRecognition();
+      recognitionRef.current = recognition; 
       recognition.lang = 'es-ES';
       recognition.continuous = false;
       recognition.interimResults = false;
@@ -210,371 +183,343 @@ export default function JarvisAssistant() {
         setIsListening(false); 
       };
       recognition.onerror = (e: any) => {
-          console.error("Speech Error:", e);
+          console.error("Speech Error:", e.error);
           setStatus('IDLE');
           setIsListening(false);
-          showToast("Error de reconocimiento de voz", "error");
       };
       recognition.onend = () => { 
-        if (status !== 'THINKING' && status !== 'SPEAKING') setStatus('IDLE'); 
+        // Only reset if we didn't transition to thinking/speaking
+        if (status === 'LISTENING') setStatus('IDLE'); 
         setIsListening(false); 
       };
-      
       recognition.start();
     } else {
-        showToast("Tu navegador no soporta reconocimiento de voz.", "error");
+        showToast("Speech Module Unavailable", "error");
+        // Fallback or just set listening to false
     }
   };
 
-  // Border Gradient Logic: Active on Listening or Speaking or Thinking
-  const isSystemActive = status !== 'IDLE';
-
   return (
-    <div className="relative w-full h-[500px] min-h-[500px] shrink-0 mb-8 z-40 group select-none">
+    <div className="flex flex-col items-center justify-center w-full h-full p-4 overflow-hidden select-none antialiased text-slate-200">
       
-      {/* === EXTERNAL NEON HALO (UNCLIPPED - BLUE TECH) === */}
-      {/* This layer sits behind the main container and is allowed to spill out */}
-      <div className={clsx(
-          "absolute inset-0 z-0 pointer-events-none transition-opacity duration-500",
-          isSystemActive ? "opacity-100" : "opacity-0" // Hidden when idle, appears when active
-      )}>
-          {/* TIER 0: Proximity Border Flash (Tight & Intense) */}
-          <div className={clsx(
-               "absolute -inset-[30px] rounded-[50px] bg-blue-100 mix-blend-overlay",
-               "blur-[30px] opacity-0 transition-opacity duration-200",
-               isSystemActive && "opacity-100 animate-pulse"
-          )}></div>
-
-          {/* TIER 1: Massive Core Impulse (Cyan Tech) */}
-          <div className={clsx(
-               "absolute -inset-[100px] rounded-[100px] bg-cyan-500",
-               "blur-[100px] opacity-100 transition-opacity duration-300 mix-blend-screen", // Constant opacity base
-               isSystemActive && "opacity-80 animate-[pulse_1s_cubic-bezier(0.4,0,0.6,1)_infinite]"
-          )}></div>
-          
-          {/* TIER 2: Atmospheric Flood (Deep Blue) */}
-          <div className={clsx(
-               "absolute -inset-[300px] rounded-[300px] bg-blue-600",
-               "blur-[150px] opacity-40 transition-opacity duration-500 mix-blend-screen",
-               isSystemActive && "opacity-50 animate-[pulse_2s_ease-in-out_infinite]"
-          )}></div>
-      </div>
-      
-      {/* === FRONT-FACING LENS GLARE (OVERLAY) === */}
-      {/* This layer sits ON TOP of the reactor (z-50) to create a blinding light bleeding over the UI */}
-      <div className={clsx(
-          "absolute inset-0 z-50 pointer-events-none transition-opacity duration-300 mix-blend-screen",
-          isSystemActive ? "opacity-60" : "opacity-0"
-      )}>
-           <div className="absolute inset-[-50px] bg-[radial-gradient(circle_at_center,rgba(52,211,153,0.3)_0%,transparent_70%)] blur-[40px] animate-pulse"></div>
-           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-emerald-400/20 blur-[80px] rounded-full"></div>
-      </div>
-
-      {/* === MAIN CONTAINER === */}
+      {/* PC/Laptop Mockup Container */}
       <div 
-        className={clsx(
-          "absolute inset-0 rounded-[32px] overflow-hidden transition-all duration-700",
-          "bg-gradient-to-b from-[#0f172a] to-[#020617]", // Deep Slate/Navy gradient
-          "border border-white/10 shadow-2xl shadow-black/50"
-        )}
+        ref={containerRef}
+        className="relative w-full max-w-[1000px] aspect-[16/10] bg-[#020617] rounded-[24px] 
+                   shadow-[0_40px_80px_-20px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.08),inset_0_1px_0_rgba(255,255,255,0.1)] 
+                   border-[1px] border-[#0f172a] overflow-hidden group/laptop 
+                   transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]
+                   hover:shadow-[0_50px_100px_-20px_rgba(0,0,0,0.7),0_0_0_1px_rgba(255,255,255,0.1)]"
       >
         
-        <div 
-            className={clsx(
-                "absolute inset-0 pointer-events-none transition-opacity duration-1000 z-0",
-                isSystemActive ? "opacity-100" : "opacity-0" // Hidden when idle
-            )}
-        >
-
-            {/* 2. Center-to-Border Branding Light (Blue Burst) */}
-            <div className={clsx(
-                "absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.8)_0%,rgba(6,182,212,0.5)_50%,transparent_80%)]",
-                "opacity-0 transition-opacity duration-300 mix-blend-screen",
-                isSystemActive && "opacity-100 animate-[pulse_1.5s_ease-in-out_infinite]"
-            )}></div>
-
-            {/* 3. Moving Multi-Color Gradient Border (Blue Tech - Thinner inner visible) */}
-            <div className={clsx(
-                "absolute -inset-[10px] bg-[conic-gradient(from_0deg,transparent_0deg,rgba(6,182,212,1)_60deg,rgba(59,130,246,1)_120deg,rgba(6,182,212,1)_180deg,transparent_360deg)]",
-                "opacity-100 animate-[spin_2s_linear_infinite] shadow-[0_0_100px_rgba(6,182,212,1)] mix-blend-plus-lighter",
-                 status === 'SPEAKING' ? "duration-1000" : "duration-[2s]" 
-            )}></div>
-            
-            {/* 4. Illuminated Glow Behind Border (Blue Intensity) */}
-            <div className={clsx(
-                "absolute -inset-[20px] rounded-[40px] bg-[conic-gradient(from_0deg,transparent_0deg,rgba(6,182,212,0.8)_60deg,rgba(59,130,246,0.8)_120deg,rgba(6,182,212,0.8)_180deg,transparent_360deg)]",
-                "blur-2xl opacity-100 animate-[spin_2s_linear_infinite] transition-opacity duration-500", // Always visible (opacity-100)
-                status === 'SPEAKING' ? "duration-1000" : "duration-[2s]"
-            )}></div>
-            
-            {/* 4. Inner Mask (Apple Premium Glass Effect - Refined) */}
-            {/* Added subtle specular gradient at top for physical glass look */}
-            <div className="absolute inset-[6px] bg-black/90 backdrop-blur-3xl rounded-[28px] z-10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),inset_0_-1px_1px_rgba(0,0,0,0.5)] border border-white/5 ring-1 ring-white/5 ring-inset">
-                {/* Specular Top Reflection */}
-                <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-white/5 to-transparent rounded-t-[28px] pointer-events-none opacity-50"></div>
-            </div>
-            
-            {/* 5. Cinematic Grain Overlay (Anti-Banding Texture) */}
-            <div className="absolute inset-0 z-20 pointer-events-none opacity-[0.03] mix-blend-overlay" 
-                 style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}>
-            </div>
-        </div>
-
-
-        {/* === BACKGROUND LAYERS (Siri Aurora Effect) === */}
-        {/* The "Liquid Aurora Surge" Interface Layer */}
-        <div className={clsx(
-            "absolute inset-0 z-0 pointer-events-none transition-opacity duration-1000", 
-            isSystemActive ? "opacity-100" : "opacity-0"
-        )}>
-           
-           {/* 1. Dynamic Pro Siri Aura (Apple Intelligence Style) */}
-           {/* Fluid iridescent mesh gradients with additive blending */}
-           <div className="absolute inset-0 overflow-hidden z-10 opacity-80 mix-blend-plus-lighter pointer-events-none">
-               
-               {/* Orb 1: Deep Indigo/Blue Base (Anchor) */}
-               <div className={clsx(
-                   "absolute bottom-[-10%] left-[10%] w-[90%] h-[90%] rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.8),rgba(79,70,229,0.4),transparent)] blur-[60px]",
-                   "animate-[aurora-float-1_12s_infinite_ease-in-out]", 
-                   isSystemActive && "opacity-100" 
-               )} />
-               
-               {/* Orb 2: Vibrant Fuschia/Pink Accent (The "Siri" Spark) */}
-               <div className={clsx(
-                   "absolute top-[0%] right-[0%] w-[60%] h-[60%] rounded-full bg-[radial-gradient(circle,rgba(236,72,153,0.8),rgba(168,85,247,0.5),transparent)] blur-[70px]",
-                   "animate-[aurora-float-2_9s_infinite_ease-in-out]",
-                   isSystemActive && "opacity-90"
-               )} />
-
-               {/* Orb 3: Bright Cyan/Teal Highlight (Energy) */}
-               <div className={clsx(
-                   "absolute top-[30%] left-[30%] w-[50%] h-[50%] rounded-full bg-[radial-gradient(circle,rgba(34,211,238,0.9),rgba(56,189,248,0.5),transparent)] blur-[50px]",
-                   "animate-[aurora-float-3_7s_infinite_ease-in-out]",
-                   isSystemActive && "opacity-100"
-               )} />
-           </div>
-
-           {/* 2. Atmospheric Bleed */}
-           <div className="absolute inset-0 bg-gradient-to-br from-sky-500/10 via-transparent to-emerald-500/10 blur-[100px] animate-[slow-breathe_8s_ease-in-out_infinite]" />
-            
-           {/* 3. Premium Particle Dust (NEON SPARKS) */}
-           <div className="absolute inset-0 opacity-100 mix-blend-screen z-20">
-                <div className="absolute top-1/4 left-1/4 w-1.5 h-1.5 bg-white rounded-full blur-[0.5px] animate-float-slow shadow-[0_0_10px_white]" />
-                <div className="absolute top-1/2 right-1/4 w-1 h-1 bg-cyan-300 rounded-full blur-[0.5px] animate-float-medium shadow-[0_0_10px_cyan]" />
-                <div className="absolute bottom-1/4 left-1/3 w-1.5 h-1.5 bg-emerald-300 rounded-full blur-[0.5px] animate-float-fast shadow-[0_0_10px_emerald]" />
-           </div>
-        </div>
-
-        {/* Base Background (Always visible) */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#020617_100%)] z-0 pointer-events-none"></div>
-
-
-        {/* === HEADS UP DISPLAY (HUD) === */}
-        {/* Top Left: Identity */}
-        {/* Top Left: Identity (Refined Typography) */}
-        <div className="absolute top-8 left-8 z-30 flex items-center gap-4">
-          <div className={clsx(
-            "w-8 h-8 rounded-lg flex items-center justify-center border transition-all duration-500 shadow-sm",
-            isSystemActive ? "bg-cyan-500/10 border-cyan-400/30 shadow-[0_0_10px_rgba(34,211,238,0.2)]" : "bg-white/5 border-white/10"
-          )}>
-             <Cpu size={14} className={isSystemActive ? "text-cyan-400 animate-pulse" : "text-slate-500"} />
-          </div>
-          <div className="flex flex-col justify-center h-full space-y-0.5">
-            <span className="text-[10px] font-bold tracking-[0.25em] text-white/90">NSG SYSTEM</span>
-            <div className="flex items-center gap-2">
-                <span className="text-[8px] font-mono text-cyan-500/80 uppercase tracking-widest">v2.4.0</span>
-                <span className={clsx("w-1 h-1 rounded-full", isSystemActive ? "bg-emerald-400 animate-pulse" : "bg-slate-600")}></span>
-                <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">{isSystemActive ? 'ONLINE' : 'STANDBY'}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Top Right: Controls */}
-        <div className="absolute top-8 right-8 z-30 flex gap-2">
-           <button 
-              onClick={() => setIsMuted(!isMuted)}
-              className="p-2.5 rounded-full bg-white/5 border border-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all active:scale-95"
-           >
-              {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-           </button>
-        </div>
-
-
-        {/* === CENTER: REACTOR ARC CENTRAL INTERACTIVO (Technologic Style) === */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center z-20 pb-12">
-            
-            {/* Core Button / Visualizer */}
-            <button 
-              onClick={toggleListening}
-              className="relative group focus:outline-none cursor-pointer"
-            >
-              {/* Outer Segmented Ring */}
-              <div className="absolute -inset-12 border border-cyan-500/5 rounded-full"></div>
-              
-              {/* Rotating Segments (Technologic Circles) */}
-              <div className="absolute -inset-8 border-t-[1px] border-b-[1px] border-cyan-500/20 rounded-full animate-[spin_10s_linear_infinite]"></div>
-              <div className="absolute -inset-8 border-l-[1px] border-r-[1px] border-cyan-400/10 rounded-full animate-[spin_15s_linear_infinite_reverse]"></div>
-
-              {/* Siri/Apple Listen Glow */}
-              <div className={clsx(
-                  "absolute -inset-4 rounded-full transition-all duration-700 blur-xl opacity-0",
-                  status === 'LISTENING' && "opacity-80 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 animate-pulse scale-110"
-              )}>
-              </div>
-
-              {/* Core Body */}
-              <div className={clsx(
-                  "relative w-40 h-40 md:w-48 md:h-48 rounded-full bg-slate-950 flex items-center justify-center transition-all duration-500 border border-cyan-500/30 overflow-hidden shadow-2xl",
-                  status === 'IDLE' ? "border-cyan-500/20 shadow-[0_0_20px_rgba(6,182,212,0.1)]" : 
-                  status === 'LISTENING' ? "border-white/40 scale-105 shadow-[0_0_40px_rgba(6,182,212,0.2)]" :
-                  status === 'THINKING' ? "border-cyan-400/50 shadow-[0_0_30px_rgba(6,182,212,0.2)]" :
-                  "border-cyan-400 shadow-[0_0_40px_rgba(6,182,212,0.3)]"
-              )}>
-                
-                {/* Thinking Spinner Layers */}
-                {status === 'THINKING' && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Loader2 className="w-10 h-10 text-cyan-400 animate-spin" />
-                    <div className="absolute w-24 h-24 border border-dashed border-cyan-500/30 rounded-full animate-[spin_3s_linear_infinite]"></div>
-                  </div>
-                )}
-
-                {/* Speaking Pulse Waves */}
-                {status === 'SPEAKING' && [1, 2, 3].map(i => (
-                  <div key={i} className="absolute inset-0 border-2 border-cyan-400/30 rounded-full animate-[shockwave_2s_infinite]" style={{ animationDelay: `${i * 0.4}s` }}></div>
+        {/* Screen Bezel */}
+        <div className="absolute top-0 left-0 w-full h-9 bg-[#0B1121]/80 backdrop-blur-xl border-b border-[#1e293b]/50 z-50 flex items-center justify-between px-6">
+            <div className="flex gap-5 items-center">
+                <span className="font-bold text-[#f1f5f9] text-sm hover:text-white cursor-default transition-colors"></span>
+                {['File', 'Edit', 'View', 'Window', 'Help'].map((item) => (
+                  <span key={item} className="text-xs font-medium text-[#94A3B8] hover:text-[#e2e8f0] cursor-default transition-colors duration-300">{item}</span>
                 ))}
+            </div>
+            <div className="flex gap-4 items-center text-[#64748B]">
+                <Search size={14} className="hover:text-[#94A3B8] transition-colors" />
+                <Wifi size={14} />
+                <Volume2 size={14} />
+                <Battery size={16} />
+                <span className="text-xs font-medium ml-1 text-[#94A3B8]">Tue 9:41 AM</span>
+            </div>
+        </div>
 
-                {/* Siri Waveform Mesh (Listening only) */}
-                {status === 'LISTENING' && (
-                  <div className="absolute inset-0 opacity-40 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 animate-[spin_2s_linear_infinite]"></div>
-                )}
+        {/* MAIN DESKTOP CONTENT AREA */}
+        <div 
+          className={`absolute inset-0 top-9 bg-[#020617] z-0 flex items-center justify-center cursor-pointer overflow-hidden group/desktop
+                      transition-transform duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]
+                      ${isActive ? 'scale-[1.00]' : 'active:scale-[0.995]'}`}
+          onClick={() => { if(!isActive) toggleListening(); }}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          {/* Subtle Grid Pattern */}
+          <div className="absolute inset-0 opacity-[0.2] transition-all duration-1000 group-hover/desktop:opacity-[0.3]" 
+               style={{ backgroundImage: 'radial-gradient(#334155 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
 
-                {/* Inner Mechanical Core */}
-                <div className={clsx(
-                    "relative w-20 h-20 md:w-24 md:h-24 rounded-full border border-cyan-500/30 flex items-center justify-center bg-black transition-transform duration-500 shadow-inner",
-                    status === 'LISTENING' ? "scale-90 bg-white" : "scale-100"
-                )}>
-                  <div className={clsx(
-                      "w-8 h-8 rounded-full transition-all duration-500 blur-[2px]",
-                      status === 'LISTENING' ? "bg-indigo-500" : "bg-cyan-500"
-                  )}></div>
-                  <div className="absolute inset-2 border border-dashed border-cyan-500/20 rounded-full"></div>
+          {/* Vignette */}
+          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_0%,rgba(2,6,23,0.8)_100%)]" />
+
+          {/* ==============================================
+              THE PRO BORDER GLOW
+             ============================================== */}
+          <div className={`absolute inset-0 z-10 pointer-events-none transition-all duration-1000 ease-[cubic-bezier(0.32,0.72,0,1)] ${isActive ? 'opacity-100' : 'opacity-0'}`}>
+            <div className="absolute inset-[-20px] rounded-[30px] opacity-30 blur-[40px]">
+                 <div className="w-full h-full bg-pro-blue-flow animate-flow-slow" />
+            </div>
+            <div className="absolute inset-[-10px] rounded-[30px] opacity-60 blur-[15px]">
+                 <div className="w-full h-full bg-pro-blue-flow animate-flow-medium" />
+            </div>
+            <div className="absolute inset-[0px] rounded-[24px] p-[3px]" 
+                 style={{ 
+                    maskImage: 'linear-gradient(white, white), linear-gradient(white, white)', 
+                    maskClip: 'content-box, border-box', 
+                    maskComposite: 'exclude' 
+                 }}>
+                 <div className="absolute inset-[-50%] w-[200%] h-[200%] top-[-50%] left-[-50%] bg-pro-blue-flow animate-flow-fast" />
+            </div>
+            <div className="absolute inset-[1px] rounded-[23px] border border-white/10 z-20 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]" />
+          </div>
+
+          {/* ==============================================
+              PRO BRAND ATOM
+             ============================================== */}
+          <div className={`relative -mt-24 z-20 transition-all duration-1000 cubic-bezier(0.25, 1, 0.5, 1) 
+                          ${isActive ? 'scale-150' : isHovered ? 'scale-105' : 'scale-100'}`}
+              onClick={(e) => { e.stopPropagation(); toggleListening(); }}
+          >
+            
+            {/* INNER WAVES (Sonar Effect) */}
+            {isActive && (
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full pointer-events-none">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border border-[#60A5FA]/30 bg-[#3B82F6]/10 animate-ripple-1 opacity-0" />
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border border-[#3B82F6]/20 bg-[#2563EB]/5 animate-ripple-2 opacity-0" />
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border border-[#60A5FA]/10 bg-transparent animate-ripple-3 opacity-0" />
                 </div>
-              </div>
-            </button>
+            )}
 
-            {/* Info Text */}
-            <div className="mt-8 text-center z-30 space-y-2">
-              <h2 className={clsx(
-                  "text-lg font-light tracking-[0.3em] transition-all duration-500",
-                  status === 'IDLE' ? "text-white/30" : "text-white"
-              )}>
-                {status === 'LISTENING' ? 'IDENTIFICANDO VOZ...' : 
-                 status === 'THINKING' ? 'PROCESANDO DATOS' : 
-                 status === 'SPEAKING' ? 'TRANSMITIENDO' : 'SISTEMA EN ESPERA'}
-              </h2>
-              <p className="text-[9px] tracking-[0.2em] text-cyan-500/60 uppercase font-mono">Haga clic en el núcleo para hablar</p>
+            {/* Core Glow */}
+            <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full blur-[64px] transition-all duration-1000 
+                ${isActive ? 'opacity-40 scale-125 bg-[#3B82F6]' : isHovered ? 'opacity-15 scale-100 bg-[#60A5FA]' : 'opacity-0 scale-50'}`} />
+
+            <div className="w-64 h-64 flex items-center justify-center animate-atom-breathe">
+                <svg viewBox="0 0 100 100" className={`w-full h-full overflow-visible transition-all duration-700 
+                                                      ${isActive ? 'drop-shadow-[0_0_30px_rgba(59,130,246,0.5)]' : 'drop-shadow-lg'}`}>
+                    <defs>
+                        <linearGradient id="proBlueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stopColor="#60A5FA" />
+                            <stop offset="50%" stopColor="#3B82F6" />
+                            <stop offset="100%" stopColor="#2563EB" />
+                        </linearGradient>
+
+                        <linearGradient id="idleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stopColor="#94A3B8" />
+                            <stop offset="100%" stopColor="#475569" />
+                        </linearGradient>
+
+                        <linearGradient id="hoverGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stopColor="#60A5FA" />
+                            <stop offset="100%" stopColor="#3B82F6" />
+                        </linearGradient>
+                    </defs>
+
+                    {/* Orbit Group */}
+                    <g className={`origin-center ${isActive ? 'animate-spin-slow' : 'animate-spin-ultra-slow'}`} style={{ transformBox: 'fill-box' }}>
+                        {[0, 60, 120].map((angle, i) => (
+                             <circle 
+                                key={i}
+                                cx="50" cy="50" r="42" 
+                                fill="none" 
+                                strokeWidth={isActive ? 1.5 : 1}
+                                stroke={`url(#${isActive ? 'proBlueGrad' : isHovered ? 'hoverGrad' : 'idleGrad'})`}
+                                className="transition-all duration-1000 origin-center ease-out"
+                                style={{ 
+                                    transform: isActive ? `rotate(${angle}deg) scale(1)` : `rotate(${angle}deg) scaleY(0.45)`,
+                                    opacity: isActive ? 0.9 : 0.6
+                                }} 
+                            />
+                        ))}
+                    </g>
+                    
+                    {/* FIXED ELECTRON ORBIT - CLOCKWISE 
+                        - Now uses 'animate-electron-orbit-clockwise'
+                        - Enhanced shadow for 'Soft Apple Touch'
+                    */}
+                    {isActive && (
+                        <g style={{ transformOrigin: '50px 50px' }} className="animate-electron-orbit-clockwise">
+                           {/* Soft diffuse glow layer behind electron */}
+                           <circle cx="50" cy="8" r="6" fill="#60A5FA" className="opacity-30 blur-[4px]" />
+                           {/* Sharp core electron */}
+                           <circle cx="50" cy="8" r="3.5" fill="#60A5FA" className="drop-shadow-[0_0_8px_rgba(96,165,250,0.8)]" />
+                        </g>
+                    )}
+
+                    {/* CORE */}
+                    {isActive ? (
+                        <>
+                            {/* Blue Radiant Core */}
+                            <circle cx="50" cy="50" r="14" fill="url(#proBlueGrad)" className="animate-pulse-fast filter blur-[4px] opacity-90" />
+                            <circle cx="50" cy="50" r="8" fill="white" className="filter drop-shadow-[0_0_15px_rgba(96,165,250,0.8)]" />
+                        </>
+                    ) : (
+                        <>
+                            {/* Clean Pro Idle Core */}
+                            <circle cx="50" cy="50" r="10" fill={isHovered ? "#2563EB" : "#0B1121"} 
+                                    className="transition-colors duration-700 shadow-inner stroke-[#1e293b] stroke-1" />
+                            <circle cx="50" cy="50" r="4" fill={isHovered ? "white" : "#94A3B8"} 
+                                    className="transition-colors duration-700" />
+                        </>
+                    )}
+                </svg>
+            </div>
+            
+            {/* LABEL */}
+            <div className={`absolute -bottom-16 w-full flex justify-center transition-all duration-700 cubic-bezier(0.34, 1.56, 0.64, 1) 
+                ${isActive ? 'opacity-0 translate-y-4 scale-95' : 'opacity-100 group-hover/desktop:-translate-y-3'}`}>
+                <div className="px-5 py-2 rounded-full bg-[#0B1121]/80 backdrop-blur-md border border-[#1e293b]/50 shadow-lg flex items-center gap-2 group-hover/desktop:border-[#3B82F6]/30 group-hover/desktop:shadow-[#3B82F6]/10 transition-all duration-500">
+                    <div className={`w-1.5 h-1.5 rounded-full transition-colors duration-500 ${isHovered ? 'bg-[#60A5FA] animate-pulse' : 'bg-[#94A3B8]'}`} />
+                    <span className={`text-[10px] font-bold tracking-[0.2em] uppercase transition-colors duration-500 ${isHovered ? 'text-[#e2e8f0]' : 'text-[#94A3B8]'}`}>
+                        {isActive ? status : 'Neural Engine'}
+                    </span>
+                </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* Floating Controls (INPUT BAR ADAPTATION) */}
+        <div className="absolute bottom-12 w-full px-8 flex justify-center z-50 pointer-events-none">
+            <div className={`pointer-events-auto transition-all duration-700 cubic-bezier(0.34, 1.56, 0.64, 1) ${isActive ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-12 opacity-0 scale-90'}`}>
+                <div className="flex items-center gap-4 px-6 py-3 bg-[#0B1121]/90 backdrop-blur-2xl rounded-full shadow-[0_20px_50px_-10px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.1)] border border-white/10 min-w-[300px]">
+                    <div className="relative">
+                        <div className={clsx("w-2.5 h-2.5 rounded-full animate-pulse", status === 'LISTENING' ? "bg-red-500" : "bg-gradient-to-tr from-[#60A5FA] to-[#2563EB]")} />
+                    </div>
+                    
+                    <input 
+                        ref={inputRef}
+                        type="text"
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleAction(input)}
+                        placeholder={status === 'Listening' ? "Listening..." : "Ask NSG Intelligence..."}
+                        className="bg-transparent border-none text-[15px] font-medium text-[#f8fafc] placeholder:text-slate-500 focus:outline-none w-full tracking-tight antialiased"
+                    />
+                    
+                    <button onClick={() => handleAction(input)} disabled={!input.trim()} className="text-blue-400 hover:text-white transition-colors disabled:opacity-30">
+                        <Send size={16} />
+                    </button>
+                    
+                    {/* Audio Wave (Only when listening/speaking) */}
+                    {(status === 'LISTENING' || status === 'SPEAKING' || status === 'THINKING') && (
+                        <div className="flex gap-1 h-4 items-center pl-2 opacity-80 border-l border-white/10 ml-2">
+                            {[1,2,3,4].map((i) => (
+                                <div key={i} className="w-1 bg-[#3B82F6] rounded-full animate-wave" style={{ animationDelay: `${i * 0.15}s` }} />
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
+        
+        {/* === RESPONSE CARD (Dark Mode) === */}
+        <AnimatePresence>
+        {showNotification && (
+            <motion.div 
+               initial={{ opacity: 0 }}
+               animate={{ opacity: 1 }}
+               exit={{ opacity: 0 }}
+               className="absolute inset-x-0 bottom-32 z-40 flex justify-center px-8"
+            >
+                <motion.div 
+                    initial={{ scale: 0.95, y: 20, opacity: 0 }}
+                    animate={{ scale: 1, y: 0, opacity: 1 }}
+                    exit={{ scale: 0.95, y: 10, opacity: 0 }}
+                    className="bg-[#0f172a]/90 backdrop-blur-3xl backdrop-saturate-150 border border-white/10 w-full max-w-2xl max-h-[400px] rounded-[24px] shadow-[0_40px_120px_-20px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden relative"
+                >
+                    <div className="h-[2px] w-full bg-gradient-to-r from-blue-500/50 via-purple-500/50 to-pink-500/50" />
 
+                    <div className="flex justify-between items-center px-6 py-4 border-b border-white/5">
+                        <div className="flex items-center gap-3">
+                           <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
+                              <Bot size={14} className="text-blue-400" />
+                           </div>
+                           <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">NSG Insight</span>
+                        </div>
+                        <button onClick={() => setShowNotification(false)} className="p-1.5 rounded-full hover:bg-white/10 transition-colors text-slate-400 hover:text-white">
+                            <X size={16} />
+                        </button>
+                    </div>
+                    
+                    <div className="p-6 overflow-y-auto custom-scroll text-slate-300 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                        <div className="prose prose-invert prose-sm max-w-none">
+                             <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                 {lastResponse || ''}
+                             </ReactMarkdown>
+                        </div>
+                    </div>
+                </motion.div>
+            </motion.div>
+        )}
+        </AnimatePresence>
 
-        {/* === INPUT FIELD (Bottom Dock) === */}
-        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-full max-w-sm z-30">
-            <div className={clsx(
-                "relative group flex items-center gap-3 px-5 py-3 rounded-full transition-all duration-500",
-                "bg-white/5 backdrop-blur-md border border-white/5",
-                "hover:bg-white/10 hover:border-white/10 focus-within:bg-[#0B1121]/80 focus-within:border-white/20 focus-within:shadow-[0_0_30px_rgba(6,182,212,0.1)]"
-            )}>
-                 <Zap size={14} className="text-slate-500 group-focus-within:text-cyan-400 transition-colors" />
-                 <input 
-                    type="text"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleAction(input)}
-                    placeholder="Ingresar comando..."
-                    className="flex-1 bg-transparent border-none text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none font-medium tracking-wide"
-                 />
-            </div>
-        </div>
+      </div>
 
-        {/* === RESPONSE NOTIFICATION (Overlay) === */}
-        <div className={clsx(
-            "absolute top-24 left-1/2 -translate-x-1/2 w-[90%] max-w-md z-40 transition-all duration-500 ease-out",
-            showNotification ? "opacity-100 translate-y-0 scale-100" : "opacity-0 -translate-y-4 scale-95 pointer-events-none"
-        )}>
-           <div className="bg-[#0f172a]/80 backdrop-blur-xl border border-white/10 p-5 rounded-2xl shadow-2xl shadow-black relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-white to-emerald-500 opacity-50"></div>
-              
-              <div className="flex justify-between items-start mb-3 relative z-10">
-                 <div className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">Respuesta del Sistema</span>
-                 </div>
-                 <button onClick={() => setShowNotification(false)} className="text-slate-500 hover:text-white transition-colors"><X size={14} /></button>
-              </div>
-              <p className="text-sm text-slate-200 leading-relaxed font-light custom-scroll max-h-40 overflow-y-auto relative z-10">
-                 {lastResponse}
-              </p>
-           </div>
-        </div>
-
+      {/* External Base Stand */}
+      <div className="w-[200px] h-[60px] bg-gradient-to-b from-[#1e293b] to-[#020617] mt-[-2px] z-[-1] rounded-b-[24px] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.6)] relative border-t border-[#1e293b]">
+         <div className="absolute top-0 w-full h-2 bg-black/30 blur-[4px]" />
       </div>
 
       <style dangerouslySetInnerHTML={{ __html: `
-        /* Apple Pro Fluid Animations */
-        @keyframes aurora-float-1 {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(30px, -20px) scale(1.1); }
-            66% { transform: translate(-20px, 10px) scale(0.95); }
+        @keyframes spin-slow {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
-        @keyframes aurora-float-2 {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(-40px, 30px) scale(1.2); }
-        }
-        @keyframes aurora-float-3 {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(20px, 40px) scale(0.9); }
-            66% { transform: translate(-30px, -20px) scale(1.1); }
+        @keyframes spin-ultra-slow {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
         
-        .animate-aurora-float-1 { animation: aurora-float-1 12s infinite cubic-bezier(0.4, 0, 0.2, 1); }
-        .animate-aurora-float-2 { animation: aurora-float-2 9s infinite cubic-bezier(0.4, 0, 0.2, 1); }
-        .animate-aurora-float-3 { animation: aurora-float-3 7s infinite cubic-bezier(0.4, 0, 0.2, 1); }
+        /* New Clockwise Linear Animation (0 -> 360) */
+        @keyframes spin-linear-clockwise {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
 
-        @keyframes music-bars {
-            0%, 100% { height: 8px; opacity: 0.5; }
-            50% { height: 20px; opacity: 1; }
+        @keyframes atom-breathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
-        @keyframes shockwave {
-            0% { transform: scale(1); opacity: 0.8; border-width: 1px; }
-            100% { transform: scale(2.5); opacity: 0; border-width: 0px; }
+        @keyframes pulse-fast {
+            0%, 100% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.1); opacity: 0.7; }
         }
-        @keyframes liquid-shimmer {
-          0%, 100% { filter: blur(1.5px) brightness(1); }
-          50% { filter: blur(2.5px) brightness(1.3); }
+        @keyframes flow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes wave {
+            0%, 100% { height: 40%; opacity: 0.5; }
+            50% { height: 100%; opacity: 1; }
+        }
+        @keyframes ripple {
+           0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0.6; }
+           100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
         }
         
-        /* Utility Classes */
-        .animate-aurora-surge {
-          animation: aurora-surge 4s cubic-bezier(0.16, 1, 0.3, 1) infinite alternate;
-        }
-        .animate-aurora-surge-delay {
-          animation: aurora-surge-delay 4s cubic-bezier(0.16, 1, 0.3, 1) infinite alternate;
-        }
-        .animate-soft-bloom {
-          animation: soft-bloom 3s cubic-bezier(0.25, 0.1, 0.25, 1) infinite alternate;
-        }
-        .animate-slow-breathe {
-          animation: slow-breathe 8s ease-in-out infinite;
-        }
-        .animate-float-slow {
-          animation: float-slow 4s linear infinite; /* Faster */
-        }
-        .animate-float-medium {
-            animation: float-medium 5s linear infinite; /* Faster */
-        }
-        .animate-float-fast {
-            animation: float-fast 3s linear infinite; /* Faster */
+        .animate-spin-slow { animation: spin-slow 10s linear infinite; }
+        .animate-spin-ultra-slow { animation: spin-ultra-slow 60s linear infinite; }
+        
+        /* Updated Class: Clockwise Orbit */
+        .animate-electron-orbit-clockwise { animation: spin-linear-clockwise 8s linear infinite; }
+        
+        .animate-atom-breathe { animation: atom-breathe 4s ease-in-out infinite; }
+        .animate-pulse-fast { animation: pulse-fast 2s ease-in-out infinite; }
+        .animate-wave { animation: wave 1s ease-in-out infinite; }
+        
+        .animate-flow-slow { animation: flow 8s ease-in-out infinite; }
+        .animate-flow-medium { animation: flow 5s ease-in-out infinite; }
+        .animate-flow-fast { animation: flow 3s ease-in-out infinite; }
+
+        .animate-ripple-1 { animation: ripple 3s linear infinite; }
+        .animate-ripple-2 { animation: ripple 3s linear infinite 1s; }
+        .animate-ripple-3 { animation: ripple 3s linear infinite 2s; }
+        
+        .bg-pro-blue-flow {
+          background: linear-gradient(
+            90deg,
+            #60A5FA 0%,
+            #3B82F6 25%,
+            #2563EB 50%,
+            #3B82F6 75%,
+            #60A5FA 100%
+          );
+          background-size: 200% 100%;
         }
       `}} />
     </div>

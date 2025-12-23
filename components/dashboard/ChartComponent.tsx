@@ -106,7 +106,7 @@ export default function ChartComponent({ role }: ChartComponentProps) {
           usePointStyle: true,
           padding: 20,
           font: {
-            family: "Plus Jakarta Sans, sans-serif",
+            family: "-apple-system, BlinkMacSystemFont, 'Inter', sans-serif",
             size: 12,
           },
         },
@@ -114,7 +114,7 @@ export default function ChartComponent({ role }: ChartComponentProps) {
       tooltip: {
         backgroundColor: "rgba(15, 23, 42, 0.95)",
         titleFont: {
-          family: "Plus Jakarta Sans, sans-serif",
+          family: "-apple-system, BlinkMacSystemFont, 'Inter', sans-serif",
           size: 14,
           weight: "bold" as const,
         },
@@ -138,7 +138,7 @@ export default function ChartComponent({ role }: ChartComponentProps) {
         },
         ticks: {
           font: {
-            family: "Inter, sans-serif",
+            family: "-apple-system, BlinkMacSystemFont, 'Inter', sans-serif",
             size: 11,
           },
           color: "#64748b",
@@ -150,7 +150,7 @@ export default function ChartComponent({ role }: ChartComponentProps) {
         },
         ticks: {
           font: {
-            family: "Inter, sans-serif",
+            family: "-apple-system, BlinkMacSystemFont, 'Inter', sans-serif",
             size: 11,
           },
           color: "#64748b",

@@ -7,8 +7,8 @@ export const CONTEXT = {
         roleDesc: "Senior Consultant", 
         menu: [
             { id: 'nsg_intelligence', label: 'NSG Intelligence', subtitle: 'Sistema Central de Inteligencia', icon: Cpu, special: true },
-            { id: 'nsg_news', label: 'NSG News', subtitle: 'Actualidad y Análisis Global', icon: Newspaper },
             { id: 'nsg_clarity', label: 'NSG Clarity', subtitle: 'Claridad en tus Objetivos', icon: Target },
+            { id: 'nsg_news', label: 'NSG News', subtitle: 'Actualidad y Análisis Global', icon: Newspaper },
             { id: 'nsg_horizon', label: 'NSG Horizon', subtitle: 'Planificación y Proyección', icon: Sunrise },
             { id: 'portfolio', label: 'Cartera de Activos', subtitle: 'Gestión Patrimonial Integral', icon: Briefcase },
             { id: 'calendar', label: 'Agenda Maestra', subtitle: 'Cronograma de Actividades', icon: Calendar },
@@ -22,8 +22,8 @@ export const CONTEXT = {
         roleDesc: "Clinical Lead", 
         menu: [ 
             { id: 'nsg_intelligence', label: 'NSG Intelligence', subtitle: 'Sistema Central de Inteligencia', icon: Cpu, special: true }, 
-            { id: 'nsg_news', label: 'NSG News', subtitle: 'Actualidad y Análisis Global', icon: Newspaper }, 
             { id: 'nsg_clarity', label: 'NSG Clarity', subtitle: 'Claridad en tus Objetivos', icon: Target }, 
+            { id: 'nsg_news', label: 'NSG News', subtitle: 'Actualidad y Análisis Global', icon: Newspaper }, 
             { id: 'nsg_horizon', label: 'NSG Horizon', subtitle: 'Planificación y Proyección', icon: Sunrise }, 
             { id: 'clinical_radar', label: 'Análisis Multiaxial', subtitle: 'Evaluación Clínica Integral', icon: Hexagon }, 
             { id: 'calendar', label: 'Agenda Maestra', subtitle: 'Cronograma de Actividades', icon: Calendar }, 
@@ -39,8 +39,8 @@ export const CONTEXT = {
         roleDesc: "CEO", 
         menu: [ 
             { id: 'nsg_intelligence', label: 'NSG Intelligence', subtitle: 'Sistema Central de Inteligencia', icon: Cpu, special: true }, 
-            { id: 'nsg_news', label: 'NSG News', subtitle: 'Actualidad y Análisis Global', icon: Newspaper }, 
             { id: 'nsg_clarity', label: 'NSG Clarity', subtitle: 'Claridad en tus Objetivos', icon: Target }, 
+            { id: 'nsg_news', label: 'NSG News', subtitle: 'Actualidad y Análisis Global', icon: Newspaper }, 
             { id: 'nsg_horizon', label: 'NSG Horizon', subtitle: 'Planificación y Proyección', icon: Sunrise }, 
             { id: 'calendar', label: 'Agenda Maestra', subtitle: 'Cronograma de Actividades', icon: Calendar }, 
             { id: 'metrics', label: 'P&L Financiero', subtitle: 'Métricas de Rendimiento', icon: PieChart }, 

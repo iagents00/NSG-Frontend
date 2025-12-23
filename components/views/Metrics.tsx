@@ -29,17 +29,17 @@ export default function Metrics() {
             y: { 
               beginAtZero: true, 
               grid: { color: '#F1F5F9' }, // Matches legacy borderDash if supported or simplified
-              ticks: { font: { family: "'Inter', sans-serif" } } 
+              ticks: { font: { family: "-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" } } 
             }, 
             x: { 
               grid: { display: false }, 
-              ticks: { font: { family: "'Inter', sans-serif" } } 
+              ticks: { font: { family: "-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" } } 
             } 
           }, 
           plugins: { 
             legend: { 
               position: 'bottom', 
-              labels: { font: { family: "'Plus Jakarta Sans', sans-serif" }, usePointStyle: true } 
+              labels: { font: { family: "-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" }, usePointStyle: true } 
             } 
           } 
         }

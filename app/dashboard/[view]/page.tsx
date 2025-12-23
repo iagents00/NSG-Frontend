@@ -34,9 +34,9 @@ const Views: Record<string, any> = {
 
 // Define which views are available for each role
 const RoleViewAccess: Record<RoleType, string[]> = {
-  consultant: ['nsg_intelligence', 'nsg_news', 'nsg_clarity', 'nsg_horizon', 'portfolio', 'calendar', 'reports', 'settings'],
-  psychologist: ['nsg_intelligence', 'nsg_news', 'nsg_clarity', 'nsg_horizon', 'clinical_radar', 'calendar', 'patients', 'library', 'settings'],
-  manager: ['nsg_intelligence', 'nsg_news', 'nsg_clarity', 'nsg_horizon', 'calendar', 'metrics', 'strategy', 'reports', 'portfolio', 'settings'],
+  consultant: ['nsg_intelligence', 'nsg_clarity', 'nsg_news', 'nsg_horizon', 'portfolio', 'calendar', 'reports', 'settings'],
+  psychologist: ['nsg_intelligence', 'nsg_clarity', 'nsg_news', 'nsg_horizon', 'clinical_radar', 'calendar', 'patients', 'library', 'settings'],
+  manager: ['nsg_intelligence', 'nsg_clarity', 'nsg_news', 'nsg_horizon', 'calendar', 'metrics', 'strategy', 'reports', 'portfolio', 'settings'],
   patient: ['nsg_intelligence', 'nsg_clarity', 'nsg_news', 'wellness', 'calendar', 'settings'],
 };
 

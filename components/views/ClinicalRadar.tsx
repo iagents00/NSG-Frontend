@@ -40,7 +40,7 @@ export default function ClinicalRadar() {
               suggestedMax: 100, 
               grid: { color: 'rgba(0,0,0,0.05)' }, 
               pointLabels: { 
-                font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: 'bold' }, 
+                font: { family: "-apple-system, BlinkMacSystemFont, 'Inter', sans-serif", size: 11, weight: 'bold' }, 
                 color: '#64748B' 
               }, 
               ticks: { display: false, backdropColor: 'transparent' } 
