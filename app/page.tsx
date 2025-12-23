@@ -1,6 +1,5 @@
 'use client'; // Required for interactivity (onClick)
 
-import Link from "next/link"
 import { 
   ShieldCheck, 
   Check, 
@@ -11,11 +10,9 @@ import {
   HeartPulse 
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useAppStore } from '@/store/useAppStore';
 
 export default function LandingPage() {
   const router = useRouter();
-  const { setRole } = useAppStore();
 
   // Logic for the profile selection buttons
   const selectProfile = (profile: string) => {
@@ -52,7 +49,7 @@ export default function LandingPage() {
                 </div>
             </div>
             <div className="flex items-center shrink-0 h-10">
-                <span className="text-base font-display font-bold text-navy-950 tracking-tight leading-none whitespace-nowrap drop-shadow-sm">NSG Intelligence</span>
+                <span className="text-base font-system font-semibold text-navy-950 tracking-tight leading-none whitespace-nowrap drop-shadow-sm">NSG Intelligence</span>
             </div>
         </div>
 
@@ -88,12 +85,12 @@ export default function LandingPage() {
 
                 {/* PRECISE COPY - Strengthened Title */}
                 <div className="space-y-6 lg:space-y-6 max-w-3xl lg:max-w-4xl mx-auto">
-                    <p className="text-[0.65rem] md:text-xs lg:text-xs font-bold text-slate-400 tracking-[0.3em] uppercase pl-1">NSG SYSTEM OS • Enterprise</p>
-                    <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-black tracking-tighter text-navy-950 leading-[1.05] drop-shadow-sm">
-                        Infraestructura cognitiva <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">de precisión.</span>
+                    <p className="text-[0.65rem] md:text-xs lg:text-xs font-system font-medium text-slate-400 tracking-[0.3em] uppercase pl-1">NSG SYSTEM OS • Enterprise</p>
+                    <h1 className="font-system text-5xl sm:text-6xl lg:text-7xl font-semibold tracking-tight text-navy-950 leading-[1.05] drop-shadow-sm">
+                        Sistema Personalizado de <br/><span className="text-blue-600">Inteligencia Profesional.</span>
                     </h1>
                     <div className="relative pl-6 border-l-4 border-blue-100 text-left mx-auto max-w-md md:max-w-lg lg:max-w-xl mt-6 lg:mt-8">
-                        <p className="text-lg md:text-xl lg:text-xl text-slate-600 font-medium leading-relaxed italic">
+                        <p className="text-lg md:text-xl lg:text-xl text-slate-600 font-system font-normal leading-relaxed italic">
                             &quot;Transformamos datos clínicos y corporativos en estrategias inteligentes.&quot;
                         </p>
                     </div>
@@ -113,11 +110,11 @@ export default function LandingPage() {
                                 </div>
                             </div>
                             <div className="text-center sm:text-left flex-1">
-                                <p className="text-[0.55rem] lg:text-xs font-bold text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100 inline-block mb-1">Officially Verified</p>
-                                <h3 className="text-sm lg:text-base text-navy-900 font-medium leading-tight mb-2">Verified by <span className="font-display font-bold text-navy-950">New Strategy Group</span></h3>
+                                <p className="text-[0.55rem] lg:text-xs font-system font-semibold text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100 inline-block mb-1">Officially Verified</p>
+                                <h3 className="text-sm lg:text-base text-navy-900 font-system font-medium leading-tight mb-2">Verified by <span className="font-system font-semibold text-navy-950">New Strategy Group</span></h3>
                                 <div className="flex gap-6 justify-center sm:justify-start pt-3 border-t border-slate-100">
-                                    <div className="text-center sm:text-left"><p className="text-lg lg:text-xl font-display font-bold text-blue-600 leading-none">1,000+</p><p className="text-[0.5rem] lg:text-[0.6rem] font-bold text-slate-400 uppercase tracking-wide mt-0.5">Conversaciones</p></div>
-                                    <div className="text-center sm:text-left border-l border-slate-100 pl-6"><p className="text-lg lg:text-xl font-display font-bold text-indigo-600 leading-none">100+</p><p className="text-[0.5rem] lg:text-[0.6rem] font-bold text-slate-400 uppercase tracking-wide mt-0.5">Reseñas Positivas</p></div>
+                                    <div className="text-center sm:text-left"><p className="text-lg lg:text-xl font-system font-semibold text-blue-600 leading-none">1,000+</p><p className="text-[0.5rem] lg:text-[0.6rem] font-system font-medium text-slate-400 uppercase tracking-wide mt-0.5">Conversaciones</p></div>
+                                    <div className="text-center sm:text-left border-l border-slate-100 pl-6"><p className="text-lg lg:text-xl font-system font-semibold text-indigo-600 leading-none">100+</p><p className="text-[0.5rem] lg:text-[0.6rem] font-system font-medium text-slate-400 uppercase tracking-wide mt-0.5">Reseñas Positivas</p></div>
                                 </div>
                             </div>
                         </div>
@@ -136,8 +133,8 @@ export default function LandingPage() {
                             </div>
                             <ArrowRight className="w-5 h-5 lg:w-6 lg:h-6 text-slate-300 group-hover:text-blue-600 transition-transform group-hover:translate-x-1" />
                         </div>
-                        <h3 className="font-display font-bold text-lg lg:text-xl text-navy-900">Consultor</h3>
-                        <p className="text-xs lg:text-sm text-slate-500 mt-1 font-medium">Gestión de Activos & Data Strategy</p>
+                        <h3 className="font-system font-semibold text-lg lg:text-xl text-navy-900">Consultor</h3>
+                        <p className="text-xs lg:text-sm text-slate-500 mt-1 font-system font-normal">Gestión de Activos & Data Strategy</p>
                     </button>
 
                     {/* Psicologo */}
@@ -148,8 +145,8 @@ export default function LandingPage() {
                             </div>
                             <ArrowRight className="w-5 h-5 lg:w-6 lg:h-6 text-slate-300 group-hover:text-sky-600 transition-transform group-hover:translate-x-1" />
                         </div>
-                        <h3 className="font-display font-bold text-lg lg:text-xl text-navy-900">Psicólogo</h3>
-                        <p className="text-xs lg:text-sm text-slate-500 mt-1 font-medium">Clínica & Análisis de Conducta</p>
+                        <h3 className="font-system font-semibold text-lg lg:text-xl text-navy-900">Psicólogo</h3>
+                        <p className="text-xs lg:text-sm text-slate-500 mt-1 font-system font-normal">Clínica & Análisis de Conducta</p>
                     </button>
 
                     {/* Directivo */}
@@ -160,8 +157,8 @@ export default function LandingPage() {
                             </div>
                             <ArrowRight className="w-5 h-5 lg:w-6 lg:h-6 text-slate-300 group-hover:text-emerald-600 transition-transform group-hover:translate-x-1" />
                         </div>
-                        <h3 className="font-display font-bold text-lg lg:text-xl text-navy-900">CEO / Directivo</h3>
-                        <p className="text-xs lg:text-sm text-slate-500 mt-1 font-medium">Inteligencia de Datos & KPIs</p>
+                        <h3 className="font-system font-semibold text-lg lg:text-xl text-navy-900">CEO / Directivo</h3>
+                        <p className="text-xs lg:text-sm text-slate-500 mt-1 font-system font-normal">Inteligencia de Datos & KPIs</p>
                     </button>
 
                     {/* Paciente */}
@@ -172,16 +169,16 @@ export default function LandingPage() {
                             </div>
                             <ArrowRight className="w-5 h-5 lg:w-6 lg:h-6 text-slate-300 group-hover:text-teal-600 transition-transform group-hover:translate-x-1" />
                         </div>
-                        <h3 className="font-display font-bold text-lg lg:text-xl text-navy-900">Paciente</h3>
-                        <p className="text-xs lg:text-sm text-slate-500 mt-1 font-medium">Bienestar Integral & Tracking</p>
+                        <h3 className="font-system font-semibold text-lg lg:text-xl text-navy-900">Paciente</h3>
+                        <p className="text-xs lg:text-sm text-slate-500 mt-1 font-system font-normal">Bienestar Integral & Tracking</p>
                     </button>
                 </div>
             </div>
 
              {/* FOOTER */}
             <div className="mt-20 lg:mt-24 w-full pt-10 pb-8 text-center flex flex-col items-center gap-6 border-t border-slate-100/50">
-                <div><p className="text-[0.65rem] font-bold text-slate-400 uppercase tracking-widest">&copy; 2024 NSG Intelligence. All rights reserved.</p></div>
-                <div className="flex items-center gap-6 text-[0.7rem] font-bold text-slate-500">
+                <div><p className="text-[0.65rem] font-system font-medium text-slate-400 uppercase tracking-widest">&copy; 2024 NSG Intelligence. All rights reserved.</p></div>
+                <div className="flex items-center gap-6 text-[0.7rem] font-system font-medium text-slate-500">
                     <span className="hover:text-blue-600 cursor-pointer transition">Privacy Policy</span>
                     <span className="w-1 h-1 rounded-full bg-slate-300"></span>
                     <span className="hover:text-blue-600 cursor-pointer transition">Terms of Service</span>

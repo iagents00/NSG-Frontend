@@ -5,6 +5,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-inter);
   --font-mono: var(--font-mono);
+  --font-system: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
   /* Custom Colors */
   --color-navy-950: #020617;
@@ -75,6 +76,14 @@ body {
 
 .will-change-transform {
   will-change: transform;
+}
+
+/* Apple System Typography */
+.font-system {
+  font-family: var(--font-system);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 /* Smooth Scroll & Custom Bars */

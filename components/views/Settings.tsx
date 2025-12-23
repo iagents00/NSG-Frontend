@@ -11,7 +11,7 @@ import { authService } from "@/lib/auth"; // Import authService
 
 export default function Settings() {
   const { showToast } = useToast();
-  const { theme, setTheme, userId } = useAppStore(); // Connect to store
+  const { theme, setTheme, userId, setUserId } = useAppStore(); // Connect to store
   
   const [username, setUsername] = useState<string | null>(null);
 
@@ -21,6 +21,9 @@ export default function Settings() {
         const data = await authService.verifySession();
         if (data?.user?.username) {
             setUsername(data.user.username);
+        }
+        if (data?.user?.id) {
+            setUserId(data.user.id);
         }
       } catch (error) {
         // Silent fail or log
@@ -178,7 +181,7 @@ export default function Settings() {
           <div className="text-center sm:text-left">
             <h4 className="font-bold text-xl text-navy-900">{username || 'Usuario Activo'}</h4>
             <p className="text-slate-500 text-sm mb-3">
-                ID: NSG-8821-X • <span className="text-emerald-600 font-medium">Online</span>
+                NSG-ID: {userId} • <span className="text-emerald-600 font-medium">Online</span>
             </p>
             <button 
                 onClick={() => showToast('Perfil actualizado', 'success')} 
