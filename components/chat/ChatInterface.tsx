@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 // Refresh import to clear stale cache
 import DynamicIsland from '@/components/layout/DynamicIsland';
 import clsx from 'clsx';
@@ -219,17 +220,20 @@ export default function ChatInterface() {
         }))
       };
 
+      const stylingPrompt = `\n\n[SYSTEM: Generate the following content using GitHub Flavored Markdown for structure. For colors, wrap the text in <span style="color: [hex];"> tags using Notion’s specific palette: use #28456C for blue text and #18592E for green text. Ensure headers use #, ##, and ###, and apply bold (***) or italics () inside the span tags where necessary.]`;
+      const finalMessage = input.trim() + stylingPrompt;
+      
       if (attachment) {
           const formData = new FormData();
           formData.append('file', attachment);
-          formData.append('message', input.trim());
+          formData.append('message', finalMessage);
           formData.append('userId', userId); // Send User ID
           formData.append('context', JSON.stringify(contextData));
           requestData = formData;
           headers = { 'Content-Type': 'multipart/form-data' }; // axios sets boundary automatically usually, but good to be explicit or let axios handle it
       } else {
           requestData = {
-              message: input.trim(),
+              message: finalMessage,
               userId: userId, // Send User ID
               context: contextData
           };
@@ -382,6 +386,7 @@ export default function ChatInterface() {
                                             <div className="prose prose-slate max-w-none">
                                                 <ReactMarkdown 
                                                     remarkPlugins={[remarkGfm]}
+                                                    rehypePlugins={[rehypeRaw]}
                                                     components={{
                                                         // Notion-like styling overrides
                                                         h1: ({node, ...props}) => <h1 className="text-2xl font-bold mt-6 mb-4 text-slate-900 tracking-tight" {...props} />,
@@ -405,7 +410,9 @@ export default function ChatInterface() {
                                                         a: ({node, ...props}) => <a className="text-blue-600 hover:underline cursor-pointer font-medium" {...props} />,
                                                         table: ({node, ...props}) => <div className="overflow-x-auto my-4"><table className="min-w-full divide-y divide-slate-200 border border-slate-200" {...props} /></div>,
                                                         th: ({node, ...props}) => <th className="bg-slate-50 px-4 py-2 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider border-b" {...props} />,
-                                                        td: ({node, ...props}) => <td className="px-4 py-2 whitespace-nowrap text-sm text-slate-600 border-b" {...props} />
+                                                        td: ({node, ...props}) => <td className="px-4 py-2 whitespace-nowrap text-sm text-slate-600 border-b" {...props} />,
+                                                        // Ensure span passes through with styles
+                                                        span: ({node, ...props}) => <span {...props} />
                                                     }}
                                                 >
                                                     {displayContent || ''}

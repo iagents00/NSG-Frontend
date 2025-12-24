@@ -8,7 +8,7 @@ import {
   Layers, Calendar, Play, FileCheck, FileText, Cpu, 
   PenTool, ArrowUpRight, CheckSquare, ListTodo, PlusCircle,
   Folder, ArrowLeft, MoreHorizontal, Loader2,
-  Zap, Activity, ChevronRight, CheckCircle, Trash2
+  Zap, Activity, ChevronRight, CheckCircle, Trash2, Sparkles
 } from "lucide-react";
 import clsx from "clsx";
 import ReactMarkdown from 'react-markdown';
@@ -224,8 +224,8 @@ export default function NSGHorizon() {
                     isUser: !!(t.matched_calendar_invitee_email || t.speaker?.matched_calendar_invitee_email)
                 })) : [],
 
-                // Map AI Info (Optional)
-                aiInfo: undefined 
+                // Map AI Info (Attempt to retrieve from backend)
+                aiInfo: item.ai_analysis || undefined 
             };
         });
 
@@ -590,133 +590,152 @@ export default function NSGHorizon() {
         {/* RIGHT COLUMN: CONTEXT & ACTIONS */}
         <div className="lg:col-span-7 flex flex-col gap-6 h-full overflow-y-auto custom-scroll pr-1 pb-4">
           
-          {/* Fathom Summary Card */}
-          <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm relative overflow-hidden shrink-0">
-              <div className="relative z-10">
-                <h4 className="font-display font-bold text-xl mb-4 text-navy-900 flex items-center gap-3">
-                    <div className="p-1.5 bg-blue-100 rounded-lg"><FileText className="w-4 h-4 text-blue-600" /></div> 
-                    Resumen de la Sesión
-                </h4>
-                <div className="prose prose-slate max-w-none text-slate-700 text-sm leading-relaxed markdown-content">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {selectedFolder.description}
-                  </ReactMarkdown>
-                </div>
-              </div>
-          </div>
-
-          {/* Context Engine Card */}
-          {selectedFolder.aiInfo?.contextEngine && (
-            <div className="bg-navy-950 text-white p-8 rounded-[2.5rem] relative overflow-hidden shadow-2xl shrink-0">
+          {/* 1. MAIN CONTEXT ENGINE CARD (Merged with Summary) */}
+          <div className="bg-navy-950 text-white p-8 rounded-[2.5rem] relative overflow-hidden shadow-2xl shrink-0 animate-fade-in-up">
                 <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none"></div>
                 <div className="absolute right-0 top-0 w-64 h-64 bg-blue-600/30 rounded-full blur-[80px] pointer-events-none"></div>
                 
                 <div className="relative z-10">
-                <h4 className="font-display font-bold text-xl mb-4 flex items-center gap-3">
-                    <div className="p-1.5 bg-blue-500 rounded-lg"><Cpu className="w-4 h-4 text-white" /></div> NSG Context Engine
-                </h4>
-                <p className="text-blue-100 text-sm mb-6 max-w-lg">
-                    {selectedFolder.aiInfo.contextEngine.description}
-                </p>
+                    <h4 className="font-display font-bold text-xl mb-4 flex items-center gap-3">
+                        <div className="p-1.5 bg-blue-500 rounded-lg"><Cpu className="w-4 h-4 text-white" /></div> 
+                        NSG Context Engine
+                    </h4>
+                    
+                    {/* The Resume/Summary placed here */}
+                    <div className="prose prose-invert max-w-none text-blue-100/90 text-sm leading-relaxed mb-8 markdown-content">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {selectedFolder.description || "Sin descripción disponible."}
+                        </ReactMarkdown>
+                    </div>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="bg-white/10 p-4 rounded-xl border border-white/10 backdrop-blur-sm">
-                    <p className="text-[0.6rem] font-bold text-blue-300 uppercase mb-1">Punto de Dolor</p>
-                    <p className="text-sm font-bold">{selectedFolder.aiInfo.contextEngine.painPoint}</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="bg-white/10 p-4 rounded-xl border border-white/10 backdrop-blur-sm">
+                            <p className="text-[0.6rem] font-bold text-blue-300 uppercase mb-1">Punto de Dolor</p>
+                            <p className="text-sm font-bold truncate">
+                                {selectedFolder.aiInfo?.contextEngine?.painPoint || "Analizando..."}
+                            </p>
+                        </div>
+                        <div className="bg-white/10 p-4 rounded-xl border border-white/10 backdrop-blur-sm">
+                            <p className="text-[0.6rem] font-bold text-emerald-300 uppercase mb-1">Oportunidad</p>
+                            <p className="text-sm font-bold truncate">
+                                {selectedFolder.aiInfo?.contextEngine?.opportunity || "Analizando..."}
+                            </p>
+                        </div>
+                        <div className="bg-white/10 p-4 rounded-xl border border-white/10 backdrop-blur-sm">
+                            <p className="text-[0.6rem] font-bold text-purple-300 uppercase mb-1">Herramienta</p>
+                            <p className="text-sm font-bold truncate">
+                                {selectedFolder.aiInfo?.contextEngine?.tool || "Analizando..."}
+                            </p>
+                        </div>
                     </div>
-                    <div className="bg-white/10 p-4 rounded-xl border border-white/10 backdrop-blur-sm">
-                    <p className="text-[0.6rem] font-bold text-emerald-300 uppercase mb-1">Oportunidad</p>
-                    <p className="text-sm font-bold">{selectedFolder.aiInfo.contextEngine.opportunity}</p>
-                    </div>
-                    <div className="bg-white/10 p-4 rounded-xl border border-white/10 backdrop-blur-sm">
-                    <p className="text-[0.6rem] font-bold text-purple-300 uppercase mb-1">Herramienta</p>
-                    <p className="text-sm font-bold">{selectedFolder.aiInfo.contextEngine.tool}</p>
-                    </div>
                 </div>
-                </div>
-            </div>
-          )}
-
-          {/* Action Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 shrink-0">
-            {/* Metodología */}
-            {selectedFolder.aiInfo?.methodology && (
-                <div className="bg-white p-6 rounded-[2.5rem] border border-slate-200 shadow-sm hover:shadow-md transition group">
-                <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600">
-                    <PenTool className="w-6 h-6" />
-                    </div>
-                    <ArrowUpRight className="w-5 h-5 text-slate-300 group-hover:text-purple-600 transition" />
-                </div>
-                <h5 className="font-bold text-navy-900 text-lg mb-2">Metodología Sugerida</h5>
-                <p className="text-sm text-slate-500 mb-4 line-clamp-3">
-                    {selectedFolder.aiInfo.methodology.description}
-                </p>
-                <button className="w-full py-2.5 bg-slate-50 text-purple-700 font-bold text-xs rounded-xl hover:bg-purple-100 transition cursor-pointer">
-                    Ver Guía de Implementación
-                </button>
-                </div>
-            )}
-            
-            {/* Estrategia Táctica */}
-            {selectedFolder.aiInfo?.strategy && (
-                <div className="bg-white p-6 rounded-[2.5rem] border border-slate-200 shadow-sm hover:shadow-md transition group">
-                <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
-                    <CheckSquare className="w-6 h-6" />
-                    </div>
-                    <ArrowUpRight className="w-5 h-5 text-slate-300 group-hover:text-emerald-600 transition" />
-                </div>
-                <h5 className="font-bold text-navy-900 text-lg mb-2">Estrategia Táctica</h5>
-                <p className="text-sm text-slate-500 mb-4 line-clamp-3">
-                    {selectedFolder.aiInfo.strategy.description}
-                </p>
-                <button className="w-full py-2.5 bg-slate-50 text-emerald-700 font-bold text-xs rounded-xl hover:bg-emerald-100 transition cursor-pointer">
-                    Añadir a Calendario
-                </button>
-                </div>
-            )}
           </div>
-          {/* Action Plan Checklist */}
-          {selectedFolder.aiInfo?.actionPlan && selectedFolder.aiInfo.actionPlan.length > 0 && (
-            <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-card flex-1">
-                <h4 className="font-bold text-navy-900 text-xl mb-6 flex items-center gap-3">
-                <ListTodo className="w-6 h-6 text-blue-600" /> Plan de Acción Inmediata
-                </h4>
-                
-                <div className="space-y-4">
-                {selectedFolder.aiInfo.actionPlan.map((step) => (
-                    <div 
-                        key={step.id}
-                        className={clsx(
-                        "flex items-start gap-4 p-4 rounded-2xl border transition cursor-pointer group",
-                        checkedItems.includes(step.id) ? "bg-emerald-50 border-emerald-200" : "bg-slate-50 border-slate-100 hover:bg-white hover:shadow-sm"
-                        )}
-                        onClick={() => toggleItem(step.id)}
-                    >
-                        <div className={clsx(
-                        "mt-1 w-5 h-5 rounded-full border-2 transition flex items-center justify-center",
-                        checkedItems.includes(step.id) ? "border-emerald-500 bg-emerald-500" : "border-slate-300 bg-white group-hover:border-blue-500"
-                        )}>
-                        {checkedItems.includes(step.id) && <div className="w-2 h-2 bg-white rounded-full"></div>}
+
+          {/* AI Analysis Section: Actions, Plan */}
+          {selectedFolder.aiInfo ? (
+            <>
+                {/* Action Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 shrink-0 animate-fade-in-up delay-100">
+                    {/* Metodología */}
+                    {selectedFolder.aiInfo.methodology && (
+                        <div className="bg-white p-6 rounded-[2.5rem] border border-slate-200 shadow-sm hover:shadow-md transition group">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600">
+                            <PenTool className="w-6 h-6" />
+                            </div>
+                            <ArrowUpRight className="w-5 h-5 text-slate-300 group-hover:text-purple-600 transition" />
                         </div>
-                        <div>
-                        <p className={clsx("font-bold text-sm", checkedItems.includes(step.id) ? "text-emerald-900" : "text-navy-900")}>
-                            {step.text}
+                        <h5 className="font-bold text-navy-900 text-lg mb-2">Metodología Sugerida</h5>
+                        <p className="text-sm text-slate-500 mb-4 line-clamp-3">
+                            {selectedFolder.aiInfo.methodology.description}
                         </p>
-                        <p className={clsx("text-xs mt-1", checkedItems.includes(step.id) ? "text-emerald-700" : "text-slate-500")}>
-                            {step.subtext}
-                        </p>
+                        <button className="w-full py-2.5 bg-slate-50 text-purple-700 font-bold text-xs rounded-xl hover:bg-purple-100 transition cursor-pointer">
+                            Ver Guía de Implementación
+                        </button>
                         </div>
-                    </div>
-                ))}
+                    )}
+                    
+                    {/* Estrategia Táctica */}
+                    {selectedFolder.aiInfo.strategy && (
+                        <div className="bg-white p-6 rounded-[2.5rem] border border-slate-200 shadow-sm hover:shadow-md transition group">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
+                            <CheckSquare className="w-6 h-6" />
+                            </div>
+                            <ArrowUpRight className="w-5 h-5 text-slate-300 group-hover:text-emerald-600 transition" />
+                        </div>
+                        <h5 className="font-bold text-navy-900 text-lg mb-2">Estrategia Táctica</h5>
+                        <p className="text-sm text-slate-500 mb-4 line-clamp-3">
+                            {selectedFolder.aiInfo.strategy.description}
+                        </p>
+                        <button className="w-full py-2.5 bg-slate-50 text-emerald-700 font-bold text-xs rounded-xl hover:bg-emerald-100 transition cursor-pointer">
+                            Añadir a Calendario
+                        </button>
+                        </div>
+                    )}
                 </div>
 
+                {/* Action Plan Checklist */}
+                {selectedFolder.aiInfo.actionPlan && selectedFolder.aiInfo.actionPlan.length > 0 && (
+                    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-card flex-1 animate-fade-in-up delay-200">
+                        <h4 className="font-bold text-navy-900 text-xl mb-6 flex items-center gap-3">
+                        <ListTodo className="w-6 h-6 text-blue-600" /> Plan de Acción Inmediata
+                        </h4>
+                        
+                        <div className="space-y-4">
+                        {selectedFolder.aiInfo.actionPlan.map((step) => (
+                            <div 
+                                key={step.id}
+                                className={clsx(
+                                "flex items-start gap-4 p-4 rounded-2xl border transition cursor-pointer group",
+                                checkedItems.includes(step.id) ? "bg-emerald-50 border-emerald-200" : "bg-slate-50 border-slate-100 hover:bg-white hover:shadow-sm"
+                                )}
+                                onClick={() => toggleItem(step.id)}
+                            >
+                                <div className={clsx(
+                                "mt-1 w-5 h-5 rounded-full border-2 transition flex items-center justify-center",
+                                checkedItems.includes(step.id) ? "border-emerald-500 bg-emerald-500" : "border-slate-300 bg-white group-hover:border-blue-500"
+                                )}>
+                                {checkedItems.includes(step.id) && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                                </div>
+                                <div>
+                                <p className={clsx("font-bold text-sm", checkedItems.includes(step.id) ? "text-emerald-900" : "text-navy-900")}>
+                                    {step.text}
+                                </p>
+                                <p className={clsx("text-xs mt-1", checkedItems.includes(step.id) ? "text-emerald-700" : "text-slate-500")}>
+                                    {step.subtext}
+                                </p>
+                                </div>
+                            </div>
+                        ))}
+                        </div>
+
+                        <button 
+                        onClick={() => showToast('Personalizando...', 'info')} 
+                        className="w-full mt-6 py-3 bg-navy-900 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+                        >
+                        <PlusCircle className="w-4 h-4" /> Personalizar más acciones con AI
+                        </button>
+                    </div>
+                )}
+            </>
+          ) : (
+            // WAITING FOR API RESPONSE STATE (Now only for deeper analysis)
+            <div className="flex-1 flex flex-col items-center justify-center p-8 border-2 border-dashed border-slate-200 rounded-[2.5rem] bg-slate-50/50 gap-4 text-center min-h-[300px]">
+                <div className="w-16 h-16 bg-white rounded-full shadow-sm flex items-center justify-center">
+                    <Sparkles className="w-8 h-8 text-blue-400" />
+                </div>
+                <div>
+                    <h5 className="text-lg font-bold text-navy-900">Análisis Profundo en Proceso</h5>
+                    <p className="text-sm text-slate-500 max-w-xs mx-auto mt-2">
+                        Generando estrategias tácticas y planes de acción personalizados...
+                    </p>
+                </div>
                 <button 
-                onClick={() => showToast('Personalizando...', 'info')} 
-                className="w-full mt-6 py-3 bg-navy-900 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+                     onClick={() => showToast("Solicitando análisis a API...", "info")}
+                     className="mt-2 px-6 py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold text-blue-600 hover:bg-blue-50 transition cursor-pointer shadow-sm"
                 >
-                <PlusCircle className="w-4 h-4" /> Personalizar más acciones con AI
+                    Generar Análisis Ahora
                 </button>
             </div>
           )}

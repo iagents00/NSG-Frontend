@@ -11,12 +11,15 @@ import {
   Zap,
   RefreshCw,
   Bell,
-  Trophy
+  Trophy,
+  Calendar,
+  LogOut
 } from "lucide-react";
 import clsx from "clsx";
 import { useToast } from "@/components/ui/ToastProvider";
-
 import confetti from "canvas-confetti";
+import { useAppStore } from "@/store/useAppStore";
+import { authService } from "@/lib/auth";
 
 // --- AUDIO ENGINE: HIGH DOPAMINE ---
 // We use a singleton pattern for the context but handle state carefully
@@ -348,6 +351,172 @@ function UpdateCard({ title, date, type }: { title: string, date: string, type: 
 // --- MAIN COMPONENT ---
 export default function NSGClarity() {
   const { showToast } = useToast();
+  const { userId } = useAppStore();
+  const [isConnected, setIsConnected] = useState(false);
+  const [telegramId, setTelegramId] = useState<number | null>(null);
+  const [telegramData, setTelegramData] = useState<any>(null);
+  const [isLoadingTelegramData, setIsLoadingTelegramData] = useState(false);
+
+  // Fetch user data to check telegram connection status
+  // Fetch user data to check telegram connection status - w/ Focus Refresh
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const data = await authService.verifySession();
+        if (data?.user?.telegram_id) {
+          setTelegramId(data.user.telegram_id);
+        }
+      } catch (error) {
+        console.error("NSGClarity: Failed to fetch user session", error);
+      }
+    };
+
+    fetchUser();
+
+    // Re-check on window focus (e.g. user coming back from Telegram tab)
+    const onFocus = () => fetchUser();
+    window.addEventListener('focus', onFocus);
+
+    return () => window.removeEventListener('focus', onFocus);
+  }, []);
+
+  // Sync Objectives from Telegram
+  const syncObjectives = async (isManual = false) => {
+    if (!telegramId) {
+        if (isManual) showToast("Conecta Telegram primero", "error");
+        return;
+    }
+    
+    setIsLoadingTelegramData(true);
+    if (isManual) showToast("Sincronizando objetivos...", "info");
+
+    try {
+      const jwtToken = localStorage.getItem('token');
+      if (!jwtToken) return;
+
+      const response = await fetch(`https://nsg-backend.onrender.com/telegram/${telegramId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': jwtToken,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setTelegramData(data);
+
+        // Update task descriptions
+        if (data?.daily_checking_in) {
+            setTasks(prev => prev.map(task => {
+                if (task.time === "08:00 AM" && data.daily_checking_in.morning) {
+                    return { ...task, desc: data.daily_checking_in.morning };
+                }
+                if (task.time === "01:00 PM" && data.daily_checking_in.noon) {
+                    return { ...task, desc: data.daily_checking_in.noon };
+                }
+                if (task.time === "08:00 PM" && data.daily_checking_in.night) {
+                    return { ...task, desc: data.daily_checking_in.night };
+                }
+                return task;
+            }));
+            
+            if (isManual) showToast("Objetivos actualizados", "success");
+        }
+      } else {
+        console.error('Failed to fetch telegram data:', response.status);
+        if (isManual) showToast("Error al sincronizar", "error");
+      }
+    } catch (error) {
+      console.error('Error fetching telegram data:', error);
+      if (isManual) showToast("Error de conexión", "error");
+    } finally {
+      setIsLoadingTelegramData(false);
+    }
+  };
+
+  // Fetch Telegram user data when telegramId is available
+  useEffect(() => {
+    syncObjectives(false);
+  }, [telegramId]);
+
+  // Check Google Calendar connection status on mount
+  useEffect(() => {
+    const checkGoogleConnection = async () => {
+        const jwtToken = localStorage.getItem('token');
+        if (!jwtToken) return;
+        try {
+            const res = await fetch('https://nsg-backend.onrender.com/google/calendar/events', {
+                headers: { 'Authorization': jwtToken }
+            });
+            if (res.ok) {
+                setIsConnected(true);
+            }
+        } catch (error) {
+            console.error("Error checking calendar connection:", error);
+        }
+    };
+    checkGoogleConnection();
+  }, []);
+
+  const handleConnect = async (platform: string) => {
+    if (platform === "Telegram") {
+      if (telegramId) {
+        showToast("Telegram ya está conectado", "info");
+        return;
+      }
+      
+      showToast("Abriendo Telegram para vinculación segura...", "info");
+      
+      // Senior Implementation: Using the 'start' parameter for deep linking.
+      // This sends the platform userId to your bot automatically when the user clicks 'Start'.
+      // The bot will receive: /start user_12345
+      const telegramBotUrl = `https://t.me/nsg_preguntasyrespuestas_bot?start=${userId}`;
+      
+      setTimeout(() => {
+        window.open(telegramBotUrl, "_blank");
+      }, 800);
+      
+      return;
+    }
+
+    if (platform === "Calendar") {
+      const jwtToken = localStorage.getItem('token');
+      
+      if (isConnected) {
+          // Disconnect Logic
+          try {
+              const res = await fetch('https://nsg-backend.onrender.com/google/calendar', {
+                  method: 'DELETE',
+                  headers: { 'Authorization': jwtToken || '' }
+              });
+              if (res.ok) {
+                  setIsConnected(false);
+                  showToast('Google Calendar desconectado', 'info');
+              }
+          } catch (error) {
+              showToast('Error al desconectar', 'error');
+              console.error(error);
+          }
+          return;
+      }
+
+      // Connect Logic
+      try {
+          const res = await fetch('https://nsg-backend.onrender.com/google/auth', {
+              headers: { 'Authorization': jwtToken || '' }
+          });
+          const data = await res.json();
+          if (data.url) {
+              window.open(data.url, '_blank');
+          }
+      } catch (error) {
+          showToast('Error al iniciar autenticación', 'error');
+          console.error(error);
+      }
+      return;
+    }
+  };
   
   // Tasks State
   const [tasks, setTasks] = useState([
@@ -357,7 +526,7 @@ export default function NSGClarity() {
       title: "Morning Clarity",
       status: "Completado",
       color: "emerald" as const,
-      desc: "Definición de intención estratégica.",
+      desc: telegramData?.daily_checking_in?.morning || "Definición de intención estratégica.",
       locked: false,
       isChecked: true
     },
@@ -367,7 +536,7 @@ export default function NSGClarity() {
       title: "Power Check",
       status: "Pendiente",
       color: "blue" as const,
-      desc: "Recalibración de medio día.",
+      desc: telegramData?.daily_checking_in?.noon || "Recalibración de medio día.",
       locked: false,
       isChecked: false
     },
@@ -377,7 +546,7 @@ export default function NSGClarity() {
       title: "Next Day Planning",
       status: "Bloqueado",
       color: "violet" as const, // UPDATED: More attractive 'violet'
-      desc: "Diseño del éxito para mañana.",
+      desc: telegramData?.daily_checking_in?.night || "Diseño del éxito para mañana.",
       locked: false, 
       isChecked: false
     }
@@ -451,20 +620,15 @@ export default function NSGClarity() {
 
   return (
     <div className="max-w-7xl mx-auto h-full flex flex-col animate-fade-in-up pb-10">
-        <style jsx>{`
-            @keyframes flash {
-                0% { opacity: 0.5; }
-                100% { opacity: 0; }
-            }
-        `}</style>
-      
-
-
       {/* 1. Header Section */}
       <div className="mb-8 flex flex-col md:flex-row justify-between items-center gap-8">
         <div className="flex-1">
-          <div className="flex flex-wrap items-center gap-4 mb-3">
-            <div className="w-12 h-12 bg-navy-950 rounded-2xl flex items-center justify-center shadow-lg transform transition hover:scale-105 hover:shadow-blue-900/20">
+          <div 
+            onClick={() => syncObjectives(true)} 
+            className="flex flex-wrap items-center gap-4 mb-3 cursor-pointer group/header hover:opacity-80 transition-opacity"
+            title="Clic para sincronizar objetivos"
+          >
+            <div className="w-12 h-12 bg-navy-950 rounded-2xl flex items-center justify-center shadow-lg transform transition group-hover/header:rotate-12 hover:shadow-blue-900/20">
               <Target className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -481,24 +645,60 @@ export default function NSGClarity() {
           </p>
         </div>
 
-        {/* Next Session Card */}
-        <div className="w-full md:w-auto">
-          <div className="bg-navy-950 rounded-2xl p-5 text-white shadow-2xl flex items-center gap-6 min-w-[280px] relative overflow-hidden group hover:scale-[1.02] transition cursor-pointer">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 opacity-50 animate-pulse-slow"></div>
-            <div className="relative z-10 text-right flex-1">
-              <p className="text-[0.6rem] font-bold text-blue-300 uppercase tracking-widest mb-0.5">
-                Próxima Sesión
-              </p>
-              <div className="flex items-baseline justify-end gap-1">
-                <span className="text-3xl font-display font-bold">08:00</span>
-                <span className="text-xs font-bold text-blue-400">PM</span>
+        {/* Integration Hub - Connected State */}
+        <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+            {/* Telegram Button */}
+            <button 
+              onClick={() => handleConnect("Telegram")}
+              disabled={telegramId !== null}
+              className={clsx(
+                "flex-1 sm:flex-none group relative flex items-center gap-4 px-6 py-4 bg-white border rounded-[2rem] shadow-sm transition-all duration-500 min-w-[200px]",
+                telegramId ? "border-emerald-100 bg-emerald-50/30 cursor-not-allowed opacity-75" : "border-slate-200 hover:shadow-md hover:border-blue-200 cursor-pointer"
+              )}
+            >
+              <div className={clsx(
+                "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300",
+                telegramId ? "bg-emerald-500 text-white" : "bg-[#0088cc]/10 text-[#0088cc] group-hover:bg-[#0088cc] group-hover:text-white"
+              )}>
+                  {telegramId ? (
+                    <CheckCircle className="w-5 h-5" />
+                  ) : (
+                    <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11.944 0C5.352 0 0 5.352 0 11.944c0 6.592 5.352 11.944 11.944 11.944c6.592 0 11.944-5.352 11.944-11.944C23.888 5.352 18.536 0 11.944 0zm5.66 8.16l-1.928 9.096c-.144.644-.528.804-1.068.5l-2.936-2.164l-1.416 1.364c-.156.156-.288.288-.588.288l.212-3.04l5.524-4.992c.24-.212-.052-.332-.372-.12l-6.828 4.3l-2.948-.92c-.64-.2-.652-.64.132-.948l11.524-4.44c.532-.2.996.12.804.976z"/>
+                    </svg>
+                  )}
               </div>
-            </div>
-            <div className="relative z-10 w-12 h-12 rounded-full border-2 border-blue-500/30 flex items-center justify-center shrink-0 group-hover:border-blue-400 transition-colors">
-              <div className="w-12 h-12 border-2 border-t-blue-400 border-transparent rounded-full animate-spin-slow absolute inset-0"></div>
-              <div className="w-2 h-2 bg-white rounded-full shadow-[0_0_15px_white]"></div>
-            </div>
-          </div>
+              <div className="text-left">
+                <p className="text-[0.6rem] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Status</p>
+                <p className="text-sm font-bold text-navy-900">{telegramId ? "Telegram Conectado" : "Conectar Telegram"}</p>
+              </div>
+            </button>
+
+            {/* Google Calendar Button */}
+            <button 
+              onClick={() => handleConnect("Calendar")}
+              className={clsx(
+                "flex-1 sm:flex-none group relative flex items-center gap-4 px-6 py-4 bg-white border rounded-[2rem] shadow-sm transition-all duration-500 cursor-pointer min-w-[200px]",
+                isConnected ? "border-red-100 bg-red-50/10 hover:bg-red-50/20" : "border-slate-200 hover:shadow-md hover:border-blue-200"
+              )}
+            >
+              <div className={clsx(
+                "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300",
+                isConnected ? "bg-white border border-red-200" : "bg-white border border-slate-100 group-hover:border-blue-200"
+              )}>
+                 {isConnected ? (
+                    <LogOut className="w-5 h-5 text-red-500" />
+                 ) : (
+                    <div className="w-5 h-5 flex items-center justify-center">
+                        <svg viewBox="0 0 24 24" className="w-full h-full"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/><path d="M1 1h22v22H1z" fill="none"/></svg>
+                    </div>
+                 )}
+              </div>
+              <div className="text-left">
+                <p className={clsx("text-[0.6rem] font-bold uppercase tracking-widest leading-none mb-1", isConnected ? "text-red-400" : "text-slate-400")}>Google</p>
+                <p className={clsx("text-sm font-bold", isConnected ? "text-red-600" : "text-navy-900")}>{isConnected ? "Desconectar Calendar" : "Conectar Calendar"}</p>
+              </div>
+            </button>
         </div>
       </div>
 
