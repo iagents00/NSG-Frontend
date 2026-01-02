@@ -15,6 +15,9 @@ module.exports = {
         display: ['-apple-system', 'BlinkMacSystemFont', 'var(--font-inter)', 'ui-sans-serif', 'system-ui', 'sans-serif', "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"],
         mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'var(--font-mono)', 'monospace'],
       },
+      spacing: {
+        '4.5': '1.125rem',
+      },
       colors: {
         navy: { 950: '#020617', 900: '#0B1121', 850: '#111827', 800: '#1f2937' },
         slate: { 850: '#1e293b', 900: '#0f172a' },
