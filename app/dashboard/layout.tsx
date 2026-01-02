@@ -14,36 +14,36 @@ export default function DashboardLayout({
   const { isDayDetailOpen, closeDayDetail } = useUIStore();
 
   return (
-    <div className="flex h-screen bg-navy-950 overflow-hidden">
-      
+    <div className="flex h-screen bg-slate-50 overflow-hidden">
+
       {/* 1. Sidebar (Fixed or Slide-out) */}
       <Sidebar />
 
       {/* 2. Main Content Wrapper */}
       <main className="flex-1 flex flex-col relative overflow-hidden w-full h-full">
-        
+
         {/* Header */}
         <TopNav />
 
         {/* Dynamic Page Content */}
-        <div id="workspace-content" className="flex-1 overflow-y-auto custom-scroll safe-bottom-scroll scroll-smooth w-full">
-           {children}
+        <div id="workspace-content" className="flex-1 overflow-y-auto custom-scroll safe-bottom-scroll scroll-smooth w-full px-4 sm:px-6 lg:px-10 py-6 lg:py-8">
+          {children}
         </div>
 
       </main>
 
       {/* 3. Global Modals (Overlaying everything) */}
       <AIModal />
-      
+
       {/* 4. Day Detail Panel (Slide Over) */}
       <DayDetailPanel />
-      
+
       {/* Backdrop for Day Detail Panel */}
-      <div 
+      <div
         className={clsx(
           "fixed inset-0 bg-navy-950/20 z-105 backdrop-blur-sm transition-opacity",
           isDayDetailOpen ? "opacity-100 block" : "opacity-0 hidden pointer-events-none"
-        )} 
+        )}
         onClick={closeDayDetail}
       />
     </div>

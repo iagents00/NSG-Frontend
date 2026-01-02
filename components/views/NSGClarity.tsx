@@ -627,7 +627,7 @@ export default function NSGClarity() {
   return (
     <div className="max-w-7xl mx-auto h-full flex flex-col animate-fade-in-up pb-10">
       {/* 1. Header Section */}
-      <div className="mb-6 sm:mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 sm:gap-8 px-4 sm:px-0">
+      <div className="mb-6 sm:mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 sm:gap-8">
         <div className="flex-1 w-full">
           <div
             onClick={() => syncObjectives(true)}

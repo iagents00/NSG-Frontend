@@ -53,7 +53,7 @@ export default function NSGNews() {
   };
 
   return (
-    <div className="max-w-[1400px] mx-auto animate-fade-in-up flex flex-col px-6 pt-6 gap-6 min-h-screen">
+    <div className="max-w-[1400px] mx-auto animate-fade-in-up flex flex-col gap-6 min-h-screen">
 
       {/* 1. Featured Hero */}
       <div className="w-full relative group cursor-pointer shrink-0">
@@ -79,7 +79,7 @@ export default function NSGNews() {
       </div>
 
       {/* 2. Main Navigation Tabs - STICKY TOP */}
-      <div className="sticky top-0 z-50 bg-slate-50/80 backdrop-blur-xl py-3 -mx-6 px-6">
+      <div className="sticky top-0 z-50 bg-slate-50/80 backdrop-blur-xl py-3 -mx-4 sm:-mx-6 lg:-mx-10 px-4 sm:px-6 lg:px-10">
         <div className="flex justify-center">
           <div className="flex p-1 bg-slate-200/50 backdrop-blur-md rounded-xl border border-slate-200/60 shadow-inner gap-0.5">
             <button
