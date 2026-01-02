@@ -77,5 +77,13 @@ export default function ViewPage({ params }: PageProps) {
     return notFound();
   }
 
-  return <Component />;
+  if (resolvedParams.view === 'nsg_intelligence') {
+    return <Component />;
+  }
+
+  return (
+    <div className="h-full w-full overflow-y-auto custom-scroll relative p-6 lg:p-8">
+      <Component />
+    </div>
+  );
 }

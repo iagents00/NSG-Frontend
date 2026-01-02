@@ -81,7 +81,7 @@ export default function ClinicalRadar() {
              <StatItem label="Eje IV: Psicosocial" value="Estrés Laboral" color="text-blue-500" bg="bg-blue-50" />
              <StatItem label="Eje V: GAF" value="75/100" color="text-indigo-500" bg="bg-indigo-50" />
           </div>
-          <button onClick={() => showToast('Métricas actualizadas', 'success')} className="w-full py-3 bg-navy-950 text-white rounded-xl font-bold hover:bg-blue-700 transition cursor-pointer">
+          <button onClick={() => showToast('Métricas actualizadas', 'success')} className="w-full py-3 bg-slate-50 text-slate-900 rounded-xl font-bold hover:bg-blue-700 transition cursor-pointer">
             Actualizar Métricas
           </button>
         </div>

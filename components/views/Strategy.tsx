@@ -30,7 +30,7 @@ export default function Strategy() {
         <h3 className="font-display font-bold text-2xl text-navy-900">M&A Pipeline</h3>
         <button 
           onClick={() => showToast('Formulario nuevo deal abierto', 'info')} 
-          className="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-blue-500 transition shadow-lg cursor-pointer"
+          className="bg-blue-600 text-slate-900 px-4 py-2 rounded-xl font-bold text-sm hover:bg-blue-500 transition shadow-lg cursor-pointer"
         >
           + Nuevo Deal
         </button>

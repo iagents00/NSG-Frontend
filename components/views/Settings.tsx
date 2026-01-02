@@ -170,7 +170,7 @@ export default function Settings() {
         {/* Profile Section */}
         <div className="flex flex-col sm:flex-row items-center gap-6 mb-10 p-6 bg-slate-50 rounded-[2rem] border border-slate-100">
           <div className="relative group cursor-pointer">
-            <div className="w-24 h-24 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-3xl shadow-lg group-hover:scale-105 transition-transform duration-300">
+            <div className="w-24 h-24 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center text-slate-900 font-bold text-3xl shadow-lg group-hover:scale-105 transition-transform duration-300">
                 <span className="relative z-10">{username ? username.substring(0, 2).toUpperCase() : 'US'}</span>
                 <div className="absolute inset-0 bg-white/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </div>
@@ -185,7 +185,7 @@ export default function Settings() {
             </p>
             <button 
                 onClick={() => showToast('Perfil actualizado', 'success')} 
-                className="text-xs font-bold text-white bg-navy-900 px-4 py-2 rounded-lg hover:bg-blue-600 transition shadow-md flex items-center gap-2 mx-auto sm:mx-0 cursor-pointer"
+                className="text-xs font-bold text-slate-900 bg-white px-4 py-2 rounded-lg hover:bg-blue-600 transition shadow-md flex items-center gap-2 mx-auto sm:mx-0 cursor-pointer"
             >
                 <Edit2 className="w-3 h-3" /> Editar Perfil
             </button>
@@ -258,7 +258,7 @@ export default function Settings() {
             className={clsx(
               "w-full py-4 px-6 rounded-2xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-3 shadow-md",
               selectedFile && !isUploading
-                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-lg hover:scale-[1.02] cursor-pointer'
+                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-slate-900 hover:shadow-lg hover:scale-[1.02] cursor-pointer'
                 : 'bg-slate-100 text-slate-400 cursor-not-allowed'
             )}
           >
@@ -332,15 +332,15 @@ function ToggleItem({ icon: Icon, title, desc, color, active, onClick }: ToggleI
   const styles = {
     blue: {
         container: "hover:border-blue-300",
-        iconBox: "bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white"
+        iconBox: "bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-slate-900"
     },
     purple: {
         container: "hover:border-purple-300",
-        iconBox: "bg-purple-50 text-purple-600 group-hover:bg-purple-600 group-hover:text-white"
+        iconBox: "bg-purple-50 text-purple-600 group-hover:bg-purple-600 group-hover:text-slate-900"
     },
     orange: {
         container: "hover:border-orange-300",
-        iconBox: "bg-orange-50 text-orange-600 group-hover:bg-orange-600 group-hover:text-white"
+        iconBox: "bg-orange-50 text-orange-600 group-hover:bg-orange-600 group-hover:text-slate-900"
     }
   };
 

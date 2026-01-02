@@ -634,8 +634,8 @@ export default function NSGClarity() {
             className="flex flex-wrap items-center gap-4 mb-3 cursor-pointer group/header hover:opacity-80 transition-opacity"
             title="Clic para sincronizar objetivos"
           >
-            <div className="w-12 h-12 bg-navy-950 rounded-2xl flex items-center justify-center shadow-lg transform transition group-hover/header:rotate-12 hover:shadow-blue-900/20">
-              <Target className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lg transform transition group-hover/header:rotate-12 hover:shadow-blue-900/20">
+              <Target className="w-6 h-6 text-blue-600" />
             </div>
             <div>
               <h3 className="font-display font-bold text-3xl lg:text-4xl text-navy-900 tracking-tight leading-none">
@@ -669,7 +669,7 @@ export default function NSGClarity() {
               "w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 relative overflow-hidden",
               telegramId
                 ? "bg-white text-emerald-500 shadow-sm ring-1 ring-emerald-100"
-                : "bg-[#0088cc]/5 text-[#0088cc] group-hover:bg-[#0088cc] group-hover:text-white"
+                : "bg-[#0088cc]/5 text-[#0088cc] group-hover:bg-[#0088cc] group-hover:text-slate-900"
             )}>
               {telegramId && <div className="absolute inset-0 bg-emerald-100/50 animate-pulse"></div>}
               <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current relative z-10" xmlns="http://www.w3.org/2000/svg">
@@ -854,7 +854,7 @@ export default function NSGClarity() {
 
             <button
               onClick={() => showToast("Historial completo no disponible en demo", "info")}
-              className="w-full mt-8 py-3.5 text-xs font-bold text-slate-600 hover:text-white border border-slate-200 hover:border-navy-900 hover:bg-navy-900 rounded-xl transition-all duration-300 shadow-sm flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
+              className="w-full mt-8 py-3.5 text-xs font-bold text-slate-600 hover:text-slate-900 border border-slate-200 hover:border-navy-900 hover:bg-white rounded-xl transition-all duration-300 shadow-sm flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
             >
               Ver Historial Completo <ArrowRight className="w-3 h-3" />
             </button>

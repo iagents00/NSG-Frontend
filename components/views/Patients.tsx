@@ -24,7 +24,7 @@ export default function Patients() {
         <h3 className="font-display font-bold text-2xl text-navy-900">Gestión de Pacientes</h3>
         <button 
           onClick={() => showToast('Añadir paciente...', 'info')} 
-          className="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg hover:bg-blue-500 transition flex items-center gap-2 cursor-pointer"
+          className="bg-blue-600 text-slate-900 px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg hover:bg-blue-500 transition flex items-center gap-2 cursor-pointer"
         >
           <UserPlus className="w-4 h-4" /> Nuevo Ingreso
         </button>
@@ -44,7 +44,7 @@ export default function Patients() {
               <h4 className="font-bold text-navy-900 text-lg">{p.name}</h4>
               <p className="text-sm text-slate-500">{p.diagnosis}</p>
             </div>
-            <button className="w-full py-2 bg-slate-50 text-slate-600 font-bold text-xs rounded-xl hover:bg-navy-900 hover:text-white transition cursor-pointer">
+            <button className="w-full py-2 bg-slate-50 text-slate-600 font-bold text-xs rounded-xl hover:bg-white hover:text-slate-900 transition cursor-pointer">
               Ver Expediente
             </button>
           </div>

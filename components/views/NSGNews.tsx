@@ -101,10 +101,10 @@ export default function NSGNews() {
                      </button>
                       <button 
                         type="submit" 
-                        className="group/btn relative w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all duration-500 transform active:scale-95 cursor-pointer overflow-hidden bg-linear-to-br from-navy-900 to-blue-900 hover:shadow-blue-500/40 hover:scale-105 border border-white/10"
+                        className="group/btn relative w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all duration-500 transform active:scale-95 cursor-pointer overflow-hidden bg-linear-to-br from-navy-900 to-blue-900 hover:shadow-blue-500/40 hover:scale-105 border border-slate-200"
                       >
                           <div className="absolute inset-0 flex items-center justify-center transition-all duration-300 group-hover/btn:opacity-0 group-hover/btn:scale-50">
-                             <ArrowUp className="w-6 h-6 text-white stroke-[3px]" />
+                             <ArrowUp className="w-6 h-6 text-slate-900 stroke-[3px]" />
                           </div>
                           <div className="absolute inset-0 flex items-center justify-center opacity-0 scale-150 transition-all duration-300 group-hover/btn:opacity-100 group-hover/btn:scale-100">
                               <div className="w-8 h-8 relative shrink-0 atom-container pointer-events-none">
