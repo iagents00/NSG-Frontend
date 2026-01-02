@@ -25,12 +25,12 @@ export default function Strategy() {
   };
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="font-display font-bold text-2xl text-navy-900">M&A Pipeline</h3>
-        <button 
-          onClick={() => showToast('Formulario nuevo deal abierto', 'info')} 
-          className="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-blue-500 transition shadow-lg cursor-pointer"
+    <div className="h-full flex flex-col px-4 sm:px-0">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <h3 className="font-display font-bold text-xl sm:text-2xl text-navy-900">M&A Pipeline</h3>
+        <button
+          onClick={() => showToast('Formulario nuevo deal abierto', 'info')}
+          className="w-full sm:w-auto bg-blue-600 text-white px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm hover:bg-blue-500 transition shadow-lg cursor-pointer"
         >
           + Nuevo Deal
         </button>

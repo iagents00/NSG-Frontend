@@ -428,7 +428,7 @@ export default function NSGClarity() {
     }
   }, [telegramId]);
 
-  // Update tasks when telegramData changes
+  // Update tasks when telegramData changesw
   useEffect(() => {
     if (telegramData) {
       setTasks(prev => prev.map(task => {
@@ -627,70 +627,69 @@ export default function NSGClarity() {
   return (
     <div className="max-w-7xl mx-auto h-full flex flex-col animate-fade-in-up pb-10">
       {/* 1. Header Section */}
-      <div className="mb-8 flex flex-col md:flex-row justify-between items-center gap-8">
-        <div className="flex-1">
+      <div className="mb-6 sm:mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 sm:gap-8 px-4 sm:px-0">
+        <div className="flex-1 w-full">
           <div
             onClick={() => syncObjectives(true)}
-            className="flex flex-wrap items-center gap-4 mb-3 cursor-pointer group/header hover:opacity-80 transition-opacity"
+            className="flex flex-row items-center gap-3 sm:gap-4 mb-3 cursor-pointer group/header hover:opacity-80 transition-opacity"
             title="Clic para sincronizar objetivos"
           >
-            <div className="w-12 h-12 bg-navy-950 rounded-2xl flex items-center justify-center shadow-lg transform transition group-hover/header:rotate-12 hover:shadow-blue-900/20">
-              <Target className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-navy-950 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg transform transition group-hover/header:rotate-12 hover:shadow-blue-900/20 shrink-0">
+              <Target className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
-            <div>
-              <h3 className="font-display font-bold text-3xl lg:text-4xl text-navy-900 tracking-tight leading-none">
+            <div className="overflow-hidden">
+              <h3 className="font-display font-bold text-2xl sm:text-3xl lg:text-4xl text-navy-900 tracking-tight leading-none truncate">
                 NSG Clarity
               </h3>
-              <p className="text-[0.65rem] font-bold text-blue-600 uppercase tracking-widest mt-1">
+              <p className="text-[0.55rem] sm:text-[0.65rem] font-bold text-blue-600 uppercase tracking-widest mt-1 truncate">
                 Strategic Alignment Protocol
               </p>
             </div>
           </div>
-          <p className="text-slate-500 max-w-md text-sm lg:text-base leading-relaxed font-medium mt-2">
+          <p className="text-slate-500 max-w-md text-xs sm:text-sm lg:text-base leading-relaxed font-medium mt-2">
             Sincronización neuronal activa. Tu ecosistema de productividad circadiana conectado en tiempo real.
           </p>
         </div>
 
         {/* Integration Hub - Connected State */}
-        <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
-          {/* Telegram Button */}
+        <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full md:w-auto">
           {/* Telegram Button */}
           <button
             onClick={() => handleConnect("Telegram")}
             disabled={telegramId !== null}
             className={clsx(
-              "flex-1 sm:flex-none group relative flex items-center gap-3 px-5 py-2.5 border rounded-[2rem] transition-all duration-500 min-w-[170px]",
+              "w-full sm:w-auto group relative flex items-center gap-3 px-4 sm:px-5 py-2 sm:py-2.5 border rounded-2xl sm:rounded-[2rem] transition-all duration-500",
               telegramId
-                ? "bg-emerald-50/60 border-emerald-200 shadow-[0_4px_20px_-10px_rgba(16,185,129,0.3)] cursor-default"
+                ? "bg-emerald-50/60 border-emerald-200 shadow-sm cursor-default"
                 : "bg-white border-slate-200 hover:shadow-md hover:border-blue-300 cursor-pointer shadow-sm"
             )}
           >
             <div className={clsx(
-              "w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 relative overflow-hidden",
+              "w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center transition-all duration-300 relative overflow-hidden shrink-0",
               telegramId
                 ? "bg-white text-emerald-500 shadow-sm ring-1 ring-emerald-100"
                 : "bg-[#0088cc]/5 text-[#0088cc] group-hover:bg-[#0088cc] group-hover:text-white"
             )}>
               {telegramId && <div className="absolute inset-0 bg-emerald-100/50 animate-pulse"></div>}
-              <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current relative z-10" xmlns="http://www.w3.org/2000/svg">
+              <svg viewBox="0 0 24 24" className="w-4 h-4 sm:w-5 sm:h-5 fill-current relative z-10" xmlns="http://www.w3.org/2000/svg">
                 <path d="M11.944 0C5.352 0 0 5.352 0 11.944c0 6.592 5.352 11.944 11.944 11.944c6.592 0 11.944-5.352 11.944-11.944C23.888 5.352 18.536 0 11.944 0zm5.66 8.16l-1.928 9.096c-.144.644-.528.804-1.068.5l-2.936-2.164l-1.416 1.364c-.156.156-.288.288-.588.288l.212-3.04l5.524-4.992c.24-.212-.052-.332-.372-.12l-6.828 4.3l-2.948-.92c-.64-.2-.652-.64.132-.948l11.524-4.44c.532-.2.996.12.804.976z" />
               </svg>
             </div>
-            <div className="text-left relative">
+            <div className="text-left overflow-hidden">
               <p className={clsx(
-                "text-[0.55rem] font-bold uppercase tracking-widest leading-none mb-0.5 transition-colors",
+                "text-[0.5rem] sm:text-[0.55rem] font-bold uppercase tracking-widest leading-none mb-0.5 transition-colors truncate",
                 telegramId ? "text-emerald-600/70" : "text-slate-400"
               )}>
                 {telegramData?.name ? telegramData.name : "Status"}
               </p>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 overflow-hidden">
                 <p className={clsx(
-                  "text-xs font-bold transition-colors",
+                  "text-xs font-bold transition-colors truncate",
                   telegramId ? "text-emerald-900" : "text-navy-900"
                 )}>
                   {telegramId ? (telegramData?.username ? `@${telegramData.username}` : "Activo") : "Conectar Telegram"}
                 </p>
-                {telegramId && <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>}
+                {telegramId && <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></div>}
               </div>
             </div>
           </button>
@@ -699,23 +698,22 @@ export default function NSGClarity() {
           <button
             onClick={() => handleConnect("Calendar")}
             className={clsx(
-              "flex-1 sm:flex-none group relative flex items-center gap-3 px-5 py-2.5 border rounded-[2rem] transition-all duration-500 cursor-pointer min-w-[170px]",
+              "w-full sm:w-auto group relative flex items-center gap-3 px-4 sm:px-5 py-2 sm:py-2.5 border rounded-2xl sm:rounded-[2rem] transition-all duration-500 cursor-pointer shadow-sm",
               isConnected
-                ? "bg-gradient-to-br from-white to-blue-50/50 border-blue-200 shadow-[0_4px_20px_-10px_rgba(59,130,246,0.2)] hover:border-red-200 hover:bg-red-50/30 hover:shadow-red-500/10"
-                : "bg-white border-slate-200 hover:shadow-md hover:border-blue-200 shadow-sm"
+                ? "bg-white border-blue-200 hover:border-red-200"
+                : "bg-white border-slate-200 hover:shadow-md hover:border-blue-200"
             )}
           >
             <div className={clsx(
-              "w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 shadow-sm border relative",
+              "w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center transition-all duration-300 shadow-sm border relative shrink-0",
               isConnected ? "bg-white border-blue-100 group-hover:border-red-100" : "bg-white border-slate-100 group-hover:border-blue-200"
             )}>
               <div className={clsx(
-                "w-5 h-5 flex items-center justify-center transition-opacity duration-300",
+                "w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center transition-opacity duration-300",
                 isConnected ? "group-hover:opacity-20" : ""
               )}>
                 <svg viewBox="0 0 24 24" className="w-full h-full"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" /><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" /><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" /><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" /><path d="M1 1h22v22H1z" fill="none" /></svg>
               </div>
-              {/* Disconnect Icon on Hover */}
               {isConnected && (
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <LogOut className="w-4 h-4 text-red-500" />
@@ -723,16 +721,15 @@ export default function NSGClarity() {
               )}
             </div>
 
-            <div className="text-left">
+            <div className="text-left overflow-hidden">
               <p className={clsx(
-                "text-[0.55rem] font-bold uppercase tracking-widest leading-none mb-0.5 transition-colors",
+                "text-[0.5rem] sm:text-[0.55rem] font-bold uppercase tracking-widest leading-none mb-0.5 transition-colors truncate",
                 isConnected ? "text-blue-500/80 group-hover:text-red-400" : "text-slate-400"
               )}>Google</p>
 
-              {/* Text Swap Effect */}
               <div className="relative h-4 w-28 overflow-hidden">
                 <p className={clsx(
-                  "text-xs font-bold whitespace-nowrap transition-all duration-300 absolute top-0 left-0",
+                  "text-xs font-bold whitespace-nowrap transition-all duration-300 absolute top-0 left-0 truncate",
                   isConnected
                     ? "text-blue-900 group-hover:-translate-y-full group-hover:opacity-0"
                     : "text-navy-900"

@@ -16,25 +16,25 @@ export default function Wellness() {
         type: 'line',
         data: {
           labels: ['L', 'M', 'M', 'J', 'V', 'S', 'D'],
-          datasets: [{ 
-            label: 'Nivel Energía', 
-            data: [70, 75, 60, 80, 85, 90, 88], 
-            borderColor: '#10B981', 
-            backgroundColor: 'rgba(16, 185, 129, 0.1)', 
-            tension: 0.4, 
-            fill: true, 
-            pointRadius: 4, 
-            borderWidth: 3 
+          datasets: [{
+            label: 'Nivel Energía',
+            data: [70, 75, 60, 80, 85, 90, 88],
+            borderColor: '#10B981',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            tension: 0.4,
+            fill: true,
+            pointRadius: 4,
+            borderWidth: 3
           }]
         },
-        options: { 
-          responsive: true, 
-          maintainAspectRatio: false, 
-          plugins: { legend: { display: false } }, 
-          scales: { 
-            y: { display: false, min: 0, max: 100 }, 
-            x: { grid: { display: false } } 
-          } 
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { display: false, min: 0, max: 100 },
+            x: { grid: { display: false } }
+          }
         }
       });
     }
@@ -46,24 +46,24 @@ export default function Wellness() {
   return (
     <div className="max-w-4xl mx-auto animate-fade-in-up pb-10">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-        
+
         {/* Sleep Ring (SVG) */}
-        <div className="bg-white p-8 rounded-[2.5rem] shadow-card border border-slate-200 flex flex-col items-center justify-center text-center">
-          <div className="w-48 h-48 relative mb-6">
+        <div className="bg-white p-6 sm:p-8 rounded-2xl sm:rounded-[2.5rem] shadow-card border border-slate-200 flex flex-col items-center justify-center text-center">
+          <div className="w-32 h-32 sm:w-48 sm:h-48 relative mb-4 sm:mb-6">
             <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
-              <circle cx="50" cy="50" r="45" stroke="#F1F5F9" strokeWidth="8" fill="none"/>
-              <circle cx="50" cy="50" r="45" stroke="#10B981" strokeWidth="8" fill="none" strokeDasharray="283" strokeDashoffset="70" strokeLinecap="round"/>
+              <circle cx="50" cy="50" r="45" stroke="#F1F5F9" strokeWidth="8" fill="none" />
+              <circle cx="50" cy="50" r="45" stroke="#10B981" strokeWidth="8" fill="none" strokeDasharray="283" strokeDashoffset="70" strokeLinecap="round" />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-4xl font-display font-extrabold text-navy-900">85</span>
-              <span className="text-xs font-bold text-slate-400 uppercase">Sleep Score</span>
+              <span className="text-2xl sm:text-4xl font-display font-extrabold text-navy-900">85</span>
+              <span className="text-[0.6rem] sm:text-xs font-bold text-slate-400 uppercase">Sleep Score</span>
             </div>
           </div>
-          <p className="text-slate-600 font-medium">Calidad de sueño óptima. Recuperación profunda detectada.</p>
+          <p className="text-xs sm:text-sm text-slate-600 font-medium px-4">Calidad de sueño óptima. Recuperación profunda detectada.</p>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
           <SmallCard title="HRV" value="42ms" icon={Heart} bgClass="bg-red-50 text-red-600" />
           <SmallCard title="Pasos" value="8,240" icon={Footprints} bgClass="bg-blue-50 text-blue-600" />
           <SmallCard title="Calorías" value="2,100" icon={Flame} bgClass="bg-orange-50 text-orange-600" />
@@ -82,7 +82,7 @@ export default function Wellness() {
   );
 }
 
-function SmallCard({ title, value, icon: Icon, bgClass }: { title: string, value: string, icon: React.ElementType, bgClass: string }) {
+function SmallCard({ title, value, icon: Icon, bgClass }: { title: string, value: string, icon: React.ElementType, bgClass: string; }) {
   return (
     <div className="bg-white p-5 rounded-[1.5rem] shadow-sm border border-slate-100 flex items-center justify-between">
       <div className="flex flex-col">
