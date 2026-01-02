@@ -99,12 +99,12 @@ export default function TopNav() {
           )}
         </div>
 
-        {/* AI Trigger Button */}
+        {/* NSG Intelligence AI Trigger Button */}
         <button
           onClick={toggleAI}
-          className="group flex items-center justify-center gap-2 sm:gap-3 bg-navy-950 text-white px-3 sm:pl-4 sm:pr-6 py-2 sm:py-2.5 rounded-full text-[0.7rem] sm:text-xs font-bold shadow-2xl hover:bg-navy-900 transition-all border border-navy-800 relative overflow-hidden shrink-0"
+          className="group flex items-center justify-center gap-2 sm:gap-3 bg-navy-950 text-white px-3 sm:pl-4 sm:pr-6 py-2 sm:py-2.5 rounded-full text-[0.7rem] sm:text-xs font-bold shadow-2xl hover:bg-navy-900 transition-all border border-navy-800 relative overflow-hidden shrink-0 cursor-pointer"
         >
-          <div className="w-4 h-4 sm:w-5 sm:h-5 relative shrink-0 atom-container">
+          <div className="w-5 h-5 relative shrink-0 atom-container">
             <div className="w-full h-full atom-breathe">
               <svg
                 viewBox="0 0 100 100"
@@ -112,17 +112,16 @@ export default function TopNav() {
                 fill="none"
                 strokeWidth="4"
               >
-                <circle cx="50" cy="50" r="42" stroke="currentColor" />
-                <circle cx="50" cy="50" r="42" stroke="currentColor" style={{ transform: 'rotate(60deg) scaleY(0.4)' }} />
-                <circle cx="50" cy="50" r="42" stroke="currentColor" style={{ transform: 'rotate(120deg) scaleY(0.4)' }} />
+                <circle cx="50" cy="50" r="42" stroke="currentColor" className="morph-orbit orbit-1 ui-orbit" />
+                <circle cx="50" cy="50" r="42" stroke="currentColor" className="morph-orbit orbit-2 ui-orbit" />
+                <circle cx="50" cy="50" r="42" stroke="currentColor" className="morph-orbit orbit-3 ui-orbit" />
                 <circle cx="50" cy="50" r="14" fill="white" />
               </svg>
             </div>
           </div>
-          <span className="hidden xs:inline tracking-tight">
+          <span className="tracking-tight">
             NSG Intelligence
           </span>
-          <span className="xs:hidden">IA</span>
         </button>
       </div>
     </header>
