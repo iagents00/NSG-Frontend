@@ -586,7 +586,6 @@ export default function NSGHorizon() {
           <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-900 shrink-0 shadow-lg hidden sm:flex">
             <Layers className="w-7 h-7" />
           </div>
-          </div>
           <div className="overflow-hidden">
             <h3 className="font-display font-bold text-lg sm:text-2xl text-navy-900 truncate">{selectedFolder.title}</h3>
             <p className="text-[0.65rem] sm:text-sm text-slate-500 font-medium flex items-center gap-2 truncate">

@@ -11,6 +11,7 @@ const Views: Record<string, any> = {
   // Main System
   nsg_intelligence: dynamic(() => import("@/components/views/NSGIntelligence")),
   
+  // Force rebuild
   // Modules
   nsg_news: dynamic(() => import("@/components/views/NSGNews")),
   nsg_clarity: dynamic(() => import("@/components/views/NSGClarity")),
