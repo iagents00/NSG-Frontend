@@ -469,7 +469,7 @@
                     { id: 'nsg_clarity', label: 'NSG Clarity', icon: 'target' },
                     { id: 'nsg_news', label: 'NSG News', icon: 'newspaper' },
                     { id: 'nsg_horizon', label: 'NSG Horizon', icon: 'sunrise' },
-                    { id: 'portfolio', label: 'Cartera de Activos', icon: 'briefcase' },
+
                     { id: 'calendar', label: 'Agenda Maestra', icon: 'calendar' },
                     { id: 'reports', label: 'Inteligencia de Datos', icon: 'bar-chart-2' },
                     { id: 'settings', label: 'Configuración', icon: 'settings' }
@@ -526,7 +526,7 @@
             if(chartInstance2) { chartInstance2.destroy(); chartInstance2 = null; }
             
             const renderFn = VIEW_RENDERERS[viewId] || VIEW_RENDERERS['nsg_ios'];
-            const titleMap = { nsg_ios: "Core System", calendar: "Agenda Inteligente", nsg_news: "Power Intelligence", nsg_clarity: "Clarity & Focus", strategy: "Pipeline M&A", reports: "Data Center", nsg_horizon: "NSG Horizon", settings: "Configuración", patients: "Gestión Pacientes", library: "Recursos Clínicos", metrics: "P&L Financiero", wellness: "Salud y Biometría", journal: "Diario Reflexivo", tasks: "Gestión de Tareas", portfolio: "Cartera Activa", clinical_radar: "Análisis Multiaxial", deliverables: "Mis Entregables" };
+            const titleMap = { nsg_ios: "Core System", calendar: "Agenda Inteligente", nsg_news: "Power Intelligence", nsg_clarity: "Clarity & Focus", strategy: "Pipeline M&A", reports: "Data Center", nsg_horizon: "NSG Horizon", settings: "Configuración", patients: "Gestión Pacientes", library: "Recursos Clínicos", metrics: "P&L Financiero", wellness: "Salud y Biometría", journal: "Diario Reflexivo", tasks: "Gestión de Tareas", clinical_radar: "Análisis Multiaxial", deliverables: "Mis Entregables" };
             
             document.getElementById('page-subtitle').innerText = titleMap[viewId] || "Vista del Sistema";
             document.getElementById('page-title').innerText = activeBtn ? activeBtn.innerText.trim() : "NSG iOS";

@@ -10,7 +10,7 @@ export const CONTEXT = {
             { id: 'nsg_clarity', label: 'NSG Clarity', subtitle: 'Claridad en tus Objetivos', icon: Target },
             { id: 'nsg_news', label: 'NSG News', subtitle: 'Actualidad y Análisis Global', icon: Newspaper },
             { id: 'nsg_horizon', label: 'NSG Horizon', subtitle: 'Planificación y Proyección', icon: Sunrise },
-            { id: 'portfolio', label: 'Cartera de Activos', subtitle: 'Gestión Patrimonial Integral', icon: Briefcase },
+
             { id: 'calendar', label: 'Agenda Maestra', subtitle: 'Cronograma de Actividades', icon: Calendar },
             { id: 'reports', label: 'Inteligencia de Datos', subtitle: 'Análisis y Reportes', icon: BarChart2 },
             { id: 'settings', label: 'Configuración', subtitle: 'Preferencias del Sistema', icon: Settings }

@@ -34,18 +34,18 @@ export default function AIModal() {
                 damping: 30,
                 mass: 0.8 // Snappy but smooth "Google" feel
               }}
-              className="fixed inset-0 z-120 bg-[#f0f4f9] flex flex-col shadow-2xl overflow-hidden"
+              className="fixed inset-0 z-120 bg-[#F5F5F7]/95 backdrop-blur-3xl flex flex-col shadow-2xl overflow-hidden supports-[backdrop-filter]:bg-[#F5F5F7]/85"
             >
               
-              {/* Header Gradient Overlay */}
-              <div className="absolute top-0 left-0 right-0 h-40 bg-linear-to-b from-[#f0f4f9] via-[#f0f4f9]/90 to-transparent z-30 pointer-events-none" />
+              {/* Header Gradient Overlay - Subtle Ambience */}
+              <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-b from-white/80 via-white/40 to-transparent z-30 pointer-events-none" />
 
               {/* Dynamic Back Button - Responsive & Pro UI */}
               <m.div 
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2, duration: 0.3 }}
-                className="absolute top-4 left-4 md:top-6 md:left-6 z-60"
+                className="absolute top-6 left-6 md:top-8 md:left-8 z-60"
               >
                   <button 
                       onClick={toggleAI} 

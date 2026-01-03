@@ -46,7 +46,7 @@ function LoginContent() {
     setError(null);
     
     try {
-        const data = await authService.login({ email, password });
+        const data = await authService.login({ email: email.toLowerCase(), password });
         
         if (data.token) {
              localStorage.setItem('token', data.token);
@@ -121,7 +121,7 @@ function LoginContent() {
                                         setError(null);
                                     }}
                                     className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400"
-                                    placeholder="Ingresa tu email"
+                                    placeholder="Ingresa tu usuario o email"
                                 />
                             </div>
                         </div>
@@ -164,7 +164,10 @@ function LoginContent() {
                 {/* Register Link */}
                 <div className="mt-8 pt-6 border-t border-slate-100 flex justify-center text-sm">
                     <span className="text-slate-500 mr-1">¿No tienes cuenta?</span>
-                    <a href="/auth/register" className="text-blue-600 font-semibold hover:text-blue-700 transition-colors cursor-pointer">
+                    <a 
+                        href={`/auth/register?role=${selectedRole}`}
+                        className="text-blue-600 font-semibold hover:text-blue-700 transition-colors cursor-pointer"
+                    >
                         Registrarse
                     </a>
                 </div>

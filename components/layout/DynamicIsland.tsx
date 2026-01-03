@@ -5,6 +5,7 @@ import { Activity } from "lucide-react";
 import { CONTEXT, RoleType } from "@/data/context";
 import { Dispatch, SetStateAction, useRef } from "react";
 import clsx from "clsx";
+import { m } from "framer-motion";
 
 // Update Props Interface
 interface DynamicIslandProps {
@@ -30,21 +31,25 @@ export default function DynamicIsland({ currentMode, setMode, selectedModel, set
   ];
 
   return (
-    <div className="relative z-50 flex flex-col items-center justify-center p-4 transition-all duration-500 ease-in-out gap-3" ref={containerRef}>
+    <div className="relative z-50 flex flex-col items-center justify-start pt-0 md:pt-4 transition-all duration-500 ease-out gap-4 md:gap-6 w-full" ref={containerRef}>
       
-      {/* Header Title - Apple Pro Style */}
-      <div className="flex flex-col items-center animate-fade-in mb-1">
-         <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold mb-0.5">System</span>
-         <h2 className="text-lg font-bold text-navy-900 tracking-tight drop-shadow-sm">NSG Intelligence</h2>
+      {/* 1. System Status Indicator (Apple Pro Label) */}
+      <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/50 backdrop-blur-md border border-white/60 shadow-sm animate-fade-in group cursor-default">
+         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+         <span className="text-[10px] font-bold tracking-[0.15em] text-navy-900/70 uppercase font-display group-hover:text-navy-900 transition-colors">
+            System NSG Intelligence
+         </span>
       </div>
 
+      {/* 2. Primary Dynamic Island (Navigation) */}
       <div className="relative flex items-center justify-center w-full max-w-[95vw] md:max-w-3xl mx-auto">
         <div className={clsx(
-            "flex flex-nowrap items-center p-1.5 md:p-2 gap-1.5 md:gap-2 w-full md:w-auto",
-            "bg-[#0F172A] backdrop-blur-xl border border-white/10",
-            "rounded-2xl md:rounded-full shadow-lg shadow-blue-900/10",
-            "overflow-x-auto scrollbar-hide transition-all duration-500",
-            "justify-start" 
+            "flex flex-nowrap items-center p-1.5 gap-1",
+            "bg-[#020617] supports-[backdrop-filter]:bg-[#020617]/90 backdrop-blur-3xl", // Ultra-dark Navy/Black for max contrast
+            "border border-white/10 ring-1 ring-white/5",
+            "rounded-[2rem] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)]", // Reduced, smoother "Pro" shadow
+            "overflow-x-auto scrollbar-hide",
+            "transition-all duration-500 ease-spring"
         )}>
            
            {allItems.map((item) => {
@@ -57,25 +62,20 @@ export default function DynamicIsland({ currentMode, setMode, selectedModel, set
                  key={item.id}
                  onClick={() => setMode(item.id)}
                  className={clsx(
-                    "flex items-center gap-2 px-5 py-2.5 md:px-5 md:py-2.5 rounded-xl md:rounded-full transition-all duration-300 ease-out whitespace-nowrap group relative shrink-0 cursor-pointer",
+                    "flex items-center gap-2.5 px-4 py-2.5 rounded-[1.4rem] transition-all duration-300 ease-out whitespace-nowrap relative shrink-0 cursor-pointer group",
                     isActive 
-                        ? (isSpecial ? "bg-blue-600/10 text-blue-400" : "bg-blue-600/20 text-blue-400 ring-1 ring-blue-500/30") 
-                        : "text-slate-400 hover:text-slate-200 hover:bg-white/5",
-                     (isActive && isSpecial) && "px-6 py-3 md:px-6 md:py-3"
+                        ? "bg-blue-600/20 text-blue-100 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] ring-1 ring-blue-500/30" 
+                        : "text-slate-400 hover:text-white hover:bg-white/5",
+                     (isActive && isSpecial) && "bg-blue-600/30 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)] border border-blue-400/30"
                  )}
                >
                  <Icon className={clsx(
-                   "w-5 h-5 md:w-5 md:h-5 transition-colors shrink-0", 
-                   isActive ? "text-blue-400" : "text-slate-500 group-hover:text-slate-300"
+                   "w-4.5 h-4.5 transition-colors shrink-0", 
+                   isActive ? "text-blue-300" : "text-slate-500 group-hover:text-slate-300"
                  )} />
-                 <span className="text-[14px] md:text-[14px] font-semibold tracking-wide">
+                 <span className="text-[13px] font-medium tracking-wide">
                    {item.label}
                  </span>
-                 
-                 {/* Subtle Active Glow Effect */}
-                 {isActive && !isSpecial && (
-                    <div className="absolute inset-0 rounded-xl md:rounded-full bg-blue-400/5 blur-md pointer-events-none" />
-                 )}
                </button>
              );
            })}
@@ -83,9 +83,9 @@ export default function DynamicIsland({ currentMode, setMode, selectedModel, set
         </div>
       </div>
 
-      {/* --- SECONDARY LAYER: AI MODEL SELECTOR --- */}
+      {/* 3. Secondary Intelligence Selector (Glass Pill) */}
       {setSelectedModel && selectedModel && (
-        <div className="animate-fade-in-up flex items-center justify-center gap-1 bg-white/80 backdrop-blur-md border border-white/20 p-1.5 rounded-full shadow-sm hover:shadow-md transition-all duration-300">
+        <div className="animate-fade-in-up flex items-center justify-center p-1 rounded-full bg-white/60 backdrop-blur-xl border border-white/40 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 transform">
              {['Chat GPT', 'Gemini', 'Claude'].map((model) => {
                  const isModelActive = selectedModel === model;
                  return (
@@ -93,14 +93,26 @@ export default function DynamicIsland({ currentMode, setMode, selectedModel, set
                         key={model}
                         onClick={() => setSelectedModel(model)}
                         className={clsx(
-                            "px-5 py-2 rounded-full text-[13px] font-medium transition-all duration-200 flex items-center gap-1.5",
+                            "px-4 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 flex items-center gap-2 cursor-pointer relative overflow-hidden",
                             isModelActive 
-                                ? "bg-white text-[#0b57d0] shadow-sm ring-1 ring-slate-100" 
-                                : "text-slate-500 hover:bg-slate-100/50 hover:text-slate-700"
+                                ? "text-slate-900 bg-white shadow-sm ring-1 ring-black/5" 
+                                : "text-slate-500 hover:text-slate-800 hover:bg-slate-100/50"
                         )}
                     >
-                        {/* Dot Indicator */}
-                        <div className={clsx("w-1.5 h-1.5 rounded-full transition-colors", isModelActive ? "bg-[#0b57d0]" : "bg-slate-300")} />
+                        {isModelActive && (
+                            <m.div 
+                                layoutId="activeModelIndicator"
+                                className="absolute inset-0 bg-white rounded-full z-[-1]"
+                                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                            />
+                        )}
+                        
+                        {/* Status Dot */}
+                        <div className={clsx(
+                            "w-1.5 h-1.5 rounded-full transition-colors", 
+                            isModelActive ? "bg-blue-600 scale-110" : "bg-slate-300"
+                        )} />
+                        
                         {model}
                     </button>
                  );

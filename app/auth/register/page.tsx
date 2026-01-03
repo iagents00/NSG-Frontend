@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, Suspense } from 'react';
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import BrandAtom from "@/components/ui/BrandAtom";
 import { Lock, ChevronLeft, User, Mail, ArrowRight } from "lucide-react";
 import Link from 'next/link';
@@ -10,6 +10,8 @@ import { useAppStore } from '@/store/useAppStore';
 
 function RegisterContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const role = searchParams.get('role');
   const [isAnimating, setIsAnimating] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -170,7 +172,7 @@ function RegisterContent() {
 
                     <div className="flex items-center justify-between pt-4">
                         <Link 
-                            href="/auth/login"
+                            href={`/auth/login?role=${role || 'clinic_owner'}`}
                             className="text-slate-500 hover:text-slate-800 text-sm font-medium transition-colors flex items-center gap-1 pl-1 cursor-pointer"
                         >
                             <ChevronLeft className="w-4 h-4" /> Volver
