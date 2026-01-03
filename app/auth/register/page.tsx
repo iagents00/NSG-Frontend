@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, Suspense } from 'react';
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import BrandAtom from "@/components/ui/BrandAtom";
 import { Lock, ChevronLeft, User, Mail, ArrowRight } from "lucide-react";
 import Link from 'next/link';
@@ -10,6 +10,8 @@ import { useAppStore } from '@/store/useAppStore';
 
 function RegisterContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const role = searchParams.get('role');
   const [isAnimating, setIsAnimating] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -116,6 +118,7 @@ function RegisterContent() {
                 </div>
               </div>
 
+<<<<<<< HEAD
               {/* Email */}
               <div className="space-y-2">
                 <label className="text-xs font-bold text-slate-500 ml-1 uppercase tracking-wider">Correo Profesional</label>
@@ -129,6 +132,92 @@ function RegisterContent() {
                     className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400"
                     placeholder="usuario@empresa.com"
                   />
+=======
+            {/* Register Form */}
+            <div className="w-full relative">
+                <div className="space-y-5">
+                    
+                    {/* Name */}
+                     <div className="space-y-2">
+                        <label className="text-xs font-bold text-slate-500 ml-1 uppercase tracking-wider">Nombre de Usuario</label>
+                        <div className="relative group">
+                            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                            <input 
+                                type="text"
+                                name="name"
+                                value={formData.name}
+                                onChange={handleChange}
+                                className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400"
+                                placeholder="Ej. Juan Pérez"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Email */}
+                    <div className="space-y-2">
+                        <label className="text-xs font-bold text-slate-500 ml-1 uppercase tracking-wider">Correo Profesional</label>
+                        <div className="relative group">
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                            <input 
+                                type="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleChange}
+                                className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400"
+                                placeholder="usuario@empresa.com"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Password */}
+                    <div className="space-y-5">
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold text-slate-500 ml-1 uppercase tracking-wider">Contraseña</label>
+                            <div className="relative group">
+                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                                <input 
+                                    type="password"
+                                    name="password"
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400"
+                                    placeholder="••••••••"
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-2" hidden>
+                            <label className="text-xs font-bold text-slate-500 ml-1 uppercase tracking-wider">Confirmar</label>
+                            <div className="relative group">
+                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                                <input 
+                                    type="password"
+                                    name="confirmPassword"
+                                    value={formData.confirmPassword}
+                                    onChange={handleChange}
+                                    className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400"
+                                    placeholder="••••••••"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-4">
+                        <Link 
+                            href={`/auth/login?role=${role || 'clinic_owner'}`}
+                            className="text-slate-500 hover:text-slate-800 text-sm font-medium transition-colors flex items-center gap-1 pl-1 cursor-pointer"
+                        >
+                            <ChevronLeft className="w-4 h-4" /> Volver
+                        </Link>
+                        <button 
+                            onClick={handleRegister}
+                            disabled={isAnimating}
+                            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 px-6 rounded-xl shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+                        >
+                            {isAnimating ? "Creando..." : "Registrarse"}
+                            {!isAnimating && <ArrowRight className="w-4 h-4" />}
+                        </button>
+                    </div>
+>>>>>>> 4da6b8c929bf31ac2743586204de22d6928b6763
                 </div>
               </div>
 

@@ -311,6 +311,7 @@ export default function NSGClarity() {
 
   return (
     <div className="max-w-7xl mx-auto h-full flex flex-col animate-fade-in-up pb-10">
+<<<<<<< HEAD
       {/* 1. HERO BANNER */}
       <div className="w-full relative group cursor-pointer mb-6 shrink-0">
         <div className="relative w-full h-[180px] rounded-[2rem] overflow-hidden shadow-2xl border border-white/10 transition-all duration-700 hover:shadow-[0_20px_60px_rgba(0,0,0,0.4)]">
@@ -321,6 +322,26 @@ export default function NSGClarity() {
           <div className="absolute inset-0 flex flex-col justify-center p-8 sm:px-12">
             <div className="overflow-hidden mb-3">
               <span className="inline-block px-3 py-1 bg-blue-500/20 backdrop-blur-xl border border-blue-400/30 text-blue-200 text-[0.6rem] font-bold uppercase tracking-[0.25em] rounded-lg">Protocolo de Alineación • Sistema Activo</span>
+=======
+      {/* 1. Header Section */}
+      <div className="mb-6 sm:mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 sm:gap-8">
+        <div className="flex-1 w-full">
+          <div
+            onClick={() => syncObjectives(true)}
+            className="flex flex-row items-center gap-3 sm:gap-4 mb-3 cursor-pointer group/header hover:opacity-80 transition-opacity"
+            title="Clic para sincronizar objetivos"
+          >
+            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lg transform transition group-hover/header:rotate-12 hover:shadow-blue-900/20">
+              <Target className="w-6 h-6 text-blue-600" />
+            </div>
+            <div className="overflow-hidden">
+              <h3 className="font-display font-bold text-2xl sm:text-3xl lg:text-4xl text-navy-900 tracking-tight leading-none truncate">
+                NSG Clarity
+              </h3>
+              <p className="text-[0.55rem] sm:text-[0.65rem] font-bold text-blue-600 uppercase tracking-widest mt-1 truncate">
+                Strategic Alignment Protocol
+              </p>
+>>>>>>> 4da6b8c929bf31ac2743586204de22d6928b6763
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-display font-medium text-white mb-4 leading-tight tracking-tight">Diseño de <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-emerald-400 font-bold">Claridad Estratégica.</span></h2>
             <p className="text-slate-300 text-sm sm:text-base lg:text-lg leading-relaxed font-medium max-w-2xl translate-y-1">Sincronización neuronal activa diseñada para la precisión máxima y el alto rendimiento continuo. Protocolo de alineación estratégica ejecutándose.</p>
@@ -328,6 +349,7 @@ export default function NSGClarity() {
         </div>
       </div>
 
+<<<<<<< HEAD
       {/* 2. INTEGRATION BAR */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8 bg-white/50 backdrop-blur-sm p-4 rounded-2xl border border-slate-200/60 shadow-sm transition-all hover:bg-white/60">
         <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 rounded-lg border border-slate-200">
@@ -339,6 +361,31 @@ export default function NSGClarity() {
           <button onClick={() => handleConnect("Telegram")} className={clsx("flex items-center gap-3 px-4 py-2 rounded-xl border transition-all duration-300 shadow-sm active:scale-95", telegramId ? "bg-emerald-50 border-emerald-200 text-emerald-700" : "bg-white border-slate-200 text-slate-600 hover:border-blue-300 hover:bg-slate-50")}>
             <div className={clsx("w-6 h-6 rounded-lg flex items-center justify-center", telegramId ? "bg-emerald-500 text-white" : "bg-blue-500 text-white")}>
               <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-current" xmlns="http://www.w3.org/2000/svg"><path d="M11.944 0C5.352 0 0 5.352 0 11.944c0 6.592 5.352 11.944 11.944 11.944c6.592 0 11.944-5.352 11.944-11.944C23.888 5.352 18.536 0 11.944 0zm5.66 8.16l-1.928 9.096c-.144.644-.528.804-1.068.5l-2.936-2.164l-1.416 1.364c-.156.156-.288.288-.588.288l.212-3.04l5.524-4.992c.24-.212-.052-.332-.372-.12l-6.828 4.3l-2.948-.92c-.64-.2-.652-.64.132-.948l11.524-4.44c.532-.2.996.12.804.976z" /></svg>
+=======
+        {/* Integration Hub - Connected State */}
+        <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full md:w-auto">
+          {/* Telegram Button */}
+          <button
+            onClick={() => handleConnect("Telegram")}
+            disabled={telegramId !== null}
+            className={clsx(
+              "w-full sm:w-auto group relative flex items-center gap-3 px-4 sm:px-5 py-2 sm:py-2.5 border rounded-2xl sm:rounded-[2rem] transition-all duration-500",
+              telegramId
+                ? "bg-emerald-50/60 border-emerald-200 shadow-sm cursor-default"
+                : "bg-white border-slate-200 hover:shadow-md hover:border-blue-300 cursor-pointer shadow-sm"
+            )}
+          >
+            <div className={clsx(
+              "w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center transition-all duration-300 relative overflow-hidden shrink-0",
+              telegramId
+                ? "bg-white text-emerald-500 shadow-sm ring-1 ring-emerald-100"
+                : "bg-[#0088cc]/5 text-[#0088cc] group-hover:bg-[#0088cc] group-hover:text-slate-900"
+            )}>
+              {telegramId && <div className="absolute inset-0 bg-emerald-100/50 animate-pulse"></div>}
+              <svg viewBox="0 0 24 24" className="w-4 h-4 sm:w-5 sm:h-5 fill-current relative z-10" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11.944 0C5.352 0 0 5.352 0 11.944c0 6.592 5.352 11.944 11.944 11.944c6.592 0 11.944-5.352 11.944-11.944C23.888 5.352 18.536 0 11.944 0zm5.66 8.16l-1.928 9.096c-.144.644-.528.804-1.068.5l-2.936-2.164l-1.416 1.364c-.156.156-.288.288-.588.288l.212-3.04l5.524-4.992c.24-.212-.052-.332-.372-.12l-6.828 4.3l-2.948-.92c-.64-.2-.652-.64.132-.948l11.524-4.44c.532-.2.996.12.804.976z" />
+              </svg>
+>>>>>>> 4da6b8c929bf31ac2743586204de22d6928b6763
             </div>
             <div className="text-left">
               <p className="text-[9px] font-bold uppercase tracking-widest opacity-60 leading-none mb-1">Telegram</p>
@@ -412,6 +459,16 @@ export default function NSGClarity() {
                 </div>
               )}
             </div>
+<<<<<<< HEAD
+=======
+
+            <button
+              onClick={() => showToast("Historial completo no disponible en demo", "info")}
+              className="w-full mt-8 py-3.5 text-xs font-bold text-slate-600 hover:text-slate-900 border border-slate-200 hover:border-navy-900 hover:bg-white rounded-xl transition-all duration-300 shadow-sm flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
+            >
+              Ver Historial Completo <ArrowRight className="w-3 h-3" />
+            </button>
+>>>>>>> 4da6b8c929bf31ac2743586204de22d6928b6763
           </div>
         </div>
       </div>

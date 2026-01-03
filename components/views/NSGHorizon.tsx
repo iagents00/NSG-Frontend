@@ -401,7 +401,7 @@ export default function NSGHorizon() {
 
           <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="space-y-4 max-w-2xl text-center md:text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-xs font-bold uppercase tracking-wider">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-600 text-xs font-bold uppercase tracking-wider">
                 <Zap className="w-3 h-3 fill-current" />
                 Potenciado por AI
               </div>
@@ -419,8 +419,8 @@ export default function NSGHorizon() {
                       <CheckCircle className="w-5 h-5" />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[10px] uppercase font-bold text-blue-200 tracking-wider">Conectado</span>
-                      <span className="text-sm text-white font-bold">
+                      <span className="text-[10px] uppercase font-bold text-blue-600 tracking-wider">Conectado</span>
+                      <span className="text-sm text-slate-900 font-bold">
                         Fathom Analytics
                       </span>
                     </div>
@@ -437,7 +437,7 @@ export default function NSGHorizon() {
                     onClick={() => setShowFathomModal(true)}
                     className="px-8 py-4 rounded-2xl font-bold transition transform hover:-translate-y-0.5 shadow-lg flex items-center gap-3 group bg-white text-navy-900 hover:bg-blue-50 shadow-black/10 cursor-pointer"
                   >
-                    <div className="w-6 h-6 bg-linear-to-tr from-orange-400 to-pink-500 rounded-lg flex items-center justify-center text-white">
+                    <div className="w-6 h-6 bg-linear-to-tr from-orange-400 to-pink-500 rounded-lg flex items-center justify-center text-slate-900">
                       <Activity className="w-4 h-4" />
                     </div>
 
@@ -447,7 +447,7 @@ export default function NSGHorizon() {
                   </button>
                 )}
 
-                <button className="px-6 py-4 bg-navy-800/50 text-white border border-white/10 rounded-2xl font-medium hover:bg-navy-800 transition cursor-pointer">
+                <button className="px-6 py-4 bg-navy-800/50 text-slate-900 border border-slate-200 rounded-2xl font-medium hover:bg-navy-800 transition cursor-pointer">
                   Saber más
                 </button>
               </div>
@@ -455,7 +455,7 @@ export default function NSGHorizon() {
 
             {/* Visual Element / Illustration */}
             <div className="hidden md:flex relative">
-              <div className="w-64 h-48 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 p-4 transform rotate-3 shadow-2xl">
+              <div className="w-64 h-48 bg-white/5 backdrop-blur-md rounded-2xl border border-slate-200 p-4 transform rotate-3 shadow-2xl">
                 <div className="flex gap-2 mb-4">
                   <div className="w-2 h-2 rounded-full bg-red-400"></div>
                   <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
@@ -465,7 +465,7 @@ export default function NSGHorizon() {
                   <div className="h-2 w-3/4 bg-white/20 rounded"></div>
                   <div className="h-2 w-1/2 bg-white/20 rounded"></div>
                   <div className="h-24 w-full bg-white/10 rounded-xl mt-4 border border-white/5 flex items-center justify-center">
-                    <Activity className="w-8 h-8 text-white/30" />
+                    <Activity className="w-8 h-8 text-slate-900/30" />
                   </div>
                 </div>
               </div>
@@ -504,7 +504,7 @@ export default function NSGHorizon() {
                   className="bg-white rounded-[2rem] p-6 border border-slate-200 hover:border-blue-300 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer group flex flex-col h-full"
                 >
                   <div className="flex justify-between items-start mb-4">
-                    <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
+                    <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-slate-900 transition-colors duration-300">
                       <Folder className="w-6 h-6 fill-current" />
                     </div>
                     <button className="text-slate-300 hover:text-navy-900 transition">
@@ -575,8 +575,8 @@ export default function NSGHorizon() {
 
           <div className="w-px h-8 sm:h-10 bg-slate-200 mx-1 sm:mx-2 hidden xs:block"></div>
 
-          <div className="w-10 h-10 sm:w-14 sm:h-14 bg-navy-950 rounded-xl sm:rounded-2xl flex items-center justify-center text-white shrink-0 shadow-lg hidden sm:flex">
-            <Layers className="w-5 h-5 sm:w-7 sm:h-7" />
+          <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-900 shrink-0 shadow-lg hidden sm:flex">
+            <Layers className="w-7 h-7" />
           </div>
           <div className="overflow-hidden">
             <h3 className="font-display font-bold text-lg sm:text-2xl text-navy-900 truncate">{selectedFolder.title}</h3>
@@ -603,7 +603,7 @@ export default function NSGHorizon() {
           </a>
           <button
             onClick={() => showToast('Exportando PDF...', 'success')}
-            className="col-span-2 xs:flex-1 lg:flex-none px-3 sm:px-6 py-2.5 sm:py-3 bg-blue-600 text-white text-xs sm:text-sm font-bold rounded-xl hover:bg-blue-500 transition shadow-lg shadow-blue-200 flex items-center justify-center gap-2 cursor-pointer"
+            className="flex-1 lg:flex-none px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-500 transition shadow-lg shadow-blue-200 flex items-center justify-center gap-2 cursor-pointer"
           >
             <FileCheck className="w-3.5 h-3.5 sm:w-4 h-4" /> <span className="hidden md:inline">Exportar</span> PDF
           </button>
@@ -623,7 +623,7 @@ export default function NSGHorizon() {
             <div className="absolute right-0 top-0 w-64 h-64 bg-blue-600/30 rounded-full blur-[80px] pointer-events-none"></div>
 
             <div className="relative z-10 text-center sm:text-left">
-              <div className="bg-navy-950 p-8 rounded-[2.5rem] text-white relative overflow-hidden border border-white/10 shadow-2xl">
+              <div className="bg-slate-50 p-8 rounded-[2.5rem] text-slate-900 relative overflow-hidden border border-slate-200 shadow-2xl">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
                 <div className="flex items-center gap-3 mb-4">
                   <div className="p-2 bg-blue-500/20 rounded-xl">
@@ -660,19 +660,19 @@ export default function NSGHorizon() {
                   )}
                 </div>
               </div>     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-white/10 p-4 rounded-xl border border-white/10 backdrop-blur-sm">
+                <div className="bg-white/10 p-4 rounded-xl border border-slate-200 backdrop-blur-sm">
                   <p className="text-[0.6rem] font-bold text-blue-300 uppercase mb-1">Punto de Dolor</p>
                   <p className="text-sm font-bold truncate">
                     {selectedFolder.aiInfo?.punto_de_dolor?.titulo || "Analizando..."}
                   </p>
                 </div>
-                <div className="bg-white/10 p-4 rounded-xl border border-white/10 backdrop-blur-sm">
+                <div className="bg-white/10 p-4 rounded-xl border border-slate-200 backdrop-blur-sm">
                   <p className="text-[0.6rem] font-bold text-emerald-300 uppercase mb-1">Oportunidad</p>
                   <p className="text-sm font-bold truncate">
                     {selectedFolder.aiInfo?.oportunidad?.titulo || "Analizando..."}
                   </p>
                 </div>
-                <div className="bg-white/10 p-4 rounded-xl border border-white/10 backdrop-blur-sm">
+                <div className="bg-white/10 p-4 rounded-xl border border-slate-200 backdrop-blur-sm">
                   <p className="text-[0.6rem] font-bold text-purple-300 uppercase mb-1">Herramienta</p>
                   <p className="text-sm font-bold truncate">
                     {selectedFolder.aiInfo?.herramienta?.nombre || "Analizando..."}
@@ -746,7 +746,7 @@ export default function NSGHorizon() {
 
                   <div className="flex items-start justify-between mb-10 relative z-10">
                     <div className="flex items-center gap-6">
-                      <div className="w-20 h-20 bg-blue-600 rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-blue-200">
+                      <div className="w-20 h-20 bg-blue-600 rounded-[2rem] flex items-center justify-center text-slate-900 shadow-2xl shadow-blue-200">
                         <ListTodo className="w-10 h-10" />
                       </div>
                       <div>
@@ -780,7 +780,7 @@ export default function NSGHorizon() {
                         {/* Step Number Circle */}
                         <div className={clsx(
                           "w-12 h-12 rounded-2xl shrink-0 flex items-center justify-center font-bold text-lg shadow-sm transition-all",
-                          checkedItems.includes(idx) ? "bg-emerald-500 text-white" : "bg-white text-blue-600 border border-blue-100"
+                          checkedItems.includes(idx) ? "bg-emerald-500 text-slate-900" : "bg-white text-blue-600 border border-blue-100"
                         )}>
                           {idx + 1}
                         </div>
@@ -802,7 +802,7 @@ export default function NSGHorizon() {
                     ))}
                   </div>
 
-                  <div className="p-8 bg-navy-950 rounded-[2.5rem] text-white shadow-2xl relative z-10 flex items-center gap-8 border border-white/10 overflow-hidden">
+                  <div className="p-8 bg-slate-50 rounded-[2.5rem] text-slate-900 shadow-2xl relative z-10 flex items-center gap-8 border border-slate-200 overflow-hidden">
                     <div className="absolute top-0 right-0 w-48 h-48 bg-blue-600/20 rounded-full blur-3xl"></div>
                     <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center shrink-0 relative z-10">
                       <Sparkles className="w-8 h-8 text-blue-300" />
@@ -861,7 +861,7 @@ export default function NSGHorizon() {
         <div className="fixed inset-0 z-[100] flex justify-end animate-in fade-in duration-300">
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-navy-950/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-slate-50/40 backdrop-blur-sm"
             onClick={() => setShowTranscription(false)}
           />
 
@@ -920,8 +920,8 @@ export default function NSGHorizon() {
                   <div key={index} className={`flex w-full gap-4 ${isMe ? 'flex-row-reverse' : 'flex-row'} mb-4 animate-fade-in-up`}>
                     <div className={`
                             w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-xs shrink-0 
-                            select-none text-white shadow-md
-                            ${isMe ? 'bg-navy-900' : avatarColor}
+                            select-none text-slate-900 shadow-md
+                            ${isMe ? 'bg-white' : avatarColor}
                         `}>
                       {item.speakerName.substring(0, 1).toUpperCase()}
                     </div>
@@ -929,7 +929,7 @@ export default function NSGHorizon() {
                     <div className={`
                            group relative max-w-[85%] px-5 py-4 shadow-sm transition-all duration-300
                            ${isMe
-                        ? 'bg-navy-900 text-white rounded-2xl rounded-tr-none'
+                        ? 'bg-white text-slate-900 rounded-2xl rounded-tr-none'
                         : 'bg-white text-slate-800 rounded-2xl rounded-tl-none border border-slate-200'
                       }
                         `}>

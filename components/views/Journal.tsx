@@ -20,7 +20,7 @@ export default function Journal() {
           </div>
           <button 
             onClick={() => showToast('Entrada guardada', 'success')} 
-            className="bg-navy-900 text-white px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-700 transition cursor-pointer"
+            className="bg-white text-slate-900 px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-700 transition cursor-pointer"
           >
             Guardar Entrada
           </button>

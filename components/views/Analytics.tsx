@@ -7,7 +7,7 @@ export default function Analytics() {
   return (
     <div className="max-w-7xl mx-auto space-y-8 animate-fade-in-up pb-10">
       {/* Header */}
-      <div className="bg-gradient-to-br from-blue-600 to-indigo-600 p-8 rounded-[2.5rem] shadow-card text-white">
+      <div className="bg-gradient-to-br from-blue-600 to-indigo-600 p-8 rounded-[2.5rem] shadow-card text-slate-900">
         <div className="flex items-center gap-4 mb-4">
           <div className="w-16 h-16 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center">
             <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">

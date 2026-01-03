@@ -15,7 +15,7 @@ export default function DashboardLayout({
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden">
-
+      
       {/* 1. Sidebar (Fixed or Slide-out) */}
       <Sidebar />
 
@@ -26,8 +26,8 @@ export default function DashboardLayout({
         <TopNav />
 
         {/* Dynamic Page Content */}
-        <div id="workspace-content" className="flex-1 overflow-y-auto custom-scroll safe-bottom-scroll scroll-smooth w-full px-4 sm:px-6 lg:px-10 py-6 lg:py-8">
-          {children}
+        <div id="workspace-content" className="flex-1 flex flex-col overflow-hidden w-full relative">
+           {children}
         </div>
 
       </main>

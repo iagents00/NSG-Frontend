@@ -73,7 +73,7 @@ export default function Sidebar() {
             <span className="font-display font-bold text-white text-lg tracking-tight">NSG <span className="font-normal text-blue-400">Intelligence</span></span>
           </div>
 
-          <button className="lg:hidden p-2 text-slate-500 hover:text-white transition" onClick={toggleSidebar}>
+          <button className="lg:hidden p-2 text-slate-500 hover:text-white transition cursor-pointer" onClick={toggleSidebar}>
             <X className="w-5 h-5" />
           </button>
         </div>
