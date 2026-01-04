@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Key, CheckCircle, Lock, Loader2 } from 'lucide-react';
 import clsx from 'clsx';
+import api from '@/lib/api';
+
 
 interface FathomTokenModalProps {
     isOpen: boolean;
@@ -34,28 +36,16 @@ export default function FathomTokenModal({ isOpen, onClose, onConnect }: FathomT
         setError('');
 
         try {
-            // Get JWT token from localStorage
-            const jwtToken = localStorage.getItem('token');
-
-            if (!jwtToken) {
-                throw new Error('No estás autenticado. Por favor inicia sesión.');
-            }
-
-            // Save token to backend
-            const response = await fetch('https://nsg-backend.onrender.com/fathom/token', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': jwtToken
-                },
-                body: JSON.stringify({ fathom_access_token: token.trim() })
+            // Save token to backend using the shared api service
+            const response = await api.post('/fathom/token', {
+                fathom_access_token: token.trim()
             });
 
-            if (!response.ok) {
-                const data = await response.json().catch(() => ({}));
-                const detailedMessage = data.message || data.error || 'Error guardando el token.';
+            if (response.status !== 200 && response.status !== 201) {
+                const detailedMessage = response.data?.message || response.data?.error || 'Error guardando el token.';
                 throw new Error(detailedMessage);
             }
+
 
             // If successful, call parent callback
             onConnect(token);

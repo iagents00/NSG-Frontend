@@ -113,7 +113,7 @@ Headers: {
 3. Usuario ingresa su Access Token
 4. Usuario hace clic en "Conectar"
 5. Modal:
-    - Obtiene JWT de `localStorage.getItem('token')`
+    - Obtiene JWT de `localStorage.getItem('nsg-token')`
     - Envía token al backend
     - Muestra loading mientras procesa
 6. Backend:

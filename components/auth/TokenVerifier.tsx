@@ -13,7 +13,7 @@ export default function TokenVerifier({ children }: { children: React.ReactNode 
     const checkAuth = async () => {
       // 1. Check if we are on a public path
       const isPublicPath = ['/auth/login', '/auth/register', '/'].includes(pathname);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('nsg-token');
 
       // 2. Logic to determine authorization
       if (isPublicPath) {
@@ -37,7 +37,7 @@ export default function TokenVerifier({ children }: { children: React.ReactNode 
          } catch (error) {
             // If verification fails (401), existing logic in authService removes token
             // Then we need to re-evaluate or redirect
-            if (!localStorage.getItem('token')) {
+            if (!localStorage.getItem('nsg-token')) {
                 // Token was removed
                 if (!isPublicPath) {
                    setIsAuthorized(false);

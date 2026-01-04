@@ -6,6 +6,11 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '50mb',
     },
   },
+  webpack: (config) => {
+    config.output.devtoolModuleFilenameTemplate = 'nsg:///[resource-path]';
+    return config;
+  },
+
 };
 
 export default nextConfig;

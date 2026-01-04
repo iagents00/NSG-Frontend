@@ -27,7 +27,7 @@ export default function CalendarView() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const jwtToken = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  const jwtToken = typeof window !== 'undefined' ? localStorage.getItem('nsg-token') : null;
 
   // 1. Verificar conexión inicial
   useEffect(() => {

@@ -21,7 +21,6 @@ function LoginContent() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
 
-<<<<<<< HEAD
     useEffect(() => {
         const roleParam = searchParams.get('role') as RoleType | null;
         if (roleParam && CONTEXT[roleParam]) {
@@ -29,32 +28,6 @@ function LoginContent() {
         } else {
             // Enforce flow: If no role is selected, go back to landing
             router.push('/');
-=======
-  const handleBack = () => {
-    router.push('/');
-  };
-
-  const handleLogin = async () => {
-    if (!selectedRole) return;
-    if (!email || !password) {
-        setError("Por favor ingresa usuario y contraseña.");
-        return;
-    }
-
-    setIsAnimating(true);
-    setError(null);
-    
-    try {
-        const data = await authService.login({ email: email.toLowerCase(), password });
-        
-        if (data.token) {
-             localStorage.setItem('token', data.token);
-         }
-        
-        // Save real user ID from backend response
-        if (data.user?.id) {
-            setUserId(data.user.id);
->>>>>>> 4da6b8c929bf31ac2743586204de22d6928b6763
         }
     }, [searchParams, router]);
 
@@ -73,10 +46,10 @@ function LoginContent() {
         setError(null);
 
         try {
-            const data = await authService.login({ email, password });
+            const data = await authService.login({ email: email.toLowerCase(), password });
 
             if (data.token) {
-                localStorage.setItem('token', data.token);
+                localStorage.setItem('nsg-token', data.token);
             }
 
             // Save real user ID from backend response
@@ -106,33 +79,8 @@ function LoginContent() {
             </div>
 
             <div className="relative w-full max-w-[448px]">
-
-<<<<<<< HEAD
                 {/* Card Container */}
                 <div className="bg-white/80 backdrop-blur-xl border border-white/40 rounded-[28px] shadow-xl shadow-slate-200/50 p-8 md:p-10 overflow-hidden relative">
-=======
-            {/* Login Form */}
-            <div className="w-full relative">
-                <div className="space-y-6">
-                    <div className="space-y-4">
-                        <div className="space-y-2">
-                            <label className="text-xs font-bold text-slate-500 ml-1 uppercase tracking-wider">Usuario / Email</label>
-                            <div className="relative group">
-                                <div className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors flex items-center justify-center font-bold text-[10px]">@</div>
-                                <input 
-                                    type="text"
-                                    value={email}
-                                    onChange={(e) => {
-                                        setEmail(e.target.value);
-                                        setError(null);
-                                    }}
-                                    className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400"
-                                    placeholder="Ingresa tu usuario o email"
-                                />
-                            </div>
-                        </div>
->>>>>>> 4da6b8c929bf31ac2743586204de22d6928b6763
-
                     {/* Header Section */}
                     <div className="flex flex-col items-center text-center mb-6">
                         <BrandAtom className="w-12 h-12 mb-2" variant="colored" />
@@ -170,7 +118,7 @@ function LoginContent() {
                                                 setError(null);
                                             }}
                                             className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400"
-                                            placeholder="Ingresa tu email"
+                                            placeholder="Ingresa tu usuario o email"
                                         />
                                     </div>
                                 </div>
@@ -213,14 +161,17 @@ function LoginContent() {
                         {/* Register Link */}
                         <div className="mt-8 pt-6 border-t border-slate-100 flex justify-center text-sm">
                             <span className="text-slate-500 mr-1">¿No tienes cuenta?</span>
-                            <a href="/auth/register" className="text-blue-600 font-semibold hover:text-blue-700 transition-colors cursor-pointer">
+                            <a 
+                                href={`/auth/register?role=${selectedRole || 'manager'}`}
+                                className="text-blue-600 font-semibold hover:text-blue-700 transition-colors cursor-pointer"
+                            >
                                 Registrarse
                             </a>
+
                         </div>
                     </div>
                 </div>
 
-<<<<<<< HEAD
                 {/* Footer */}
                 <div className="mt-8 text-center space-y-2">
                     <div className="flex justify-center gap-6 text-xs text-slate-400 font-medium">
@@ -228,19 +179,7 @@ function LoginContent() {
                         <span className="hover:text-slate-600 cursor-pointer transition-colors">Privacidad</span>
                         <span className="hover:text-slate-600 cursor-pointer transition-colors">Términos</span>
                     </div>
-=======
-                {/* Register Link */}
-                <div className="mt-8 pt-6 border-t border-slate-100 flex justify-center text-sm">
-                    <span className="text-slate-500 mr-1">¿No tienes cuenta?</span>
-                    <a 
-                        href={`/auth/register?role=${selectedRole}`}
-                        className="text-blue-600 font-semibold hover:text-blue-700 transition-colors cursor-pointer"
-                    >
-                        Registrarse
-                    </a>
->>>>>>> 4da6b8c929bf31ac2743586204de22d6928b6763
                 </div>
-
             </div>
         </div>
     );
