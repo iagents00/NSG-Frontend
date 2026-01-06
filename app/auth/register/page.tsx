@@ -94,7 +94,13 @@ function RegisterContent() {
 
           {/* Register Form */}
           <div className="w-full relative">
-            <div className="space-y-5">
+            <form 
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    handleRegister();
+                }}
+                className="space-y-5"
+            >
 
               {/* Name */}
               <div className="space-y-2">
@@ -162,13 +168,13 @@ function RegisterContent() {
 
               <div className="flex items-center justify-between pt-4">
                 <Link
-                  href={`/auth/login?role=${role || 'manager'}`}
+                  href={`/auth/login?role=${role || 'clinic_owner'}`}
                   className="text-slate-500 hover:text-slate-800 text-sm font-medium transition-colors flex items-center gap-1 pl-1 cursor-pointer"
                 >
                   <ChevronLeft className="w-4 h-4" /> Volver
                 </Link>
                 <button
-                  onClick={handleRegister}
+                  type="submit"
                   disabled={isAnimating}
                   className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 px-6 rounded-xl shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
                 >
@@ -176,7 +182,7 @@ function RegisterContent() {
                   {!isAnimating && <ArrowRight className="w-4 h-4" />}
                 </button>
               </div>
-            </div>
+            </form>
 
             {/* Terms */}
             <div className="mt-8 pt-6 border-t border-slate-100 text-center">

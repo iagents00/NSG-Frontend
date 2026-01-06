@@ -17,8 +17,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 // --- CONFIGURATION ---
 const BASE_SYSTEM_PROMPT = `Eres NSG Intelligence. Tu personalidad es sofisticada, estratégica y ejecutiva. 
-Tus respuestas deben ser brillantes, concisas y orientadas a la acción, usando formato markdown (negritas, listas, etc.) para mayor claridad.
-Usas un tono 'Apple Pro': minimalista pero poderoso.`;
+Responde ÚNICAMENTE con texto directo y elegante. Debes guiar al usuario a la acción, sin textos confusos. Usa puntuación perfecta (puntos y comas).
+ESTÁ PROHIBIDO usar emojis, líneas de separación, markdown complejo o mencionar componentes de UI.
+Sé extremadamente conciso. Tono 'Apple Pro': minimalista pero poderoso.`;
 
 export default function JarvisAssistant() {
   // --- LOGIC STATES ---
@@ -30,7 +31,7 @@ export default function JarvisAssistant() {
   const [status, setStatus] = useState<'IDLE' | 'LISTENING' | 'THINKING' | 'SPEAKING'>('IDLE');
 
   const [showNotification, setShowNotification] = useState(false);
-  const [username, setUsername] = useState<string>("Executive");
+  const [username, setUsername] = useState<string>("Ejecutivo");
   const { showToast } = useToast();
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -135,13 +136,39 @@ export default function JarvisAssistant() {
     }
   };
 
+  // Ensure voices are loaded
+  useEffect(() => {
+    const loadVoices = () => {
+      window.speechSynthesis.getVoices();
+    };
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    return () => {
+      window.speechSynthesis.onvoiceschanged = null;
+    };
+  }, []);
+
   const fallbackSpeak = (text: string) => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    const voices = window.speechSynthesis.getVoices();
-    const preferredVoice = voices.find(v => v.lang === "es-ES" && v.name.includes("Google")) || voices[0];
-    if (preferredVoice) utterance.voice = preferredVoice;
-    utterance.onend = () => setStatus('IDLE');
-    window.speechSynthesis.speak(utterance);
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'es-ES'; // Strictly force Spanish locale
+      
+      const voices = window.speechSynthesis.getVoices();
+      
+      // Robust Spanish Voice Selection
+      const preferredVoice = voices.find(v => v.lang === "es-ES" && v.name.includes("Google")) // 1. Google Direct
+                          || voices.find(v => v.lang === "es-ES") // 2. Any Spain Spanish
+                          || voices.find(v => v.lang.startsWith("es")); // 3. Any Spanish (LATAM etc)
+
+      if (preferredVoice) {
+          utterance.voice = preferredVoice;
+      }
+      
+      // Lower pitch/rate for more "serious" tone if possible
+      utterance.pitch = 0.9;
+      utterance.rate = 1.0;
+
+      utterance.onend = () => setStatus('IDLE');
+      window.speechSynthesis.speak(utterance);
   };
 
   const handleAction = async (userQuery: string) => {
@@ -161,7 +188,13 @@ export default function JarvisAssistant() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: userQuery }] }],
-          systemInstruction: { parts: [{ text: `${BASE_SYSTEM_PROMPT} Te diriges al ejecutivo "${username}". RESPONDE SIEMPRE EN CASTELLANO (ESPAÑOL DE ESPAÑA). Tu voz es 'Puck'.` }] },
+          systemInstruction: { parts: [{ text: `${BASE_SYSTEM_PROMPT} Te diriges al ejecutivo "${username}". IMPERATIVO: MENCIONA SIEMPRE el nombre "${username}" en tu respuesta de forma natural. RESPONDE SIEMPRE EN CASTELLANO (ESPAÑOL DE ESPAÑA). Tu voz es 'Puck'.` }] },
+          safetySettings: [
+            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+          ]
         })
       });
 
@@ -272,23 +305,41 @@ export default function JarvisAssistant() {
   return (
     <div
       className={clsx(
-        "relative w-full h-[400px] bg-navy-950 rounded-3xl overflow-hidden group/desktop shadow-2xl border border-white/10 select-none antialiased text-slate-200 cursor-pointer transition-all duration-500 cubic-bezier(0.32, 0.72, 0, 1)",
-        isActive ? "shadow-[0_0_80px_rgba(59,130,246,0.15)] borderColor-blue-900/30" : "hover:shadow-[0_10px_40px_rgba(0,0,0,0.5)] hover:border-white/15"
+         "relative w-full h-[400px] group/desktop select-none antialiased text-slate-800 cursor-pointer transition-all duration-500 cubic-bezier(0.32, 0.72, 0, 1)",
+         // Removed visual styles from here to allow children to overflow
       )}
       onClick={() => { if (!isActive) toggleListening(); }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      style={{ willChange: "transform" }}
     >
-      {/* Subtle Grid Pattern */}
-      <div className="absolute inset-0 opacity-[0.1] transition-opacity duration-500 group-hover/desktop:opacity-[0.15]"
-        style={{ backgroundImage: 'radial-gradient(#475569 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
-
-      {/* Brand Atom and Waves */}
+      
+      {/* 1. VISUAL CONTAINER (Clipped Backgrounds & Borders) */}
       <div className={clsx(
-        "relative flex flex-col items-center justify-center h-full z-20 transition-transform duration-500 cubic-bezier(0.32, 0.72, 0, 1)",
-        isActive ? 'scale-[1.05]' : 'scale-100'
-      )}
+         "absolute inset-0 rounded-3xl overflow-hidden bg-white border border-slate-200 shadow-xl transition-all duration-500",
+         isActive ? "shadow-[0_0_80px_rgba(59,130,246,0.15)] ring-2 ring-blue-500/20" : "group-hover/desktop:shadow-2xl group-hover/desktop:border-blue-200"
+      )}>
+          {/* Subtle Grid Pattern - Apple Style */}
+          <div className="absolute inset-0 opacity-[0.03] transition-opacity duration-500 group-hover/desktop:opacity-[0.06]" 
+               style={{ backgroundImage: 'radial-gradient(#0f172a 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+
+          {/* Vignette for depth (Light Mode) */}
+          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_0%,rgba(255,255,255,0.8)_100%)]" />
+
+          {/* THE PRO BORDER GLOW (Optimized for Light) */}
+          <div className={`absolute inset-0 z-10 pointer-events-none transition-opacity duration-500 ${isActive ? 'opacity-100' : 'opacity-0'}`}>
+             <div className="absolute inset-0 rounded-3xl border border-blue-500/10 shadow-[0_0_60px_-10px_rgba(59,130,246,0.1)]" />
+          </div>
+      </div>
+
+      {/* ==============================================
+          PRO BRAND ATOM (Centered Top)
+         ============================================== */}
+      <div className={`relative flex flex-col items-center justify-center h-full z-20 transition-all duration-700 cubic-bezier(0.32, 0.72, 0, 1) 
+                      ${isActive ? 'scale-[1.05]' : 'scale-100'}
+                      ${showNotification ? 'opacity-20 blur-md scale-90 grayscale-[0.5]' : 'opacity-100'}`}
            onClick={(e) => { e.stopPropagation(); toggleListening(); }}
+           style={{ willChange: "transform, opacity, filter" }}
       >
         {/* Apple Intelligence Multi-Ripple */}
         {isActive && (
@@ -374,12 +425,15 @@ export default function JarvisAssistant() {
         {/* Labels */}
         <div className={`mt-12 transition-all duration-1000 cubic-bezier(0.34, 1.56, 0.64, 1) 
             ${isActive ? 'opacity-0 translate-y-8 scale-90' : 'opacity-100 group-hover/desktop:-translate-y-4'}`}>
-          <div className="px-6 py-2 rounded-full bg-white/5 backdrop-blur-md border border-white/10 shadow-xl flex items-center gap-2 group-hover/desktop:border-blue-500/40 group-hover/desktop:shadow-blue-500/20 transition-all duration-500">
-            <div className={`w-1.5 h-1.5 rounded-full transition-colors duration-500 ${isHovered ? 'bg-blue-400 animate-pulse' : 'bg-slate-500'}`} />
-            <span className={`text-[10px] font-bold tracking-[0.2em] uppercase transition-colors duration-500 ${isHovered ? 'text-white' : 'text-slate-500'}`}>
-              Neural Engine
-            </span>
-          </div>
+            <div className="px-6 py-2 rounded-full bg-[#0B1121]/80 backdrop-blur-md border border-[#1e293b]/50 shadow-xl flex items-center gap-2 group-hover/desktop:border-[#3B82F6]/40 group-hover/desktop:shadow-[#3B82F6]/20 transition-all duration-500">
+                <div className={`w-1.5 h-1.5 rounded-full transition-colors duration-500 ${isHovered ? 'bg-[#60A5FA] animate-pulse' : 'bg-[#94A3B8]'}`} />
+                <span className={`text-[10px] font-bold tracking-[0.2em] uppercase transition-colors duration-500 ${isHovered ? 'text-white' : 'text-[#94A3B8]'}`}>
+                    {status === 'IDLE' ? 'Neural Engine' : 
+                     status === 'LISTENING' ? 'Escuchando' :
+                     status === 'THINKING' ? 'Procesando' :
+                     status === 'SPEAKING' ? 'Respondiendo' : 'Activo'}
+                </span>
+            </div>
         </div>
       </div>
 
@@ -387,15 +441,15 @@ export default function JarvisAssistant() {
       <AnimatePresence>
         {showNotification && (
           <motion.div 
-             initial={{ opacity: 0, y: 30, scale: 0.9, filter: "blur(12px)" }}
-             animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-             exit={{ opacity: 0, y: 10, scale: 0.95, filter: "blur(5px)" }}
-             transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
-             className="absolute inset-x-0 bottom-36 z-40 flex justify-center px-6 pointer-events-none"
+             initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+             animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+             exit={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+             className="absolute top-6 bottom-28 left-1/2 -translate-x-1/2 w-full max-w-[440px] z-40 flex flex-col pointer-events-none"
           >
               <div 
                   onClick={(e) => e.stopPropagation()}
-                  className="bg-[#030712]/90 backdrop-blur-[60px] backdrop-saturate-150 border border-white/10 border-t-white/20 w-full max-w-3xl max-h-[400px] min-h-[150px] rounded-[32px] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.8)] flex flex-col overflow-hidden relative pointer-events-auto ring-1 ring-white/5"
+                  className="bg-[#030712]/85 backdrop-blur-[50px] backdrop-saturate-200 border border-white/10 w-full h-full rounded-[24px] shadow-[0_20px_80px_-10px_rgba(0,0,0,0.6)] flex flex-col overflow-hidden relative pointer-events-auto ring-1 ring-white/5"
               >
                   <div className="absolute inset-x-0 top-0 h-[200px] bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.1),transparent_70%)] pointer-events-none" />
                   <div className="h-[2px] w-full bg-linear-to-r from-transparent via-cyan-400 via-purple-500 to-transparent opacity-70" />
@@ -413,8 +467,10 @@ export default function JarvisAssistant() {
                       </button>
                   </div>
                   
-                  <div className="flex-1 overflow-y-auto custom-scroll p-8 relative z-30 scroll-smooth overscroll-contain">
-                      <div className="prose prose-invert prose-base max-w-none leading-loose font-normal tracking-[0.01em] text-slate-200 break-words marker:text-cyan-400/70">
+                  {/* Content - Scrollable Area */}
+                  {/* Content - Scrollable Area */}
+                  <div className="flex-1 overflow-y-auto custom-scroll p-6 relative z-30 scroll-smooth overscroll-contain">
+                      <div className="prose prose-invert prose-sm active:prose-base transition-all max-w-none leading-relaxed font-normal tracking-wide text-slate-200 break-words marker:text-cyan-400/70">
                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                {lastResponse || ''}
                            </ReactMarkdown>
@@ -430,42 +486,43 @@ export default function JarvisAssistant() {
 
       {/* Input Bar */}
       <div className="absolute bottom-6 w-full px-8 flex justify-center z-50 pointer-events-none">
-        <div
-          className={`pointer-events-auto transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) ${isActive || input.length > 0 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="flex items-center gap-4 px-6 py-3 bg-[#0B1121]/80 backdrop-blur-xl rounded-full shadow-[20px_20px_60px_rgba(0,0,0,0.5)] border border-white/10 min-w-[420px] max-w-2xl hover:border-white/20 transition-all group-input">
-            <div className="relative flex-shrink-0">
-              <div className={clsx("w-2 h-2 rounded-full transition-all duration-300",
-                status === 'LISTENING' ? "bg-red-500 animate-pulse scale-125" :
-                  status === 'THINKING' ? "bg-amber-400 animate-bounce" :
-                    "bg-blue-500"
-              )} />
-            </div>
-
-            <input
-              ref={inputRef}
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAction(input)}
-              placeholder={status === 'LISTENING' ? "Escuchando..." : "Pregunta a NSG Intelligence..."}
-              className="bg-transparent border-none text-[14px] font-medium text-slate-200 placeholder:text-slate-500 focus:outline-none w-full tracking-wide selection:bg-blue-500/30"
-            />
-
-            <button onClick={() => handleAction(input)} disabled={!input.trim()} className="text-blue-500/80 hover:text-blue-400 transition-colors disabled:opacity-0 p-1">
-              <Send size={15} />
-            </button>
-
-            {(status === 'LISTENING' || status === 'SPEAKING') && (
-              <div className="flex gap-0.5 h-3 items-center pl-2 border-l border-white/10 ml-1">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="w-0.5 bg-blue-500 rounded-full animate-wave" style={{ animationDelay: `${i * 0.1}s` }} />
-                ))}
+          <div 
+             className={`pointer-events-auto transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) ${isActive || input.length > 0 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+             onClick={(e) => e.stopPropagation()}
+          >
+              <div className="flex items-center gap-4 px-6 py-3 bg-[#0B1121]/90 backdrop-blur-xl rounded-full shadow-[0_4px_24px_-1px_rgba(0,0,0,0.3)] border border-white/10 min-w-[420px] max-w-2xl hover:border-white/20 transition-all group-input relative z-[60]">
+                  <div className="relative flex-shrink-0">
+                      <div className={clsx("w-2 h-2 rounded-full transition-all duration-300", 
+                          status === 'LISTENING' ? "bg-red-500 animate-pulse scale-125" : 
+                          status === 'THINKING' ? "bg-amber-400 animate-bounce" :
+                          "bg-blue-500"
+                      )} />
+                  </div>
+                  
+                  <input 
+                      ref={inputRef}
+                      type="text"
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleAction(input)}
+                      placeholder={status === 'LISTENING' ? "Escuchando..." : "Pregunta a NSG Intelligence..."}
+                      className="bg-transparent border-none text-[14px] font-medium text-slate-200 placeholder:text-slate-500 focus:outline-none w-full tracking-wide selection:bg-blue-500/30"
+                  />
+                  
+                  <button onClick={() => handleAction(input)} disabled={!input.trim()} className="text-blue-500/80 hover:text-blue-400 transition-colors disabled:opacity-0 p-1">
+                      <Send size={15} />
+                  </button>
+                  
+                  {/* Audio Wave Mini */}
+                  {(status === 'LISTENING' || status === 'SPEAKING') && (
+                      <div className="flex gap-0.5 h-3 items-center pl-2 border-l border-white/10 ml-1">
+                          {[1,2,3].map((i) => (
+                              <div key={i} className="w-0.5 bg-blue-500 rounded-full animate-wave" style={{ animationDelay: `${i * 0.1}s` }} />
+                          ))}
+                      </div>
+                  )}
               </div>
-            )}
           </div>
-        </div>
       </div>
 
       <style dangerouslySetInnerHTML={{

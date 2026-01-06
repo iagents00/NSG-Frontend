@@ -109,11 +109,14 @@ export default function ChatInterface() {
 
         // 1. If Loading (Thinking...) -> Scroll to show spinner
         // 2. If User sent a message -> Scroll to confirm input
-        if (isLoading || isUserLast) {
-            chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        const isAssistantAndEmpty = lastMsg?.role === 'assistant' && !lastMsg.content;
+
+        // 1. If Loading (Thinking...) -> Scroll to center (safe with spacer)
+        // 2. If User sent a message -> Scroll to center (safe with spacer)
+        // 3. If AI response arrives (content exists) -> DO NOT SCROLL (keeps reading position at top)
+        if (isUserLast || (isLoading && isAssistantAndEmpty)) {
+           chatEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
         }
-        // 3. If AI finished responding (Text appears) -> DO NOT scroll.
-        //    This keeps the User's question and the *start* of the AI response in view.
     }, [messages, isLoading]);
 
 
@@ -159,6 +162,7 @@ export default function ChatInterface() {
                 mediaRecorder.start();
                 setIsRecording(true);
             } catch (err) {
+                console.error("Error accessing microphone:", err);
                 alert("Could not access microphone. Please allow permissions.");
             }
         }
@@ -294,258 +298,247 @@ export default function ChatInterface() {
     };
 
     return (
-        <div className="flex flex-col h-full w-full relative">
-
-            {/* --- LAYER 1: DYNAMIC ISLAND (Visuals) --- */}
-            {/* --- LAYER 1: DYNAMIC ISLAND (Visuals) --- */}
-            {/* Adjusted top padding to clear the "Volver" button on mobile */}
-            {/* Adjusted top padding to clear the "Volver" button on mobile */}
-            {/* Smooth transition for resize. md:pt-12 provides a bridge between mobile (20) and desktop (8) */}
-            <div className="absolute top-0 left-0 w-full flex justify-center pt-20 md:pt-12 lg:pt-8 z-40 pointer-events-none transition-all duration-500 ease-in-out">
-                <div className="pointer-events-auto w-full px-4 md:px-0 flex justify-center">
-                    <DynamicIsland
-                        currentMode={mode}
-                        setMode={setMode}
-                        selectedModel={selectedModel}
-                        setSelectedModel={setSelectedModel}
-                    />
-                </div>
+        <div className="flex flex-col h-full w-full relative overflow-hidden">
+        
+        {/* --- LAYER 1: DYNAMIC ISLAND (Visuals) --- */}
+        {/* Adjusted top padding to clear the "Volver" button on mobile but stay high */}
+        <div className="absolute top-0 left-0 w-full flex justify-center pt-16 md:pt-8 lg:pt-6 z-40 pointer-events-none transition-all duration-500 ease-in-out">
+            <div className="pointer-events-auto w-full px-4 md:px-0 flex justify-center">
+                <DynamicIsland 
+                    currentMode={mode} 
+                    setMode={setMode} 
+                    selectedModel={selectedModel}
+                    setSelectedModel={setSelectedModel}
+                />
             </div>
+        </div>
 
-            {/* --- LAYER 2: CHAT BODY --- */}
-            {/* Increased top padding on mobile only. RESTORED PC: pt-24 (md) lg:pt-40 */}
-            {/* Added large bottom padding (pb-32/40) to allow scrolling above the fixed input bar */}
-            {/* Added large bottom padding (pb-32/40) to allow scrolling above the fixed input bar */}
-            {/* Adjusted top padding: Mobile (pt-60), Tablet (md:pt-44), PC (lg:pt-48) + Smooth Transition */}
-            <div className="flex-1 overflow-y-auto custom-scroll p-4 md:p-6 lg:p-12 pt-60 md:pt-44 lg:pt-48 pb-32 md:pb-40 space-y-6 md:space-y-8 transition-all duration-500 ease-in-out">
+        {/* spacer to push chat body down below header area (Red Zone) */}
+        <div className="w-full h-52 md:h-60 shrink-0" />
 
-                {/* Messages List */}
-                <div className="flex flex-col gap-8 max-w-3xl mx-auto w-full">
-                    {messages.map((msg) => {
-                        // Calculate display content based on global selectedModel
-                        let displayContent: string | null = msg.content;
-                        let isWaiting = false;
+        {/* --- LAYER 2: CHAT BODY (Restricted to Yellow Zone) --- */}
+        <div className="flex-1 min-h-0 overflow-y-auto custom-scroll p-4 md:p-6 lg:p-12 pb-12 space-y-6 md:space-y-8 transition-all duration-500 ease-in-out">
+            
+            {/* Messages List */}
+            <div className="flex flex-col gap-6 max-w-3xl mx-auto w-full">
+                {messages.map((msg) => {
+                    // Calculate display content based on global selectedModel
+                    let displayContent: string = msg.content;
+                    let isWaiting = false;
 
-                        if (msg.role === 'assistant') {
+                    if (msg.role === 'assistant') {
+                        // Try parsing JSON if it looks like it
+                        if (msg.content && typeof msg.content === 'string' && msg.content.trim().startsWith('{')) {
                             try {
-                                if (msg.content && msg.content.trim().startsWith('{')) {
-                                    const parsed = JSON.parse(msg.content);
-                                    if (parsed.openAI_response || parsed.gemini_response) {
-                                        if (selectedModel === 'Chat GPT') {
-                                            displayContent = parsed.openAI_response || "No OpenAI response available.";
-                                        } else if (selectedModel === 'Gemini') {
-                                            displayContent = parsed.gemini_response || null;
-                                        } else if (selectedModel === 'Claude') {
-                                            displayContent = parsed.claude_response || null;
-                                        }
-                                    }
-                                } else {
-                                    // Simple string - assume it belongs to Default/GPT
-                                    if (selectedModel !== 'Chat GPT') {
-                                        displayContent = null;
-                                    }
-                                }
+                                const parsed = JSON.parse(msg.content);
+                                
+                                // 1. Try specific model
+                                if (selectedModel === 'Chat GPT' && parsed.openAI_response) displayContent = parsed.openAI_response;
+                                else if (selectedModel === 'Gemini' && parsed.gemini_response) displayContent = parsed.gemini_response;
+                                else if (selectedModel === 'Claude' && parsed.claude_response) displayContent = parsed.claude_response;
+                                
+                                // 2. General Fallbacks
+                                else if (parsed.response) displayContent = parsed.response;
+                                else if (parsed.output) displayContent = parsed.output;
+                                else if (parsed.text) displayContent = parsed.text;
+                                
+                                // 3. Cross-Model Fallbacks (Show *something* rather than nothing)
+                                else if (parsed.openAI_response) displayContent = parsed.openAI_response;
+                                else if (parsed.gemini_response) displayContent = parsed.gemini_response;
+                                else if (parsed.claude_response) displayContent = parsed.claude_response;
+                                
                             } catch (e) {
-                                // Fallback
-                                if (selectedModel !== 'Chat GPT') {
-                                    displayContent = null;
-                                }
+                                // JSON parse failed, keep original raw text
+                                displayContent = msg.content;
                             }
-
-                            if (!displayContent) isWaiting = true;
                         }
+                        
+                        if (!displayContent || displayContent.length === 0) isWaiting = true;
+                    }
 
-                        return (
-                            // Removed 'animate-fade-in-up' from here which causes re-trigger shake on updates
-                            <div key={msg.id} className={clsx("flex w-full", msg.role === 'user' ? "justify-end" : "justify-start")}>
-
-                                {msg.role === 'user' ? (
-                                    // USER MESSAGE - Distinct "Modal" / Card Style (Google Blue)
-                                    <div className="bg-[#0b57d0] text-white px-6 py-4 rounded-[24px] rounded-br-[4px] shadow-sm shadow-blue-900/10 text-[16px] max-w-[80%] leading-relaxed font-normal selection:bg-white/20 tracking-wide">
-                                        {msg.content}
-                                    </div>
-                                ) : (
-                                    // AI MESSAGE
-                                    <div className="flex gap-5 group w-full">
-                                        <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-1">
-                                            <BrandAtom className="w-8 h-8" variant="colored" />
-                                        </div>
-
-                                        <div className="flex-1 min-w-0 pt-1.5">
-                                            {msg.type === 'analysis' ? (
-                                                <NewsAnalysisResult
-                                                    tag={msg.metadata?.tag}
-                                                    roleContext={msg.metadata?.roleContext}
-                                                />
+                    return (
+                        <div key={msg.id} className={clsx("flex w-full animate-fade-in-up", msg.role === 'user' ? "justify-end" : "justify-start")}>
+                            
+                            {msg.role === 'user' ? (
+                            // USER MESSAGE - Apple Pro Blue Bubble
+                            <div className="bg-[#007AFF] text-white px-5 py-3 rounded-[20px] rounded-br-[4px] shadow-sm text-[16px] max-w-[85%] leading-relaxed font-normal tracking-wide selection:bg-white/30">
+                                {msg.content}
+                            </div>
+                            ) : (
+                            // AI MESSAGE - Clean Pro Text
+                            <div className="flex gap-4 group w-full max-w-full items-start">
+                                {/* Pro Apple Avatar */}
+                                <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-gradient-to-b from-white to-slate-50 border border-slate-200/60 shadow-[0_2px_4px_rgba(0,0,0,0.02)]">
+                                    <BrandAtom className="w-5 h-5" variant="colored" />
+                                </div>
+                                
+                                <div className="flex-1 min-w-0">
+                                    {msg.type === 'analysis' ? (
+                                        <NewsAnalysisResult 
+                                        tag={msg.metadata?.tag}
+                                        roleContext={msg.metadata?.roleContext}
+                                        />
+                                    ) : (
+                                        <div className="text-[16px] text-[#111827] leading-7 font-normal tracking-normal pt-0.5">
+                                            {!isWaiting ? (
+                                                <div className="prose prose-slate max-w-none prose-p:text-slate-800 prose-headings:text-slate-900 prose-strong:text-slate-900 prose-a:text-[#007AFF] prose-code:text-[#eb5757] prose-li:text-slate-800 [&>*:first-child]:mt-0">
+                                                    <ReactMarkdown 
+                                                        remarkPlugins={[remarkGfm]}
+                                                        rehypePlugins={[rehypeRaw]}
+                                                        components={{
+                                                            h1: ({node, ...props}) => <h1 className="text-2xl font-bold mt-6 mb-3 tracking-tight" {...props} />,
+                                                            h2: ({node, ...props}) => <h2 className="text-xl font-bold mt-5 mb-2 tracking-tight" {...props} />,
+                                                            h3: ({node, ...props}) => <h3 className="text-lg font-semibold mt-4 mb-2" {...props} />,
+                                                            p: ({node, ...props}) => <p className="mb-3 leading-relaxed" {...props} />,
+                                                            ul: ({node, ...props}) => <ul className="list-disc pl-5 mb-3 space-y-1" {...props} />,
+                                                            ol: ({node, ...props}) => <ol className="list-decimal pl-5 mb-3 space-y-1" {...props} />,
+                                                            li: ({node, ...props}) => <li className="pl-1" {...props} />,
+                                                            code: ({node, inline, className, children, ...props}: any) => {
+                                                                return inline ? (
+                                                                    <code className="bg-slate-100 px-1.5 py-0.5 rounded text-[13px] font-mono text-[#D12F2F] font-medium align-middle" {...props}>{children}</code>
+                                                                ) : (
+                                                                    <span className="block bg-[#1C1C1E] rounded-xl p-4 my-4 overflow-x-auto shadow-sm">
+                                                                        <code className="text-sm font-mono text-white block whitespace-pre" {...props}>{children}</code>
+                                                                    </span>
+                                                                );
+                                                            },
+                                                            blockquote: ({node, ...props}) => <blockquote className="border-l-[3px] border-slate-300 pl-4 py-1 my-3 text-slate-500 italic" {...props} />,
+                                                            table: ({node, ...props}) => <div className="overflow-x-auto my-4 rounded-lg border border-slate-200"><table className="min-w-full divide-y divide-slate-200" {...props} /></div>,
+                                                            th: ({node, ...props}) => <th className="bg-slate-50 px-4 py-2 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider" {...props} />,
+                                                            td: ({node, ...props}) => <td className="px-4 py-2 whitespace-nowrap text-sm text-slate-600 border-t border-slate-100" {...props} />,
+                                                            span: ({node, ...props}) => <span {...props} />
+                                                        }}
+                                                    >
+                                                        {displayContent || ''}
+                                                    </ReactMarkdown>
+                                                </div>
                                             ) : (
-                                                <div className="text-[16px] text-[#1f1f1f] leading-8 font-normal tracking-normal animate-fade-in">
-                                                    {!isWaiting ? (
-                                                        <div className="prose prose-slate max-w-none">
-                                                            <ReactMarkdown
-                                                                remarkPlugins={[remarkGfm]}
-                                                                rehypePlugins={[rehypeRaw]}
-                                                                components={{
-                                                                    // Notion-like styling overrides
-                                                                    h1: ({ node, ...props }) => <h1 className="text-2xl font-bold mt-6 mb-4 text-slate-900 tracking-tight" {...props} />,
-                                                                    h2: ({ node, ...props }) => <h2 className="text-xl font-bold mt-5 mb-3 text-slate-800 tracking-tight" {...props} />,
-                                                                    h3: ({ node, ...props }) => <h3 className="text-lg font-semibold mt-4 mb-2 text-slate-800" {...props} />,
-                                                                    p: ({ node, ...props }) => <p className="mb-4 leading-relaxed text-slate-700" {...props} />,
-                                                                    ul: ({ node, ...props }) => <ul className="list-disc pl-6 mb-4 space-y-1 text-slate-700" {...props} />,
-                                                                    ol: ({ node, ...props }) => <ol className="list-decimal pl-6 mb-4 space-y-1 text-slate-700" {...props} />,
-                                                                    li: ({ node, ...props }) => <li className="pl-1" {...props} />,
-                                                                    strong: ({ node, ...props }) => <strong className="font-semibold text-slate-900" {...props} />,
-                                                                    code: ({ node, inline, className, children, ...props }: any) => {
-                                                                        return inline ? (
-                                                                            <code className="bg-slate-100 px-1.5 py-0.5 rounded text-[13px] font-mono text-[#e01e5a] border border-slate-200 align-middle" {...props}>{children}</code>
-                                                                        ) : (
-                                                                            <div className="bg-[#1e1e1e] rounded-lg p-4 my-4 overflow-x-auto border border-slate-800 shadow-sm">
-                                                                                <code className="text-sm font-mono text-slate-200 block whitespace-pre" {...props}>{children}</code>
-                                                                            </div>
-                                                                        );
-                                                                    },
-                                                                    blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-slate-300 pl-4 italic my-4 text-slate-600 bg-slate-50 py-2 pr-2 rounded-r" {...props} />,
-                                                                    a: ({ node, ...props }) => <a className="text-blue-600 hover:underline cursor-pointer font-medium" {...props} />,
-                                                                    table: ({ node, ...props }) => <div className="overflow-x-auto my-4"><table className="min-w-full divide-y divide-slate-200 border border-slate-200" {...props} /></div>,
-                                                                    th: ({ node, ...props }) => <th className="bg-slate-50 px-4 py-2 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider border-b" {...props} />,
-                                                                    td: ({ node, ...props }) => <td className="px-4 py-2 whitespace-nowrap text-sm text-slate-600 border-b" {...props} />,
-                                                                    // Ensure span passes through with styles
-                                                                    span: ({ node, ...props }) => <span {...props} />
-                                                                }}
-                                                            >
-                                                                {displayContent || ''}
-                                                            </ReactMarkdown>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="flex items-center gap-3 text-slate-400 mt-2 px-1 animate-pulse">
-                                                            <div className="opacity-70">
-                                                                {selectedModel === 'Gemini' ? <Sparkles className="w-4 h-4" /> :
-                                                                    selectedModel === 'Claude' ? <BrainCircuit className="w-4 h-4" /> :
-                                                                        <Bot className="w-4 h-4" />}
-                                                            </div>
-                                                            <span className="text-[14px] font-medium tracking-wide">
-                                                                {msg.content ? `${selectedModel} response hidden.` : `Generando respuesta con ${selectedModel}...`}
-                                                            </span>
-                                                        </div>
-                                                    )}
+                                                <div className="flex items-center gap-2 text-slate-400 mt-1 px-1 animate-pulse">
+                                                     <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce delay-75"></div>
+                                                     <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce delay-150"></div>
+                                                     <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce delay-200"></div>
                                                 </div>
                                             )}
                                         </div>
-                                    </div>
-                                )}
+                                    )}
+                                </div>
                             </div>
-                        );
-                    })}
-                </div>
-
-                {/* Loading State (Thinking...) */}
-                {/* Loading State (Atom) */}
-                {isLoading && !messages[messages.length - 1]?.content && (
-                    <div className="flex flex-col items-center justify-center mt-8 animate-fade-in-up w-full max-w-3xl mx-auto gap-4">
-                        <div className="relative flex items-center justify-center">
-                            <AtomEffect className="w-20 h-20" />
-                        </div>
-                        <span className="text-sm font-medium text-slate-500 animate-pulse tracking-wide">PENSANDO...</span>
+                        )}
                     </div>
-                )}
+                );
+            })}
+        </div>
 
-                <div ref={chatEndRef} />
+        {/* Loading State (Atom at Top/Center) */}
+        {isLoading && !messages[messages.length - 1]?.content && (
+            <div className={clsx("flex flex-col flex-1 items-center w-full gap-6 animate-fade-in-up", messages.length <= 2 ? "justify-start pt-0 md:pt-6" : "justify-center py-12")}>
+                <div className="relative flex items-center justify-center scale-[1.5]">
+                    <AtomEffect className="w-20 h-20" />
+                </div>
+                <span className="text-sm font-medium text-slate-500 animate-pulse tracking-[0.2em] font-display uppercase">Pensando...</span>
             </div>
+        )}
+        
+        {/* Spacer to guarantee scroll clearance above the fixed input area */}
+        <div className="w-full h-40 shrink-0" />
+        
+        <div ref={chatEndRef} className="h-px w-full" />
+      </div>
 
-            {/* --- LAYER 3: INPUT AREA (Stacked Gemini Style) --- */}
-            {/* --- LAYER 3: INPUT AREA (Fixed Bottom Gemini Style) --- */}
-            <div className="absolute bottom-0 left-0 w-full z-40 px-4 pb-4 md:pb-6 pt-12 bg-gradient-to-t from-[#f0f4f9] via-[#f0f4f9] via-60% to-transparent">
-                <div className="max-w-3xl mx-auto">
-                    {!isContextCached ? (
-                        <div className="flex items-center justify-center gap-4 text-[15px] text-[#0b57d0] font-medium py-5 bg-white rounded-[24px] shadow-sm animate-pulse">
-                            <Loader2 className="w-5 h-5 animate-spin" />
-                            <span>Sincronizando Contexto de {currentRole?.toUpperCase()}...</span>
-                        </div>
-                    ) : (
-                        <form onSubmit={handleSubmit} className="relative group">
-                            <div className="relative flex flex-col bg-white rounded-[28px] shadow-[0_4px_20px_rgba(0,0,0,0.08)] border border-slate-100 focus-within:shadow-[0_8px_30px_rgba(0,0,0,0.12)] focus-within:border-slate-200 transition-all duration-300">
-                                {/* Attachment Preview */}
-                                {attachment && (
-                                    <div className="px-6 pb-2 pt-0 flex">
-                                        <div className="flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full text-sm animate-fade-in">
-                                            <FileText className="w-4 h-4" />
-                                            <span className="max-w-[150px] truncate">{attachment.name}</span>
-                                            <button
-                                                type="button"
-                                                onClick={handleRemoveAttachment}
-                                                className="ml-1 p-0.5 hover:bg-blue-100 rounded-full cursor-pointer"
-                                            >
-                                                <X className="w-3 h-3" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Top: Input (Textarea for Multiline) */}
-                                <textarea
-                                    ref={textareaRef}
-                                    value={input}
-                                    onChange={(e) => setInput(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' && !e.shiftKey) {
-                                            e.preventDefault();
-                                            handleSubmit(e as any);
-                                        }
-                                    }}
-                                    disabled={isLoading}
-                                    rows={1}
-                                    className="w-full bg-transparent border-none pt-4 pb-2 px-6 font-normal text-[#1f1f1f] placeholder:text-slate-500 text-[16px] focus:ring-0 focus:outline-none disabled:opacity-50 resize-none custom-scroll"
-                                    placeholder={isRecording ? "Grabando audio..." : (attachment ? "Añade un comentario..." : `Pregunta a ${currentRole || 'NSG'}...`)}
-                                />
-
-                                {/* Hidden File Input */}
-                                <input
-                                    type="file"
-                                    ref={fileInputRef}
-                                    className="hidden"
-                                    onChange={handleFileChange}
-                                />
-
-                                {/* Bottom: Icons & Send */}
-                                <div className="flex justify-between items-center px-4 pb-3">
-                                    <div className="flex gap-1">
-                                        <button
-                                            type="button"
-                                            onClick={handleFileSelect}
-                                            className="p-2.5 text-slate-500 hover:bg-[#dce3f1] rounded-full transition-colors cursor-pointer"
-                                        >
-                                            <Paperclip className="w-5 h-5" />
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={handleMicClick}
-                                            className={clsx(
-                                                "p-2.5 rounded-full transition-colors cursor-pointer",
-                                                isRecording ? "text-red-500 bg-red-100 hover:bg-red-200 animate-pulse" : "text-slate-500 hover:bg-[#dce3f1]"
-                                            )}
-                                        >
-                                            <Mic className="w-5 h-5" />
-                                        </button>
-                                    </div>
-
-                                    <button
-                                        type="submit"
-                                        disabled={isLoading || (!input.trim() && !attachment)}
-                                        className={`
-                                    w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300
-                                    ${(input.trim() || attachment) ? 'bg-[#0b57d0] text-white hover:bg-blue-700 cursor-pointer' : 'bg-transparent text-slate-400 cursor-default'}
-                                `}
+      {/* --- LAYER 3: INPUT AREA (Stacked Gemini Style) --- */}
+      <div className="absolute bottom-0 left-0 w-full z-40 px-4 pb-6 md:pb-8 pt-12 bg-gradient-to-t from-[#F5F5F7] via-[#F5F5F7] via-60% to-transparent pointer-events-none">
+        <div className="max-w-3xl mx-auto pointer-events-auto">
+            {!isContextCached ? (
+                <div className="flex items-center justify-center gap-4 text-[15px] text-[#0b57d0] font-medium py-5 bg-white rounded-[24px] shadow-sm animate-pulse">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>Sincronizando Contexto de {currentRole?.toUpperCase()}...</span>
+                </div>
+            ) : (
+                <form onSubmit={handleSubmit} className="relative group">
+                    <div className="relative flex flex-col bg-white rounded-[28px] shadow-[0_4px_20px_rgba(0,0,0,0.08)] border border-slate-100 focus-within:shadow-[0_8px_30px_rgba(0,0,0,0.12)] focus-within:border-slate-200 transition-all duration-300">
+                        {/* Attachment Preview */}
+                        {attachment && (
+                            <div className="px-6 pb-2 pt-0 flex">
+                                <div className="flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full text-sm animate-fade-in">
+                                    <FileText className="w-4 h-4" />
+                                    <span className="max-w-[150px] truncate">{attachment.name}</span>
+                                    <button 
+                                        type="button"
+                                        onClick={handleRemoveAttachment}
+                                        className="ml-1 p-0.5 hover:bg-blue-100 rounded-full cursor-pointer"
                                     >
-                                        <ArrowUp className="w-5 h-5" />
+                                        <X className="w-3 h-3" />
                                     </button>
                                 </div>
                             </div>
-                            <div className="text-center mt-2">
-                                <p className="text-[11px] text-slate-400">NSG Intelligence puede cometer errores. Considera verificar la información importante.</p>
+                        )}
+
+                        {/* Top: Input (Textarea for Multiline) */}
+                        <textarea
+                            ref={textareaRef}
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    handleSubmit(e as any);
+                                }
+                            }}
+                            disabled={isLoading}
+                            rows={1}
+                            className="w-full bg-transparent border-none pt-4 pb-2 px-6 font-normal text-[#1f1f1f] placeholder:text-slate-500 text-[16px] focus:ring-0 focus:outline-none disabled:opacity-50 resize-none custom-scroll"
+                            placeholder={isRecording ? "Grabando audio..." : (attachment ? "Añade un comentario..." : `Pregunta a ${currentRole || 'NSG'}...`)}
+                        />
+
+                        {/* Hidden File Input */}
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            className="hidden"
+                            onChange={handleFileChange}
+                        />
+
+                        {/* Bottom: Icons & Send */}
+                        <div className="flex justify-between items-center px-4 pb-3">
+                            <div className="flex gap-1">
+                                <button
+                                    type="button"
+                                    onClick={handleFileSelect}
+                                    className="p-2.5 text-slate-500 hover:bg-[#dce3f1] rounded-full transition-colors cursor-pointer"
+                                >
+                                    <Paperclip className="w-5 h-5" />
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleMicClick}
+                                    className={clsx(
+                                        "p-2.5 rounded-full transition-colors cursor-pointer",
+                                        isRecording ? "text-red-500 bg-red-100 hover:bg-red-200 animate-pulse" : "text-slate-500 hover:bg-[#dce3f1]"
+                                    )}
+                                >
+                                    <Mic className="w-5 h-5" />
+                                </button>
                             </div>
-                        </form>
-                    )}
-                </div>
-            </div>
+
+                            <button
+                                type="submit"
+                                disabled={isLoading || (!input.trim() && !attachment)}
+                                className={`
+                            w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300
+                            ${(input.trim() || attachment) ? 'bg-[#007AFF] text-white hover:bg-blue-600 cursor-pointer shadow-md' : 'bg-slate-100 text-slate-400 cursor-default'}
+                        `}
+                            >
+                                <ArrowUp className="w-5 h-5" />
+                            </button>
+                        </div>
+                    </div>
+                    <div className="text-center mt-2">
+                        <p className="text-[11px] text-slate-400">NSG Intelligence puede cometer errores. Considera verificar la información importante.</p>
+                    </div>
+                </form>
+            )}
         </div>
-    );
+      </div>
+    </div>
+  );
 }

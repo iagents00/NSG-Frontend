@@ -47,7 +47,7 @@ export default function DynamicIsland({ currentMode, setMode, selectedModel, set
             "flex flex-nowrap items-center p-1.5 gap-1",
             "bg-[#020617] supports-[backdrop-filter]:bg-[#020617]/90 backdrop-blur-3xl", // Ultra-dark Navy/Black for max contrast
             "border border-white/10 ring-1 ring-white/5",
-            "rounded-[2rem] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)]", // Reduced, smoother "Pro" shadow
+            "rounded-[2rem] shadow-[0_8px_24px_-6px_rgba(0,0,0,0.3)]", // Reduced, smoother "Pro" shadow
             "overflow-x-auto scrollbar-hide",
             "transition-all duration-500 ease-spring"
         )}>
@@ -83,9 +83,9 @@ export default function DynamicIsland({ currentMode, setMode, selectedModel, set
         </div>
       </div>
 
-      {/* 3. Secondary Intelligence Selector (Glass Pill) */}
+      {/* 3. Secondary Intelligence Selector (Apple Pro Segmented Control) */}
       {setSelectedModel && selectedModel && (
-        <div className="animate-fade-in-up flex items-center justify-center p-1 rounded-full bg-white/60 backdrop-blur-xl border border-white/40 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 transform">
+        <div className="animate-fade-in-up flex items-center p-1 rounded-full bg-slate-200/40 backdrop-blur-md border border-white/20 shadow-inner group/selector relative">
              {['Chat GPT', 'Gemini', 'Claude'].map((model) => {
                  const isModelActive = selectedModel === model;
                  return (
@@ -93,26 +93,26 @@ export default function DynamicIsland({ currentMode, setMode, selectedModel, set
                         key={model}
                         onClick={() => setSelectedModel(model)}
                         className={clsx(
-                            "px-4 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 flex items-center gap-2 cursor-pointer relative overflow-hidden",
-                            isModelActive 
-                                ? "text-slate-900 bg-white shadow-sm ring-1 ring-black/5" 
-                                : "text-slate-500 hover:text-slate-800 hover:bg-slate-100/50"
+                            "relative px-4 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-300 ease-out flex items-center gap-1.5 cursor-pointer z-10",
+                            isModelActive
+                                ? "text-slate-900" // Active: Dark text
+                                : "text-slate-500 hover:text-slate-700" // Inactive: Gray
                         )}
                     >
                         {isModelActive && (
                             <m.div 
                                 layoutId="activeModelIndicator"
-                                className="absolute inset-0 bg-white rounded-full z-[-1]"
-                                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                className="absolute inset-0 bg-white rounded-full z-[-1] shadow-[0_2px_8px_rgba(0,0,0,0.12)]" // Floating white pill
+                                transition={{ type: "spring", stiffness: 350, damping: 25 }}
                             />
                         )}
                         
-                        {/* Status Dot */}
-                        <div className={clsx(
-                            "w-1.5 h-1.5 rounded-full transition-colors", 
-                            isModelActive ? "bg-blue-600 scale-110" : "bg-slate-300"
+                        {/* Minimal Indicator (Optional, can remove if too noisy) */}
+                         <div className={clsx(
+                            "w-1 h-1 rounded-full transition-all duration-300", 
+                            isModelActive ? "bg-blue-500" : "bg-transparent"
                         )} />
-                        
+
                         {model}
                     </button>
                  );
