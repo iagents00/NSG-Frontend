@@ -107,7 +107,13 @@ function LoginContent() {
 
             {/* Login Form */}
             <div className="w-full relative">
-                <div className="space-y-6">
+                <form 
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        handleLogin();
+                    }}
+                    className="space-y-6"
+                >
                     <div className="space-y-4">
                         <div className="space-y-2">
                             <label className="text-xs font-bold text-slate-500 ml-1 uppercase tracking-wider">Usuario / Email</label>
@@ -146,20 +152,21 @@ function LoginContent() {
 
                     <div className="flex items-center justify-between pt-2">
                         <button 
+                            type="button"
                             onClick={handleBack}
                             className="text-slate-500 hover:text-slate-800 text-sm font-medium transition-colors flex items-center gap-1 pl-1 cursor-pointer"
                         >
                             <ChevronLeft className="w-4 h-4" /> Atrás
                         </button>
                         <button 
-                            onClick={handleLogin}
+                            type="submit"
                             disabled={isAnimating}
                             className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 px-6 rounded-xl shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
                         >
                             {isAnimating ? "Verificando..." : "Acceder"}
                         </button>
                     </div>
-                </div>
+                </form>
 
                 {/* Register Link */}
                 <div className="mt-8 pt-6 border-t border-slate-100 flex justify-center text-sm">
