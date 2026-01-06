@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import api from "@/lib/api";
+import axios from "axios";
 import { useToast } from "@/components/ui/ToastProvider";
 import FathomTokenModal from "@/components/features/FathomTokenModal";
 import {
@@ -61,6 +62,7 @@ interface MeetingFolder {
   insights: number;
   transcripts?: TranscriptItem[];
   aiInfo?: AIInfo;
+  source?: "fathom" | "manual"; // Distinguished source
 }
 
 export default function NSGHorizon() {
@@ -71,10 +73,18 @@ export default function NSGHorizon() {
   // State
   const [folders, setFolders] = useState<MeetingFolder[]>([]);
   const [selectedFolder, setSelectedFolder] = useState<MeetingFolder | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isFathomLoading, setIsFathomLoading] = useState(false);
   const [checkedItems, setCheckedItems] = useState<number[]>([]);
   const [showFathomModal, setShowFathomModal] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
+  
+  // Initialize from localStorage for instant feedback
+  const [isConnected, setIsConnected] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('fathom_connected') === 'true';
+    }
+    return false;
+  });
+  
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const [fathomToken, setFathomToken] = useState<string | null>(null);
@@ -99,10 +109,19 @@ export default function NSGHorizon() {
           if (response.data.connected) {
             setIsConnected(true);
             setFathomToken('***');
+            localStorage.setItem('fathom_connected', 'true');
+          } else {
+             // If server says disconnected but local said connected, fix it
+            if (localStorage.getItem('fathom_connected') === 'true') {
+               setIsConnected(false);
+               localStorage.removeItem('fathom_connected');
+            }
           }
         }
       } catch (error) {
         console.error("Error checking Fathom connection:", error);
+         // Don't necessarily disconnect on error, could be network blip, 
+         // but if it persists the user will see error elsewhere
       }
     };
 
@@ -124,6 +143,7 @@ export default function NSGHorizon() {
       if (response.status === 200 || response.status === 204) {
         setFathomToken(null);
         setIsConnected(false);
+        localStorage.removeItem('fathom_connected'); // Clear Cache
         setFolders([]); // Limpiar las sesiones de la interfaz
         setSelectedFolder(null); // Cerrar la vista de detalle si estaba abierta
         showToast('Fathom desconectado y datos limpiados', 'info');
@@ -140,13 +160,13 @@ export default function NSGHorizon() {
     const fetchHorizonData = async () => {
       // Si no estamos conectados, no intentamos cargar datos de Fathom
       if (!isConnected) {
-        setIsLoading(false);
+        setIsFathomLoading(false);
         setFolders([]);
         return;
       }
 
       try {
-        setIsLoading(true);
+        setIsFathomLoading(true);
         const response = await api.get('/fathom/meetings');
 
         if (response.status !== 200) {
@@ -226,12 +246,39 @@ export default function NSGHorizon() {
       } catch (error) {
         showToast("Error cargando datos de Horizon", "error");
       } finally {
-        setIsLoading(false);
+        setIsFathomLoading(false);
       }
     };
 
     fetchHorizonData();
   }, [userId, isConnected]);
+
+  // Fetch Manual Transcriptions
+  useEffect(() => {
+    const fetchTranscriptions = async () => {
+      if (!userId) return;
+
+      try {
+        const response = await api.get(`/transcriptions/transcription/user/${userId}`);
+        if (response.status === 200) {
+          const mapped = response.data.map((t: any) => ({
+            id: t._id,
+            title: t.content.length > 30 ? t.content.substring(0, 30) + "..." : t.content,
+            fullContent: t.content, // Store full content for detail view
+            date: new Date(t.createdAt).toLocaleDateString(),
+            type: t.type || 'text',
+            size: (t.content.length / 1000).toFixed(1) + 'k chars'
+          }));
+          // Set ONLY the data from user_transcriptions
+          setManualRecordings(mapped);
+        }
+      } catch (e) {
+        console.error("Error fetching transcriptions:", e);
+      }
+    };
+
+    fetchTranscriptions();
+  }, [userId, activeTab]);
 
   const handleGenerateAnalysis = async () => {
     if (!selectedFolder || isAnalyzing) return;
@@ -240,9 +287,16 @@ export default function NSGHorizon() {
       setIsAnalyzing(true);
       showToast("Generando análisis profundo. Esto puede tardar unos segundos...", "info");
 
-      const response = await api.post('/fathom/generate-analysis', {
-        recording_id: selectedFolder.id
-      });
+      let response;
+      if (selectedFolder.source === 'manual') {
+         response = await api.post('/transcriptions/generate-analysis', {
+          transcription_id: selectedFolder.id
+        });
+      } else {
+        response = await api.post('/fathom/generate-analysis', {
+          recording_id: selectedFolder.id
+        });
+      }
 
       if (response.status !== 200 && response.status !== 201) {
         throw new Error(`Error en el servidor: ${response.status}`);
@@ -254,7 +308,12 @@ export default function NSGHorizon() {
         showToast("¡Análisis generado con éxito! Cargando resultados...", "success");
 
         // Forzar una recarga del análisis ahora que sabemos que existe
-        const analysisResponse = await api.get(`/fathom/analysis/${selectedFolder.id}`);
+        let analysisResponse;
+        if (selectedFolder.source === 'manual') {
+             analysisResponse = await api.get(`/transcriptions/analysis/${selectedFolder.id}`);
+        } else {
+             analysisResponse = await api.get(`/fathom/analysis/${selectedFolder.id}`);
+        }
 
         if (analysisResponse.status === 200) {
           const analysisData = analysisResponse.data;
@@ -284,7 +343,12 @@ export default function NSGHorizon() {
       if (!selectedFolder) return;
 
       try {
-        const response = await api.get(`/fathom/analysis/${selectedFolder.id}`);
+        let response;
+        if (selectedFolder.source === 'manual') {
+            response = await api.get(`/transcriptions/analysis/${selectedFolder.id}`);
+        } else {
+            response = await api.get(`/fathom/analysis/${selectedFolder.id}`);
+        }
 
         if (response.status === 200) {
           const data = response.data;
@@ -307,7 +371,7 @@ export default function NSGHorizon() {
     };
 
     checkExistingAnalysis();
-  }, [selectedFolder?.id]);
+  }, [selectedFolder?.id, selectedFolder?.source]);
 
   // Scroll to top when folder changes
   useEffect(() => {
@@ -330,25 +394,22 @@ export default function NSGHorizon() {
 
     // Save to backend
     try {
-      await api.put(`/fathom/analysis/${selectedFolder.id}/steps`, { 
-        checked_steps: newCheckedItems 
-      });
+      if (selectedFolder.source === 'manual') {
+          await api.put(`/transcriptions/analysis/${selectedFolder.id}/steps`, { 
+            checked_steps: newCheckedItems 
+          });
+      } else {
+          await api.put(`/fathom/analysis/${selectedFolder.id}/steps`, { 
+            checked_steps: newCheckedItems 
+          });
+      }
       showToast("Progreso guardado", "success");
     } catch (error) {
       console.error("Error saving progress:", error);
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-          <p className="text-slate-500 font-medium">Cargando NSG Horizon...</p>
-        </div>
-      </div>
-    );
-  }
+
 
   // --- VIEW: LIST (Fathom or Manual) ---
   if (!selectedFolder) {
@@ -473,7 +534,12 @@ export default function NSGHorizon() {
                 </div>
               </div>
 
-              {folders.length === 0 ? (
+              {isFathomLoading ? (
+                 <div className="flex flex-col items-center justify-center py-20">
+                    <Loader2 className="w-10 h-10 text-blue-600 animate-spin mb-4" />
+                    <p className="text-slate-500 font-medium">Sincronizando grabaciones...</p>
+                 </div>
+              ) : folders.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-slate-400 border-2 border-dashed border-slate-200 rounded-4xl bg-slate-50/30">
                   <Folder className="w-12 h-12 mb-4 opacity-50" />
                   <p className="font-medium">No hay grabaciones de Fathom disponibles.</p>
@@ -567,7 +633,7 @@ export default function NSGHorizon() {
                   </div>
 
                   <h2 className="text-3xl sm:text-4xl font-display font-bold text-navy-950 leading-tight">
-                    NSG <span className="text-blue-600 underline decoration-blue-200 decoration-4 underline-offset-8 italic">
+                    NSG <span className="text-blue-600">
                       {manualInputType === 'audio' ? "Neural Studio." : "Text Analysis."}
                     </span>
                   </h2>
@@ -643,23 +709,47 @@ export default function NSGHorizon() {
                               Eliminar
                             </button>
                             <button 
-                              onClick={(e) => {
+                              onClick={async (e) => {
                                 e.stopPropagation();
+                                if (!selectedFile) return;
+
                                 setIsUploading(true);
-                                setTimeout(() => {
+                                try {
+                                  const formData = new FormData();
+                                  formData.append('audio', selectedFile);
+                                  formData.append('userId', userId || '');
+                                  formData.append('fileName', selectedFile.name);
+
+                                  // Llamamos a nuestro backend en lugar de a n8n directamente
+                                  const response = await api.post('/transcriptions/proxy-audio-analysis', formData, {
+                                    headers: {
+                                      'Content-Type': 'multipart/form-data'
+                                    }
+                                  });
+
+                                  if (response.data.success) {
+                                    const savedDoc = response.data.data;
+                                    setManualRecordings(prev => [{
+                                      id: savedDoc._id,
+                                      title: savedDoc.content.substring(0, 30) + "...",
+                                      fullContent: savedDoc.content,
+                                      date: new Date(savedDoc.createdAt).toLocaleDateString(),
+                                      type: 'audio',
+                                      size: (savedDoc.content.length / 1000).toFixed(1) + 'k chars'
+                                    }, ...prev]);
+
+                                    showToast("¡Análisis completado y guardado!", "success");
+                                    setSelectedFile(null);
+                                  }
+                                } catch (error) {
+                                  console.error("Error enviando audio a n8n:", error);
+                                  showToast("Error al enviar el audio para análisis", "error");
+                                } finally {
                                   setIsUploading(false);
-                                  setManualRecordings(prev => [{
-                                    id: Math.random(),
-                                    title: selectedFile.name,
-                                    date: new Date().toLocaleDateString(),
-                                    type: 'audio',
-                                    size: (selectedFile.size / (1024 * 1024)).toFixed(1) + ' MB'
-                                  }, ...prev]);
-                                  setSelectedFile(null);
-                                  showToast("Audio analizado correctamente", "success");
-                                }, 2000);
+                                }
                               }}
-                              className="px-6 py-3 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200"
+                              disabled={isUploading || !selectedFile}
+                              className="px-6 py-3 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200 disabled:opacity-50"
                             >
                               {isUploading ? "Procesando..." : "Comenzar Análisis"}
                             </button>
@@ -694,24 +784,43 @@ export default function NSGHorizon() {
                         </div>
                       </div>
                       <button 
-                        onClick={() => {
+                        onClick={async () => {
                           if (!manualTextContent.trim()) {
                             showToast("Por favor ingresa algún texto", "error");
                             return;
                           }
+
+                          if (!userId) {
+                            showToast("Debes iniciar sesión para guardar transcripciones", "error");
+                            return;
+                          }
+
                           setIsUploading(true);
-                          setTimeout(() => {
+                          try {
+                            const response = await api.post('/transcriptions/transcription', {
+                              userId,
+                              content: manualTextContent,
+                              type: 'text'
+                            });
+
+                            if (response.status === 201) {
+                              const savedT = response.data;
+                              setManualRecordings(prev => [{
+                                id: savedT._id, 
+                                title: savedT.content.substring(0, 30) + "...",
+                                date: new Date(savedT.createdAt).toLocaleDateString(),
+                                type: 'text',
+                                size: (savedT.content.length / 1000).toFixed(1) + 'k chars'
+                              }, ...prev]);
+                              setManualTextContent('');
+                              showToast("Transcripción guardada exitosamente", "success");
+                            }
+                          } catch (error) {
+                            console.error("Error saving transcription:", error);
+                            showToast("Error al procesar la transcripción", "error");
+                          } finally {
                             setIsUploading(false);
-                            setManualRecordings(prev => [{
-                              id: Math.random(),
-                              title: manualTextContent.substring(0, 30) + "...",
-                              date: new Date().toLocaleDateString(),
-                              type: 'text',
-                              size: (manualTextContent.length / 1000).toFixed(1) + 'k chars'
-                            }, ...prev]);
-                            setManualTextContent('');
-                            showToast("Transcripción analizada con éxito", "success");
-                          }, 1500);
+                          }
                         }}
                         disabled={!manualTextContent.trim() || isUploading}
                         className="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200 disabled:opacity-50 disabled:bg-slate-300 disabled:shadow-none flex items-center justify-center gap-3"
@@ -753,7 +862,32 @@ export default function NSGHorizon() {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {manualRecordings.map((rec) => (
-                    <div key={rec.id} className="bg-white p-6 rounded-4xl border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group cursor-pointer">
+                    <div 
+                      key={rec.id} 
+                      onClick={() => {
+                        // Map manual recording to MeetingFolder structure to reuse the Detail View
+                        const manualFolder: MeetingFolder = {
+                          id: rec.id,
+                          title: "Análisis Manual", // Or rec.title if it wasn't truncated
+                          description: rec.title, // Use the content snippet as description
+                          date: rec.date,
+                          timeStr: "N/A",
+                          shareUrl: "#",
+                          type: "Manual",
+                          insights: 0,
+                          source: 'manual',
+                          transcripts: [
+                            {
+                              speakerName: "Texto Original",
+                              time: "",
+                              text: rec.fullContent || rec.title 
+                            }
+                          ]
+                        };
+                        setSelectedFolder(manualFolder);
+                      }}
+                      className="bg-white p-6 rounded-4xl border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group cursor-pointer"
+                    >
                       <div className="flex items-center gap-4 mb-4">
                         <div className={clsx(
                           "w-12 h-12 rounded-2xl flex items-center justify-center transition-all",
@@ -778,7 +912,28 @@ export default function NSGHorizon() {
                             {rec.type}
                           </span>
                         </div>
-                        <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-navy-900 transition-colors" />
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              if (window.confirm("¿Estás seguro de que deseas eliminar este análisis?")) {
+                                try {
+                                  const response = await api.delete(`/transcriptions/transcription/${rec.id}`);
+                                  if (response.status === 200) {
+                                    setManualRecordings(prev => prev.filter(r => r.id !== rec.id));
+                                    showToast("Análisis eliminado correctamente", "success");
+                                  }
+                                } catch (error) {
+                                  showToast("Error al eliminar el análisis", "error");
+                                }
+                              }
+                            }}
+                            className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                          <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-navy-900 transition-colors" />
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -853,63 +1008,73 @@ export default function NSGHorizon() {
         <div className="flex flex-col gap-8 shrink-0">
 
           {/* 1. MAIN CONTEXT ENGINE CARD (Merged with Summary) */}
-          <div className="bg-navy-950 text-white p-8 rounded-[2.5rem] relative overflow-hidden shadow-2xl shrink-0 animate-fade-in-up">
-            <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none"></div>
-            <div className="absolute right-0 top-0 w-64 h-64 bg-blue-600/30 rounded-full blur-[80px] pointer-events-none"></div>
+          {/* 1. MAIN CONTEXT ENGINE CARD */}
+          <div className="bg-navy-950 text-white rounded-[2.5rem] relative overflow-hidden shadow-2xl shrink-0 animate-fade-in-up border border-white/5">
+            <div className="absolute inset-0 bg-grid-pattern opacity-5 pointer-events-none"></div>
+            <div className="absolute right-0 top-0 w-96 h-96 bg-blue-600/20 rounded-full blur-[100px] pointer-events-none"></div>
+            <div className="absolute left-0 bottom-0 w-64 h-64 bg-emerald-600/10 rounded-full blur-[80px] pointer-events-none"></div>
 
-            <div className="relative z-10 text-center sm:text-left">
-              <div className="bg-slate-50 p-8 rounded-[2.5rem] text-slate-900 relative overflow-hidden border border-slate-200 shadow-2xl">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-blue-500/20 rounded-xl">
-                    <Cpu className="w-5 h-5 text-blue-300" />
-                  </div>
-                  <h4 className="font-bold text-lg text-blue-100 uppercase tracking-widest">NSG Context Engine</h4>
+            <div className="relative z-10 p-8 sm:p-10">
+              {/* Header */}
+              <div className="flex items-center gap-4 mb-8">
+                <div className="w-12 h-12 bg-blue-600/20 rounded-2xl flex items-center justify-center border border-blue-500/30 shadow-lg shadow-blue-900/40">
+                  <Cpu className="w-6 h-6 text-blue-400" />
                 </div>
+                <div>
+                  <h4 className="font-display font-bold text-xl text-white tracking-tight">NSG Context Engine</h4>
+                  <p className="text-[10px] font-black text-blue-400/80 uppercase tracking-[0.2em]">Neural Strategy Analysis</p>
+                </div>
+              </div>
 
+              {/* Summary Box */}
+              <div className="bg-white/5 backdrop-blur-md border border-white/10 p-6 sm:p-8 rounded-3xl mb-8 relative group hover:bg-white/[0.07] transition-all duration-300">
+                <div className="absolute top-0 right-0 p-4 opacity-20">
+                  <Sparkles className="w-5 h-5 text-blue-400" />
+                </div>
                 <div className="relative">
                   <div className={clsx(
-                    "prose prose-invert prose-sm max-w-none transition-all duration-500 ease-in-out overflow-hidden relative",
+                    "prose prose-invert prose-sm max-w-none transition-all duration-500 ease-in-out overflow-hidden",
                     !isSummaryExpanded ? "max-h-24" : "max-h-[1000px]"
                   )}>
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {selectedFolder.description || "Sin descripción disponible."}
-                    </ReactMarkdown>
-
-                    {!isSummaryExpanded && selectedFolder.description && selectedFolder.description.length > 200 && (
-                      <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-navy-950 to-transparent pointer-events-none"></div>
-                    )}
+                    <div className="text-slate-200 leading-relaxed font-medium italic">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {selectedFolder.description || "Sin descripción disponible."}
+                      </ReactMarkdown>
+                    </div>
                   </div>
 
                   {selectedFolder.description && selectedFolder.description.length > 200 && (
                     <button
                       onClick={() => setIsSummaryExpanded(!isSummaryExpanded)}
-                      className="mt-4 flex items-center gap-2 text-xs font-bold text-blue-400 hover:text-blue-300 transition-colors uppercase tracking-widest group"
+                      className="mt-4 flex items-center gap-2 text-[10px] font-black text-blue-400 hover:text-blue-300 transition-colors uppercase tracking-widest"
                     >
                       {isSummaryExpanded ? (
-                        <>Ver menos <ChevronUp className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" /></>
+                        <>Ver menos <ChevronUp className="w-4 h-4" /></>
                       ) : (
-                        <>Desplegar resumen <ChevronDown className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" /></>
+                        <>Desplegar resumen <ChevronDown className="w-4 h-4" /></>
                       )}
                     </button>
                   )}
                 </div>
-              </div>     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-white/10 p-4 rounded-xl border border-slate-200 backdrop-blur-sm">
-                  <p className="text-[0.6rem] font-bold text-blue-300 uppercase mb-1">Punto de Dolor</p>
-                  <p className="text-sm font-bold truncate">
+              </div>
+
+              {/* Quick Insights Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="bg-rose-500/10 p-5 rounded-2xl border border-rose-500/20 backdrop-blur-sm group hover:bg-rose-500/15 transition-all">
+                  <p className="text-[10px] font-black text-rose-400 uppercase mb-2 tracking-widest">Punto de Dolor</p>
+                  <p className="text-sm font-bold text-white leading-snug">
                     {selectedFolder.aiInfo?.punto_de_dolor?.titulo || "Analizando..."}
                   </p>
                 </div>
-                <div className="bg-white/10 p-4 rounded-xl border border-slate-200 backdrop-blur-sm">
-                  <p className="text-[0.6rem] font-bold text-emerald-300 uppercase mb-1">Oportunidad</p>
-                  <p className="text-sm font-bold truncate">
+                <div className="bg-emerald-500/10 p-5 rounded-2xl border border-emerald-500/20 backdrop-blur-sm group hover:bg-emerald-500/15 transition-all">
+                  <p className="text-[10px] font-black text-emerald-400 uppercase mb-2 tracking-widest">Oportunidad</p>
+                  <p className="text-sm font-bold text-white leading-snug">
                     {selectedFolder.aiInfo?.oportunidad?.titulo || "Analizando..."}
                   </p>
                 </div>
-                <div className="bg-white/10 p-4 rounded-xl border border-slate-200 backdrop-blur-sm">
-                  <p className="text-[0.6rem] font-bold text-purple-300 uppercase mb-1">Herramienta</p>
-                  <p className="text-sm font-bold truncate">
+                <div className="bg-purple-500/10 p-5 rounded-2xl border border-purple-500/20 backdrop-blur-sm group hover:bg-purple-500/15 transition-all">
+                  <p className="text-[10px] font-black text-purple-400 uppercase mb-2 tracking-widest">Herramienta</p>
+                  <p className="text-sm font-bold text-white leading-snug">
                     {selectedFolder.aiInfo?.herramienta?.nombre || "Analizando..."}
                   </p>
                 </div>
