@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export type Role = 'consultant' | 'psychologist' | 'manager' | 'patient';
+export type Role = 'consultant' | 'psychologist' | 'manager' | 'patient' | 'admin';
 
 export interface Message {
   id: string;
@@ -17,7 +17,7 @@ interface AppState {
   isContextCached: boolean;
   conversations: Record<Role, Message[]>;
   userId: string;
-  
+
   setRole: (role: Role) => void;
   setTheme: (theme: 'light' | 'dark' | 'neon' | 'system') => void;
   toggleSidebar: () => void;
@@ -40,6 +40,7 @@ export const useAppStore = create<AppState>()(
         psychologist: [],
         manager: [],
         patient: [],
+        admin: [],
       },
       userId: 'user_12345', // Default ID for demo/testing
 
@@ -64,8 +65,8 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'nsg-storage',
-      partialize: (state) => ({ 
-        currentRole: state.currentRole, 
+      partialize: (state) => ({
+        currentRole: state.currentRole,
         theme: state.theme,
         conversations: state.conversations,
         userId: state.userId

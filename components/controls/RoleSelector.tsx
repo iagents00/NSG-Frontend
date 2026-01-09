@@ -2,7 +2,7 @@
 
 import { useAppStore, Role } from "@/store/useAppStore";
 import { CONTEXT } from "@/data/context";
-import { Briefcase, Brain, TrendingUp, Building2 } from "lucide-react";
+import { Briefcase, Brain, TrendingUp, Building2, Crown } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 
 interface RoleOption {
@@ -52,6 +52,15 @@ const ROLE_OPTIONS: RoleOption[] = [
     bgColor: "bg-purple-50",
     borderColor: "border-purple-200 hover:border-purple-400",
   },
+  {
+    id: "admin",
+    label: "Admin / Superuser",
+    description: "Acceso Total & Gestión del Sistema",
+    icon: Crown,
+    color: "text-red-600",
+    bgColor: "bg-red-50",
+    borderColor: "border-red-200 hover:border-red-400",
+  },
 ];
 
 export default function RoleSelector() {
@@ -89,11 +98,10 @@ export default function RoleSelector() {
             <button
               key={option.id}
               onClick={() => handleRoleChange(option.id)}
-              className={`group relative p-6 rounded-2xl text-left border-2 transition-all duration-300 transform hover:-translate-y-1 will-change-transform cursor-pointer ${
-                isActive
-                  ? `${option.borderColor.split(" ")[0]} shadow-md ring-2 ring-offset-2 ${option.color.replace("text", "ring")}`
-                  : `border-slate-100 hover:shadow-md ${option.borderColor}`
-              }`}
+              className={`group relative p-6 rounded-2xl text-left border-2 transition-all duration-300 transform hover:-translate-y-1 will-change-transform cursor-pointer ${isActive
+                ? `${option.borderColor.split(" ")[0]} shadow-md ring-2 ring-offset-2 ${option.color.replace("text", "ring")}`
+                : `border-slate-100 hover:shadow-md ${option.borderColor}`
+                }`}
               aria-pressed={isActive}
               aria-label={`Select ${option.label} role`}
             >
@@ -107,9 +115,8 @@ export default function RoleSelector() {
               {/* Icon */}
               <div className="flex items-start gap-4 mb-4">
                 <div
-                  className={`w-14 h-14 ${option.bgColor} ${option.color} rounded-2xl flex items-center justify-center transition-all duration-300 ${
-                    isActive ? "scale-110" : "group-hover:scale-105"
-                  } will-change-transform`}
+                  className={`w-14 h-14 ${option.bgColor} ${option.color} rounded-2xl flex items-center justify-center transition-all duration-300 ${isActive ? "scale-110" : "group-hover:scale-105"
+                    } will-change-transform`}
                 >
                   <Icon className="w-7 h-7" />
                 </div>
@@ -125,9 +132,8 @@ export default function RoleSelector() {
 
               {/* Hover Arrow */}
               <div
-                className={`absolute bottom-4 right-4 transition-all duration-300 ${
-                  isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-                }`}
+                className={`absolute bottom-4 right-4 transition-all duration-300 ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                  }`}
               >
                 <svg
                   className={`w-5 h-5 ${option.color}`}
