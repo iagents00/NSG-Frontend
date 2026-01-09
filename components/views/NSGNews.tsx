@@ -20,24 +20,34 @@ export default function NSGNews() {
   const { showToast } = useToast();
 
   // Fetch news on mount to ensure persistence
+  // Fetch news on mount or tab change
   useEffect(() => {
-    const fetchOnMount = async () => {
+    const fetchNews = async () => {
       try {
         setLoading(true);
-        const response = await api.get(`/news/search`);
-        if (response.data && response.data.length > 0) {
+        setNews([]); // Clear current list to avoid confusion while loading
+
+        let endpoint = '/news/search'; // Default (Today)
+
+        if (activeTab === 'archive') {
+          endpoint = '/news/search?type=analyzed';
+        }
+
+        const response = await api.get(endpoint);
+        if (response.data) {
           setNews(response.data);
         }
       } catch (error) {
-        console.error("Mount Fetch Error:", error);
+        console.error("Fetch Error:", error);
+        showToast("Error al cargar noticias", "error");
       } finally {
         setLoading(false);
         setHasInitialFetch(true);
       }
     };
 
-    fetchOnMount();
-  }, []); // Empty array ensures this only runs once on mount
+    fetchNews();
+  }, [activeTab]); // Re-run when tab changes
   // BLOQUEO DE SCROLL DE FONDO
   useEffect(() => {
     if (selectedNews) {
@@ -52,21 +62,21 @@ export default function NSGNews() {
 
   const handleAnalyze = async (item: any) => {
     if (isAnalyzing) return;
-    
+
     setIsAnalyzing(true);
     try {
       showToast("Solicitando análisis estratégico...", "info");
-      
+
       const response = await api.post(`/news/analyze/${item._id}`);
-      
+
       // The response is just a notification message
-      const notification = typeof response.data === 'string' 
-        ? response.data 
+      const notification = typeof response.data === 'string'
+        ? response.data
         : (response.data.message || "Análisis solicitado correctamente");
 
       showToast(notification, "success");
       setModalTab('analysis'); // Still switch to show the 'pending' state
-      
+
     } catch (error: any) {
       console.error("Analysis Error:", error);
       showToast(error.response?.data?.message || "Error al solicitar el análisis", "error");
@@ -77,16 +87,16 @@ export default function NSGNews() {
 
   const handleGenerateNews = async () => {
     if (isGenerating) return;
-    
+
     setIsGenerating(true);
     setLoading(true); // Also set background loading for safety
-    
+
     try {
       // Simulate premium generation process (shorter for better feel)
       await new Promise(resolve => setTimeout(resolve, 2500));
-      
+
       const response = await api.get(`/news/search`);
-      
+
       if (response.data) {
         setNews(response.data);
         if (response.data.length > 0) {
@@ -108,146 +118,169 @@ export default function NSGNews() {
     <>
       <div className="max-w-[1400px] mx-auto animate-fade-in-up flex flex-col gap-6 min-h-screen">
 
-      {/* 1. Featured Hero */}
-      <div className="w-full relative group cursor-pointer shrink-0">
-        <div className="relative w-full h-[180px] rounded-4xl overflow-hidden shadow-xl border border-white/20 transition-all duration-700 hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
-          <div className="absolute inset-0 bg-linear-to-br from-blue-950 via-navy-900 to-black"></div>
-          <div className="absolute inset-0 opacity-40 mix-blend-overlay bg-[url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop')] bg-cover bg-center"></div>
-          <div className="absolute inset-0 bg-linear-to-t from-navy-950 via-navy-900/20 to-transparent"></div>
+        {/* 1. Featured Hero */}
+        <div className="w-full relative group cursor-pointer shrink-0">
+          <div className="relative w-full h-[180px] rounded-4xl overflow-hidden shadow-xl border border-white/20 transition-all duration-700 hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
+            <div className="absolute inset-0 bg-linear-to-br from-blue-950 via-navy-900 to-black"></div>
+            <div className="absolute inset-0 opacity-40 mix-blend-overlay bg-[url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop')] bg-cover bg-center"></div>
+            <div className="absolute inset-0 bg-linear-to-t from-navy-950 via-navy-900/20 to-transparent"></div>
 
-          <div className="absolute inset-0 flex flex-col justify-center p-8 md:px-12">
-            <div className="overflow-hidden mb-2">
-              <span className="inline-block px-2.5 py-1 bg-blue-500/20 backdrop-blur-md border border-blue-400/30 text-blue-200 text-[0.55rem] font-bold uppercase tracking-[0.2em] rounded-md">
-                Alerta Estratégica • Prioridad Alta
-              </span>
-            </div>
-            <h2 className="text-2xl md:text-3xl font-display font-medium text-white mb-3 leading-tight tracking-tight">
-              La Nueva Era de la <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-emerald-400 font-bold">Computación Biológica.</span>
-            </h2>
-            <button onClick={() => runNewsAnalysis("Quantum Bio-Computing", "Priority")} className="w-fit flex items-center gap-2 text-white text-xs font-bold bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10 pl-5 pr-3 py-2 rounded-full transition-all group-hover:bg-white group-hover:text-navy-900">
-              Analizar Impacto <ArrowUp className="w-3.5 h-3.5 rotate-90" />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* 2. Main Navigation Tabs - STICKY TOP */}
-      <div className="sticky top-0 z-50 bg-slate-50/80 backdrop-blur-xl py-3 -mx-4 sm:-mx-6 lg:-mx-10 px-4 sm:px-6 lg:px-10">
-        <div className="flex justify-center">
-          <div className="flex p-1 bg-slate-200/50 backdrop-blur-md rounded-xl border border-slate-200/60 shadow-inner gap-0.5">
-            <button
-              onClick={() => setActiveTab('intelligence')}
-              className={clsx(
-                "px-6 py-2 rounded-lg text-xs font-bold transition-all duration-300",
-                activeTab === 'intelligence'
-                  ? "bg-white text-navy-900 shadow-sm ring-1 ring-black/5"
-                  : "text-slate-500 hover:text-navy-900 hover:bg-white/40"
-              )}
-            >
-              Inteligencia de Mercado
-            </button>
-            <button
-              onClick={() => setActiveTab('archive')}
-              className={clsx(
-                "px-6 py-2 rounded-lg text-xs font-bold transition-all duration-300",
-                activeTab === 'archive'
-                  ? "bg-white text-navy-900 shadow-sm ring-1 ring-black/5"
-                  : "text-slate-500 hover:text-navy-900 hover:bg-white/40"
-              )}
-            >
-              Archivo Global
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* 3. Content Area - Natural Scroll */}
-      <div className="pb-40">
-        <div className="w-full">
-          {activeTab === 'intelligence' ? (
-            /* --- TAB 1: Inteligencia de Mercado (Backend News) --- */
-            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-              {/* PREMIUM GENERATE BUTTON */}
-              <div className="flex justify-center pt-4">
-                <button 
-                  onClick={handleGenerateNews}
-                  disabled={isGenerating || loading}
-                  className="group relative px-10 py-5 bg-navy-900 rounded-4xl overflow-hidden transition-all duration-500 hover:scale-[1.03] active:scale-95 shadow-2xl hover:shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <div className="absolute inset-0 bg-linear-to-r from-blue-600/20 via-purple-600/20 to-emerald-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-                  <div className="absolute -inset-1 bg-linear-to-r from-blue-600 via-purple-500 to-emerald-500 opacity-20 blur-xl group-hover:opacity-40 transition-opacity"></div>
-                  
-                  <div className="relative z-10 flex items-center gap-4">
-                    <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/20 group-hover:rotate-12 transition-transform duration-500">
-                      <Sparkles className="w-5 h-5 text-blue-400 fill-blue-400 group-hover:text-white group-hover:fill-white transition-colors" />
-                    </div>
-                    <div className="flex flex-col items-start pr-4">
-                      <span className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-400 mb-0.5">Analizador IA</span>
-                      <span className="text-lg font-display font-medium text-white">Generar Inteligencia Avanzada</span>
-                    </div>
-                    <div className="w-px h-8 bg-white/10"></div>
-                    <ArrowUp className="w-5 h-5 text-white/40 group-hover:text-white transition-colors rotate-90" />
-                  </div>
-                </button>
+            <div className="absolute inset-0 flex flex-col justify-center p-8 md:px-12">
+              <div className="overflow-hidden mb-2">
+                <span className="inline-block px-2.5 py-1 bg-blue-500/20 backdrop-blur-md border border-blue-400/30 text-blue-200 text-[0.55rem] font-bold uppercase tracking-[0.2em] rounded-md">
+                  Alerta Estratégica • Prioridad Alta
+                </span>
               </div>
+              <h2 className="text-2xl md:text-3xl font-display font-medium text-white mb-3 leading-tight tracking-tight">
+                La Nueva Era de la <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-emerald-400 font-bold">Computación Biológica.</span>
+              </h2>
+              <button onClick={() => runNewsAnalysis("Quantum Bio-Computing", "Priority")} className="w-fit flex items-center gap-2 text-white text-xs font-bold bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10 pl-5 pr-3 py-2 rounded-full transition-all group-hover:bg-white group-hover:text-navy-900">
+                Analizar Impacto <ArrowUp className="w-3.5 h-3.5 rotate-90" />
+              </button>
+            </div>
+          </div>
+        </div>
 
-              <div className="flex flex-col gap-6">
-                {loading ? (
-                  <div className="flex flex-col items-center justify-center py-24 gap-4">
-                    <div className="relative">
-                      <div className="w-16 h-16 rounded-3xl border-2 border-blue-500/20 animate-pulse"></div>
-                      <Loader2 className="w-8 h-8 text-blue-600 animate-spin absolute top-4 left-4" />
-                    </div>
-                    <p className="text-slate-400 font-bold text-xs uppercase tracking-widest animate-pulse">Consultando Red Neural...</p>
-                  </div>
-                ) : news.length > 0 ? (
-                  news.map((item) => (
-                    <NewsCard
-                      key={item._id}
-                      source={item.categories?.[0] || item.source || "NSG Intelligence"}
-                      title={item.title}
-                      tag={item.categories?.[1] || item.tag || "General"}
-                      color={item.color || "blue"}
-                      description={item.content ? item.content.substring(0, 300) + "..." : "No hay descripción disponible."}
-                      time={item.date || "Reciente"}
-                      onAnalyze={() => setSelectedNews(item)}
-                    />
-                  ))
-                ) : (
-                  <div className="p-20 bg-white rounded-4xl border border-slate-100 text-center shadow-sm relative overflow-hidden group/empty">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-full blur-3xl opacity-50 -mr-32 -mt-32"></div>
-                    <div className="relative z-10">
-                      <div className="w-20 h-20 bg-slate-50 rounded-[2rem] flex items-center justify-center mx-auto mb-6 group-hover/empty:scale-110 group-hover/empty:bg-blue-50 transition-all duration-500">
-                        <Zap className="w-10 h-10 text-slate-300 group-hover/empty:text-blue-500 transition-colors" />
-                      </div>
-                      <h4 className="text-2xl font-display font-medium text-navy-900 mb-3">Tu Inteligencia está lista</h4>
-                      <p className="text-slate-500 max-w-sm mx-auto font-medium">
-                        Haz clic en el botón superior para sincronizar las últimas tendencias y análisis del mercado global.
-                      </p>
-                    </div>
-                  </div>
+        {/* 2. Main Navigation Tabs - STICKY TOP */}
+        <div className="sticky top-0 z-50 bg-slate-50/80 backdrop-blur-xl py-3 -mx-4 sm:-mx-6 lg:-mx-10 px-4 sm:px-6 lg:px-10">
+          <div className="flex justify-center">
+            <div className="flex p-1 bg-slate-200/50 backdrop-blur-md rounded-xl border border-slate-200/60 shadow-inner gap-0.5">
+              <button
+                onClick={() => setActiveTab('intelligence')}
+                className={clsx(
+                  "px-6 py-2 rounded-lg text-xs font-bold transition-all duration-300",
+                  activeTab === 'intelligence'
+                    ? "bg-white text-navy-900 shadow-sm ring-1 ring-black/5"
+                    : "text-slate-500 hover:text-navy-900 hover:bg-white/40"
                 )}
-              </div>
+              >
+                Inteligencia de Mercado
+              </button>
+              <button
+                onClick={() => setActiveTab('archive')}
+                className={clsx(
+                  "px-6 py-2 rounded-lg text-xs font-bold transition-all duration-300",
+                  activeTab === 'archive'
+                    ? "bg-white text-navy-900 shadow-sm ring-1 ring-black/5"
+                    : "text-slate-500 hover:text-navy-900 hover:bg-white/40"
+                )}
+              >
+                Archivo Global
+              </button>
             </div>
-          ) : (
-            /* --- TAB 2: Archivo Global (Static News) --- */
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-              <div className="flex flex-col gap-6">
-                <NewsCard source="Capital de Riesgo" title="Modelos Generativos Q3" tag="Reporte" color="emerald" description="Inversiones récord en modelos de lenguaje específicos de dominio." time="2h" onAnalyze={(t, tg) => setSelectedNews({ title: t, tag: tg, source: "Capital de Riesgo", description: "Inversiones récord en modelos de lenguaje específicos de dominio." })} />
-                <NewsCard source="Vigilancia Regulatoria" title="Actualización Ley IA UE" tag="Legal" color="blue" description="Nuevos marcos de cumplimiento para empresas de salud digital en Europa." time="4h" onAnalyze={(t, tg) => setSelectedNews({ title: t, tag: tg, source: "Vigilancia Regulatoria", description: "Nuevos marcos de cumplimiento para empresas de salud digital en Europa." })} />
+          </div>
+        </div>
 
-                <div className="bg-slate-50 rounded-[2.5rem] border border-dashed border-slate-300 flex flex-col items-center justify-center p-8 cursor-pointer hover:bg-white hover:border-blue-300 hover:shadow-lg transition-all group">
-                  <div className="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 mb-4 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
-                    <ArrowUp className="w-6 h-6 rotate-45" />
-                  </div>
-                  <p className="font-bold text-navy-900">Cargar Más</p>
-                  <p className="text-xs text-slate-400 mt-1">Acceder a Archivos</p>
+        {/* 3. Content Area - Natural Scroll */}
+        <div className="pb-40">
+          <div className="w-full">
+            {activeTab === 'intelligence' ? (
+              /* --- TAB 1: Inteligencia de Mercado (Backend News) --- */
+              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                {/* PREMIUM GENERATE BUTTON */}
+                <div className="flex justify-center pt-4">
+                  <button
+                    onClick={handleGenerateNews}
+                    disabled={isGenerating || loading}
+                    className="group relative px-10 py-5 bg-navy-900 rounded-4xl overflow-hidden transition-all duration-500 hover:scale-[1.03] active:scale-95 shadow-2xl hover:shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <div className="absolute inset-0 bg-linear-to-r from-blue-600/20 via-purple-600/20 to-emerald-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                    <div className="absolute -inset-1 bg-linear-to-r from-blue-600 via-purple-500 to-emerald-500 opacity-20 blur-xl group-hover:opacity-40 transition-opacity"></div>
+
+                    <div className="relative z-10 flex items-center gap-4">
+                      <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/20 group-hover:rotate-12 transition-transform duration-500">
+                        <Sparkles className="w-5 h-5 text-blue-400 fill-blue-400 group-hover:text-white group-hover:fill-white transition-colors" />
+                      </div>
+                      <div className="flex flex-col items-start pr-4">
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-400 mb-0.5">Analizador IA</span>
+                        <span className="text-lg font-display font-medium text-white">Generar Inteligencia Avanzada</span>
+                      </div>
+                      <div className="w-px h-8 bg-white/10"></div>
+                      <ArrowUp className="w-5 h-5 text-white/40 group-hover:text-white transition-colors rotate-90" />
+                    </div>
+                  </button>
+                </div>
+
+                <div className="flex flex-col gap-6">
+                  {loading ? (
+                    <div className="flex flex-col items-center justify-center py-24 gap-4">
+                      <div className="relative">
+                        <div className="w-16 h-16 rounded-3xl border-2 border-blue-500/20 animate-pulse"></div>
+                        <Loader2 className="w-8 h-8 text-blue-600 animate-spin absolute top-4 left-4" />
+                      </div>
+                      <p className="text-slate-400 font-bold text-xs uppercase tracking-widest animate-pulse">Consultando Red Neural...</p>
+                    </div>
+                  ) : news.length > 0 ? (
+                    news.map((item) => (
+                      <NewsCard
+                        key={item._id}
+                        source={item.categories?.[0] || item.source || "NSG Intelligence"}
+                        title={item.title}
+                        tag={item.categories?.[1] || item.tag || "General"}
+                        color={item.color || "blue"}
+                        description={item.content ? item.content.substring(0, 300) + "..." : "No hay descripción disponible."}
+                        time={item.date || "Reciente"}
+                        onAnalyze={() => setSelectedNews(item)}
+                      />
+                    ))
+                  ) : (
+                    <div className="p-20 bg-white rounded-4xl border border-slate-100 text-center shadow-sm relative overflow-hidden group/empty">
+                      <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-full blur-3xl opacity-50 -mr-32 -mt-32"></div>
+                      <div className="relative z-10">
+                        <div className="w-20 h-20 bg-slate-50 rounded-[2rem] flex items-center justify-center mx-auto mb-6 group-hover/empty:scale-110 group-hover/empty:bg-blue-50 transition-all duration-500">
+                          <Zap className="w-10 h-10 text-slate-300 group-hover/empty:text-blue-500 transition-colors" />
+                        </div>
+                        <h4 className="text-2xl font-display font-medium text-navy-900 mb-3">Tu Inteligencia está lista</h4>
+                        <p className="text-slate-500 max-w-sm mx-auto font-medium">
+                          Haz clic en el botón superior para sincronizar las últimas tendencias y análisis del mercado global.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
-          )}
+            ) : (
+              /* --- TAB 2: Archivo Global (Static News) --- */
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <div className="flex flex-col gap-6">
+                  {loading ? (
+                    <div className="flex flex-col items-center justify-center py-24 gap-4">
+                      <div className="relative">
+                        <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+                      </div>
+                      <p className="text-slate-400 font-bold text-xs uppercase tracking-widest animate-pulse">Cargando Archivo...</p>
+                    </div>
+                  ) : news.length > 0 ? (
+                    news.map((item) => (
+                      <NewsCard
+                        key={item._id}
+                        source={item.categories?.[0] || item.source || "Archivo Global"}
+                        title={item.title}
+                        tag={item.categories?.[1] || item.tag || "Analizado"}
+                        color={item.color || "emerald"}
+                        description={item.content ? item.content.substring(0, 250) + "..." : "Análisis estratégico disponible."}
+                        time={item.date || "Archivo"}
+                        onAnalyze={() => setSelectedNews(item)}
+                      />
+                    ))
+                  ) : (
+                    <div className="p-12 text-center text-slate-400 border border-dashed border-slate-200 rounded-3xl">
+                      <p className="font-medium">No hay noticias analizadas en el archivo.</p>
+                    </div>
+                  )}
+
+                  <div className="bg-slate-50 rounded-[2.5rem] border border-dashed border-slate-300 flex flex-col items-center justify-center p-8 cursor-pointer hover:bg-white hover:border-blue-300 hover:shadow-lg transition-all group">
+                    <div className="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 mb-4 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                      <ArrowUp className="w-6 h-6 rotate-45" />
+                    </div>
+                    <p className="font-bold text-navy-900">Cargar Más</p>
+                    <p className="text-xs text-slate-400 mt-1">Acceder a Archivos Históricos</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
       </div>
 
       {/* --- NEWS DETAIL MODAL --- */}
@@ -315,9 +348,9 @@ export default function NSGNews() {
                 {modalTab === 'content' ? (
                   <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
                     {selectedNews.cntentHTML ? (
-                      <div 
+                      <div
                         className="prose prose-slate max-w-none prose-img:rounded-3xl prose-a:text-blue-600"
-                        dangerouslySetInnerHTML={{ __html: selectedNews.cntentHTML }} 
+                        dangerouslySetInnerHTML={{ __html: selectedNews.cntentHTML }}
                       />
                     ) : (
                       <p className="text-slate-600 text-base md:text-lg leading-[1.7] font-light whitespace-pre-wrap">
@@ -332,7 +365,7 @@ export default function NSGNews() {
                         <div className="absolute top-0 right-0 p-8 opacity-5">
                           <Zap className="w-24 h-24 text-blue-600" />
                         </div>
-                        
+
                         <div className="flex items-center gap-4 mb-8">
                           <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-xl shadow-blue-500/20">
                             <Sparkles className="w-6 h-6 text-white" />
@@ -343,7 +376,7 @@ export default function NSGNews() {
                           </div>
                         </div>
 
-                        <div 
+                        <div
                           className="prose prose-slate max-w-none 
                             text-slate-700 leading-relaxed text-lg
                             prose-h3:relative prose-h3:pl-6 prose-h3:text-blue-900 prose-h3:font-display prose-h3:font-bold prose-h3:text-xl prose-h3:mt-12 prose-h3:mb-6
@@ -355,12 +388,12 @@ export default function NSGNews() {
                             prose-li:before:absolute prose-li:before:left-0 prose-li:before:top-[0.6em] prose-li:before:w-5 prose-li:before:h-5 prose-li:before:bg-blue-50 prose-li:before:rounded-lg prose-li:before:flex prose-li:before:items-center prose-li:before:justify-center prose-li:before:content-['✓'] prose-li:before:text-[10px] prose-li:before:font-bold prose-li:before:text-blue-600 prose-li:before:border prose-li:before:border-blue-100"
                           dangerouslySetInnerHTML={{ __html: selectedNews.analysis }}
                         />
-                        
+
                         <div className="mt-12 pt-8 border-t border-blue-100/50 flex items-center gap-4">
                           <div className="flex -space-x-2">
-                            {[1,2,3].map(i => (
+                            {[1, 2, 3].map(i => (
                               <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-200 overflow-hidden">
-                                <img src={`https://i.pravatar.cc/150?u=${i+10}`} alt="avatar" />
+                                <img src={`https://i.pravatar.cc/150?u=${i + 10}`} alt="avatar" />
                               </div>
                             ))}
                           </div>
@@ -397,9 +430,9 @@ export default function NSGNews() {
                   <span>Publicado: {selectedNews.date}</span>
                 </div>
                 {selectedNews.link && (
-                  <a 
-                    href={selectedNews.link} 
-                    target="_blank" 
+                  <a
+                    href={selectedNews.link}
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="text-[10px] font-bold text-blue-500 hover:text-blue-700 underline"
                   >
@@ -451,7 +484,7 @@ export default function NSGNews() {
                 <Loader2 className="w-12 h-12 text-blue-500 animate-spin-slow" />
                 <div className="absolute inset-0 animate-shimmer bg-linear-to-r from-transparent via-white/5 to-transparent"></div>
               </div>
-              
+
               {/* Floating micro-elements */}
               <div className="absolute -top-4 -right-4 w-8 h-8 bg-blue-500/20 backdrop-blur-xl rounded-xl border border-white/20 flex items-center justify-center animate-bounce">
                 <Sparkles className="w-4 h-4 text-blue-300" />
