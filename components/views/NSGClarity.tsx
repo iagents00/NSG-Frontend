@@ -13,7 +13,9 @@ import {
   Bell,
   Trophy,
   Calendar,
-  LogOut
+  LogOut,
+  BarChart3,
+  TrendingUp
 } from "lucide-react";
 import clsx from "clsx";
 import { useToast } from "@/components/ui/ToastProvider";
@@ -21,6 +23,12 @@ import confetti from "canvas-confetti";
 import { useAppStore } from "@/store/useAppStore";
 import { authService } from "@/lib/auth";
 import api from "@/lib/api";
+
+// Import new metrics components
+import StreakCounter from "@/components/clarity/StreakCounter";
+import MetricsPanel from "@/components/clarity/MetricsPanel";
+import CalendarHeatmap from "@/components/clarity/CalendarHeatmap";
+import CompletionChart from "@/components/clarity/CompletionChart";
 
 // --- AUDIO ENGINE ---
 let _audioCtx: AudioContext | null = null;
@@ -184,6 +192,14 @@ export default function NSGClarity() {
   const [strategies, setStrategies] = useState<any[]>([]);
   const [isLoadingStrategies, setIsLoadingStrategies] = useState(false);
 
+  // Metrics states
+  const [streakData, setStreakData] = useState<any>(null);
+  const [metricsData, setMetricsData] = useState<any>(null);
+  const [heatmapData, setHeatmapData] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<any[]>([]);
+  const [isLoadingMetrics, setIsLoadingMetrics] = useState(false);
+  const [showMetrics, setShowMetrics] = useState(false); // Toggle for metrics view
+
   const fetchStrategies = async () => {
     setIsLoadingStrategies(true);
     try {
@@ -210,6 +226,95 @@ export default function NSGClarity() {
     } catch (e) { } finally { setIsLoadingTelegramData(false); }
   };
 
+  // Fetch all metrics data
+  const fetchAllMetrics = async () => {
+    if (!userId) return;
+
+    setIsLoadingMetrics(true);
+    try {
+      // Fetch streaks
+      const streaksResponse = await api.get(`/clarity/streaks/${userId}`);
+      if (streaksResponse.status === 200) {
+        setStreakData(streaksResponse.data.streaks);
+      }
+
+      // Fetch metrics (monthly)
+      const metricsResponse = await api.get(`/clarity/metrics/${userId}?period=month`);
+      if (metricsResponse.status === 200) {
+        setMetricsData(metricsResponse.data.metrics);
+      }
+
+      // Fetch heatmap data
+      const heatmapResponse = await api.get(`/clarity/heatmap/${userId}?months=1`);
+      if (heatmapResponse.status === 200) {
+        setHeatmapData(heatmapResponse.data.heatmap);
+      }
+
+      // Fetch history for chart (last 7 days)
+      const today = new Date();
+      const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const startDate = sevenDaysAgo.toISOString().split('T')[0];
+      const endDate = today.toISOString().split('T')[0];
+
+      const historyResponse = await api.get(`/clarity/history/${userId}?startDate=${startDate}&endDate=${endDate}`);
+      if (historyResponse.status === 200) {
+        // Transform data for chart
+        const completions = historyResponse.data.completions;
+        const chartMap: any = {};
+
+        // Initialize all 7 days
+        for (let i = 0; i < 7; i++) {
+          const date = new Date(sevenDaysAgo.getTime() + i * 24 * 60 * 60 * 1000);
+          const dateStr = date.toISOString().split('T')[0];
+          chartMap[dateStr] = {
+            date: dateStr,
+            morning_clarity: 0,
+            power_check: 0,
+            next_day_planning: 0
+          };
+        }
+
+        // Fill in completions
+        completions.forEach((c: any) => {
+          if (chartMap[c.date]) {
+            const protocolKey = c.protocol as 'morning_clarity' | 'power_check' | 'next_day_planning';
+            chartMap[c.date][protocolKey] = 1;
+          }
+        });
+
+        setChartData(Object.values(chartMap));
+      }
+
+    } catch (error) {
+      console.error("Error fetching metrics:", error);
+    } finally {
+      setIsLoadingMetrics(false);
+    }
+  };
+
+  // Check today's completions
+  const fetchTodayCompletions = async () => {
+    if (!userId) return;
+
+    try {
+      const response = await api.get(`/clarity/today/${userId}`);
+      if (response.status === 200) {
+        const completed = response.data.completed;
+
+        // Update tasks based on what's completed today
+        setTasks(prev => prev.map(t => {
+          let isChecked = false;
+          if (t.id === "1") isChecked = completed.morning_clarity;
+          if (t.id === "2") isChecked = completed.power_check;
+          if (t.id === "3") isChecked = completed.next_day_planning;
+          return { ...t, isChecked };
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching today completions:", error);
+    }
+  };
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -218,8 +323,10 @@ export default function NSGClarity() {
           if (data.user.telegram_id) setTelegramId(data.user.telegram_id);
           if (data.user.id) {
             useAppStore.getState().setUserId(data.user.id);
+            fetchStrategies();
+            fetchTodayCompletions(); // Load today's completions
+            fetchAllMetrics(); // Load metrics data
           }
-          fetchStrategies();
         }
       } catch (e) { }
     };
@@ -284,20 +391,75 @@ export default function NSGClarity() {
     prevProgressRef.current = progress;
   }, [progress, showToast]);
 
-  const handleTaskToggle = (id: string) => {
-    setTasks(prev => prev.map(t => {
-      if (t.id === id) {
-        if (!t.isChecked) playSound('check');
-        return { ...t, isChecked: !t.isChecked };
+  const handleTaskToggle = async (id: string) => {
+    const task = tasks.find(t => t.id === id);
+    if (!task || !userId) return;
+
+    // Don't allow unchecking (only checking)
+    if (task.isChecked) {
+      showToast("No puedes desmarcar un protocolo completado", "info");
+      return;
+    }
+
+    // Map task ID to protocol name
+    const protocolMap: { [key: string]: string; } = {
+      "1": "morning_clarity",
+      "2": "power_check",
+      "3": "next_day_planning"
+    };
+
+    const protocol = protocolMap[id];
+    if (!protocol) return;
+
+    try {
+      // Call backend to save completion
+      const response = await api.post('/clarity/complete', {
+        userId,
+        protocol,
+        metadata: {
+          deviceType: /Mobile/.test(navigator.userAgent) ? 'mobile' : 'desktop',
+          completionTime: 0
+        }
+      });
+
+      if (response.status === 201 || response.status === 200) {
+        // Play sound
+        playSound('check');
+
+        // Update local state
+        setTasks(prev => prev.map(t => {
+          if (t.id === id) {
+            return { ...t, isChecked: true };
+          }
+          return t;
+        }));
+
+        // Show success message with streak info
+        const streak = response.data.streak;
+        if (streak) {
+          showToast(`¡Protocolo completado! Racha: ${streak.current} días`, "success");
+        } else {
+          showToast("¡Protocolo completado!", "success");
+        }
+
+        // Refresh metrics
+        fetchAllMetrics();
       }
-      return t;
-    }));
+
+    } catch (error: any) {
+      if (error.response?.status === 409) {
+        showToast("Ya completaste este protocolo hoy", "info");
+      } else {
+        console.error("Error completing protocol:", error);
+        showToast("Error al guardar. Inténtalo de nuevo.", "error");
+      }
+    }
   };
 
   return (
     <div className="max-w-7xl mx-auto h-full flex flex-col animate-fade-in-up pb-24">
       {/* 1. HERO BANNER */}
-      <div 
+      <div
         onClick={() => syncObjectives(true)}
         className="w-full relative group cursor-pointer mb-6 shrink-0"
         title="Clic para sincronizar objetivos"
@@ -329,7 +491,7 @@ export default function NSGClarity() {
           <Zap className="w-3.5 h-3.5 text-blue-600" />
           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Sincronización de Ecosistema</span>
         </div>
-        
+
         {/* Integration Hub */}
         <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full md:w-auto">
           {/* Telegram Button */}
@@ -359,14 +521,14 @@ export default function NSGClarity() {
               <p className="text-xs font-bold leading-none text-navy-900">{telegramId ? (telegramData?.username ? `@${telegramData.username}` : "Conectado") : "Vincular"}</p>
             </div>
           </button>
-          
+
           {/* Calendar Button */}
-          <button 
-            onClick={() => handleConnect("Calendar")} 
+          <button
+            onClick={() => handleConnect("Calendar")}
             className={clsx(
               "w-full sm:w-auto group relative flex items-center gap-3 px-4 sm:px-5 py-2 sm:py-2.5 border rounded-4xl transition-all duration-500",
-              isConnected 
-                ? "bg-blue-50/60 border-blue-200 shadow-sm cursor-default" 
+              isConnected
+                ? "bg-blue-50/60 border-blue-200 shadow-sm cursor-default"
                 : "bg-white border-slate-300 hover:shadow-md hover:border-blue-400 cursor-pointer shadow-sm hover:bg-blue-50/30"
             )}
           >
@@ -389,12 +551,76 @@ export default function NSGClarity() {
               <p className="text-xs font-bold leading-none text-navy-900">{isConnected ? "Sincronizado" : "Vincular"}</p>
             </div>
           </button>
-          
+
           <button onClick={() => syncObjectives(true)} className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-400 hover:text-blue-600 hover:bg-white hover:border-blue-200 transition-all shadow-sm active:scale-95">
             <RefreshCw className={clsx("w-4 h-4", isLoadingTelegramData && "animate-spin")} />
           </button>
         </div>
       </div>
+
+      {/* METRICS TOGGLE BUTTON */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-violet-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+            <BarChart3 className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h3 className="font-display font-bold text-xl text-navy-950">Métricas de Rendimiento</h3>
+            <p className="text-xs text-slate-500 font-medium">Visualiza tu progreso y achievement</p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => setShowMetrics(!showMetrics)}
+          className={clsx(
+            "px-4 py-2 rounded-xl font-bold text-sm transition-all duration-300 flex items-center gap-2",
+            showMetrics
+              ? "bg-blue-600 text-white shadow-lg shadow-blue-200"
+              : "bg-white border-2 border-slate-200 text-slate-600 hover:border-blue-300"
+          )}
+        >
+          <TrendingUp className="w-4 h-4" />
+          {showMetrics ? "Ocultar Métricas" : "Ver Métricas"}
+        </button>
+      </div>
+
+      {/* METRICS SECTION */}
+      {showMetrics && (
+        <div className="space-y-6 mb-8 animate-fade-in">
+          {/* Streak Counter */}
+          {streakData && (
+            <StreakCounter
+              current={streakData.current}
+              longest={streakData.longest}
+              isLoading={isLoadingMetrics}
+            />
+          )}
+
+          {/* Metrics Panel */}
+          {metricsData && (
+            <MetricsPanel
+              metrics={metricsData}
+              isLoading={isLoadingMetrics}
+            />
+          )}
+
+          {/* Charts Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Completion Chart */}
+            <CompletionChart
+              data={chartData}
+              period="week"
+              isLoading={isLoadingMetrics}
+            />
+
+            {/* Calendar Heatmap */}
+            <CalendarHeatmap
+              data={heatmapData}
+              isLoading={isLoadingMetrics}
+            />
+          </div>
+        </div>
+      )}
 
       {/* 3. MAIN GRID */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -446,7 +672,7 @@ export default function NSGClarity() {
                   <p className="text-slate-400 font-medium text-sm mb-8 max-w-[250px] mx-auto">
                     Analiza una noticia o reunión para generar protocolos de acción inmediata.
                   </p>
-                  <button 
+                  <button
                     onClick={() => fetchStrategies()}
                     className="w-full py-3 bg-blue-600 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-blue-700 transition shadow-lg shadow-blue-200 flex items-center justify-center gap-2"
                   >
