@@ -34,12 +34,33 @@ function RegisterContent() {
       }
 
       navigator.geolocation.getCurrentPosition(
-        (position) => {
-          resolve({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
-          });
+        async (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+          // Reverse geocoding to get city and country
+          try {
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10`
+            );
+            const data = await response.json();
+
+            resolve({
+              latitude: lat,
+              longitude: lng,
+              timezone,
+              city: data.address?.city || data.address?.town || data.address?.village || data.address?.state,
+              country: data.address?.country
+            });
+          } catch (error) {
+            console.error("Error getting location name", error);
+            resolve({
+              latitude: lat,
+              longitude: lng,
+              timezone
+            });
+          }
         },
         (error) => {
           console.error("Error getting location", error);

@@ -4,6 +4,8 @@ export interface LocationData {
   latitude: number;
   longitude: number;
   timezone: string;
+  city?: string;
+  country?: string;
 }
 
 export interface RegisterData {

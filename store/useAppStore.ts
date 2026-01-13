@@ -17,6 +17,13 @@ interface AppState {
   isContextCached: boolean;
   conversations: Record<Role, Message[]>;
   userId: string;
+  userLocation: {
+    latitude: number;
+    longitude: number;
+    timezone: string;
+    city?: string;
+    country?: string;
+  } | null;
 
   setRole: (role: Role) => void;
   setTheme: (theme: 'light' | 'dark' | 'neon' | 'system') => void;
@@ -25,6 +32,7 @@ interface AppState {
   addMessage: (role: Role, message: Message) => void;
   setMessages: (role: Role, messages: Message[]) => void;
   setUserId: (id: string) => void;
+  setUserLocation: (location: { latitude: number; longitude: number; timezone: string; } | null) => void;
 
 }
 
@@ -43,6 +51,7 @@ export const useAppStore = create<AppState>()(
         admin: [],
       },
       userId: 'user_12345', // Default ID for demo/testing
+      userLocation: null,
 
       setRole: (role) => set({ currentRole: role }),
       setTheme: (theme) => set({ theme }),
@@ -61,6 +70,7 @@ export const useAppStore = create<AppState>()(
         }
       })),
       setUserId: (id) => set({ userId: id }),
+      setUserLocation: (location) => set({ userLocation: location }),
 
     }),
     {
@@ -69,7 +79,8 @@ export const useAppStore = create<AppState>()(
         currentRole: state.currentRole,
         theme: state.theme,
         conversations: state.conversations,
-        userId: state.userId
+        userId: state.userId,
+        userLocation: state.userLocation
       }),
     }
   )

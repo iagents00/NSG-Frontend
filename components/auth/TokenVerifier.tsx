@@ -3,11 +3,13 @@
 import { useEffect, useState } from "react";
 import { authService } from "@/lib/auth";
 import { usePathname, useRouter } from "next/navigation";
+import { useAppStore } from "@/store/useAppStore";
 
-export default function TokenVerifier({ children }: { children: React.ReactNode }) {
+export default function TokenVerifier({ children }: { children: React.ReactNode; }) {
   const router = useRouter();
   const pathname = usePathname();
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const { setUserLocation } = useAppStore();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -32,24 +34,28 @@ export default function TokenVerifier({ children }: { children: React.ReactNode 
 
       // 3. Background Verification (only if we have a token)
       if (token) {
-         try {
-            await authService.verifySession();
-         } catch (error) {
-            // If verification fails (401), existing logic in authService removes token
-            // Then we need to re-evaluate or redirect
-            if (!localStorage.getItem('nsg-token')) {
-                // Token was removed
-                if (!isPublicPath) {
-                   setIsAuthorized(false);
-                   router.replace('/auth/login');
-                }
+        try {
+          const response = await authService.verifySession();
+          // Save user location to store if available
+          if (response?.user?.location) {
+            setUserLocation(response.user.location);
+          }
+        } catch (error) {
+          // If verification fails (401), existing logic in authService removes token
+          // Then we need to re-evaluate or redirect
+          if (!localStorage.getItem('nsg-token')) {
+            // Token was removed
+            if (!isPublicPath) {
+              setIsAuthorized(false);
+              router.replace('/auth/login');
             }
-         }
+          }
+        }
       }
     };
 
     checkAuth();
-    
+
     // Constant verification loop
     const intervalId = setInterval(checkAuth, 10000);
     return () => clearInterval(intervalId);
@@ -57,7 +63,7 @@ export default function TokenVerifier({ children }: { children: React.ReactNode 
 
   // If not authorized, render NOTHING (null) effectively blocking the page
   if (!isAuthorized) {
-      return null;
+    return null;
   }
 
   return <>{children}</>;

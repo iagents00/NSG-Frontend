@@ -2,25 +2,25 @@
 
 import { useState, useEffect } from "react";
 import { useAppStore } from "@/store/useAppStore";
-import { useUIStore } from "@/store/useUIStore"; // Imported for mobile toggling
+import { useUIStore } from "@/store/useUIStore";
 import { CONTEXT } from "@/data/context";
-import { LogOut, Activity, X } from "lucide-react";
+import { LogOut, Activity, X, User, Settings, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { authService } from "@/lib/auth";
 import clsx from "clsx";
 import BrandAtom from "@/components/ui/BrandAtom";
+import LocationIndicator from "./LocationIndicator";
 
 export default function Sidebar() {
-  // 1. Merge State Management
   const { currentRole, setRole } = useAppStore();
-  const { isSidebarOpen, toggleSidebar } = useUIStore(); // Controls mobile state
+  const { isSidebarOpen, toggleSidebar } = useUIStore();
   const pathname = usePathname();
   const router = useRouter();
 
   const [username, setUsername] = useState<string | null>(null);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
-  // Safety check: fallback to 'paciente' or handle null if store is empty initially
   const roleKey = currentRole || 'paciente';
   const config = CONTEXT[roleKey];
 
@@ -28,14 +28,10 @@ export default function Sidebar() {
     const fetchUser = async () => {
       try {
         const data = await authService.verifySession();
-        // Correctly access 'user' (lowercase) based on API response
         if (data?.user?.username) {
           setUsername(data.user.username);
         }
         if (data?.user?.role) {
-          // We might want to only set it if it's different to avoid loops, 
-          // but zustand is usually smart. 
-          // Also casting to any because of potential type mismatch string vs RoleType
           setRole(data.user.role as any);
         }
       } catch (error) {
@@ -44,10 +40,46 @@ export default function Sidebar() {
     fetchUser();
   }, []);
 
+  // Generate avatar from username
+  const getAvatarInitials = (name: string | null) => {
+    if (!name) return "US";
+    const parts = name.split(" ");
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
+
+  // Get avatar color based on username
+  const getAvatarColor = (name: string | null) => {
+    if (!name) return "bg-blue-600";
+    const colors = [
+      "bg-blue-600",
+      "bg-purple-600",
+      "bg-emerald-600",
+      "bg-pink-600",
+      "bg-orange-600",
+      "bg-cyan-600"
+    ];
+    const hash = name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return colors[hash % colors.length];
+  };
+
+  // Group menu items
+  const groupedMenu = config?.menu.reduce((acc: any, item: any) => {
+    if (item.id === 'nsg_intelligence') {
+      acc.intelligence = item;
+    } else if (['nsg_clarity', 'nsg_horizon', 'nsg_news'].includes(item.id)) {
+      acc.nsgModules.push(item);
+    } else {
+      acc.other.push(item);
+    }
+    return acc;
+  }, { intelligence: null, nsgModules: [], other: [] }) || { intelligence: null, nsgModules: [], other: [] };
+
   return (
     <>
-      {/* 2. Mobile Overlay (From my design) */}
-      {/* Clicking the backdrop closes the sidebar on mobile */}
+      {/* Mobile Overlay */}
       <div
         className={clsx(
           "fixed inset-0 bg-navy-950/80 z-80 backdrop-blur-sm transition-opacity duration-300 lg:hidden",
@@ -56,13 +88,13 @@ export default function Sidebar() {
         onClick={toggleSidebar}
       />
 
-      {/* 3. Main Sidebar Container */}
+      {/* Main Sidebar Container */}
       <aside className={clsx(
         "fixed lg:static inset-y-0 left-0 w-72 bg-navy-950 flex flex-col text-slate-400 border-r border-navy-900 shadow-2xl z-90 transition-transform duration-300 ease-in-out transform h-full",
         isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
 
-        {/* HEADER: More compact Brand + Close Button */}
+        {/* HEADER */}
         <div className="h-20 flex items-center px-6 border-b border-navy-900 justify-between bg-navy-950/50 backdrop-blur-md sticky top-0 z-10 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 relative shrink-0 atom-container">
@@ -84,86 +116,210 @@ export default function Sidebar() {
           </button>
         </div>
 
-        {/* COMPACT USER PROFILE & NAVIGATION */}
-        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-          {/* Streamlined User Info */}
-          <div className="px-6 py-4 shrink-0">
-            <div className="flex items-center gap-3 bg-white/5 p-2.5 rounded-xl border border-white/5 group transition-all hover:bg-white/10 cursor-pointer">
-              <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-[0.65rem] shadow-lg border border-white/10 group-hover:scale-105 transition-transform">
-                {config?.avatar || 'US'}
-              </div>
-              <div className="overflow-hidden">
-                <p className="text-xs font-bold text-white truncate leading-none mb-1">{username || 'Usuario'}</p>
-                <p className="text-[0.6rem] font-bold text-slate-500 uppercase tracking-widest truncate">{config?.roleDesc || 'GUEST'}</p>
-              </div>
+        {/* USER PROFILE with Dropdown */}
+        <div className="px-6 py-4 shrink-0 relative">
+          <div
+            className="flex items-center gap-3 bg-white/5 p-2.5 rounded-xl border border-white/5 group transition-all hover:bg-white/10 cursor-pointer"
+            onClick={() => setShowUserMenu(!showUserMenu)}
+          >
+            {/* Avatar with initials */}
+            <div className={clsx(
+              "w-9 h-9 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg border border-white/10 group-hover:scale-105 transition-transform",
+              getAvatarColor(username)
+            )}>
+              {getAvatarInitials(username)}
             </div>
+            <div className="overflow-hidden flex-1">
+              <p className="text-xs font-bold text-white truncate leading-none mb-1">{username || 'Usuario'}</p>
+              <p className="text-[0.6rem] font-bold text-slate-500 uppercase tracking-widest truncate">{config?.roleDesc || 'GUEST'}</p>
+            </div>
+            <ChevronDown className={clsx(
+              "w-4 h-4 text-slate-500 transition-transform",
+              showUserMenu && "rotate-180"
+            )} />
           </div>
 
-          {/* MENU OPTIONS - Now has more space */}
-          <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scroll pb-6">
-            {config?.menu.map((item) => {
-              const Icon = item.icon;
-              const targetPath = `/dashboard/${item.id}`;
-              const isActive = pathname === targetPath;
-              
-              // Lista de secciones bloqueadas con Coming Soon
-              const comingSoonSections = ['nsg_news', 'clinical_radar', 'patients', 'library'];
-              const isComingSoon = comingSoonSections.includes(item.id);
-
-              return (
-                <Link
-                  key={item.id}
-                  href={targetPath}
-                  onClick={() => {
-                    if (window.innerWidth < 1024) toggleSidebar();
-                  }}
-                  className={clsx(
-                    "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all mb-0.5 cursor-pointer group",
-                    "focus:outline-none active:scale-[0.98]",
-                    item.id === 'nsg_intelligence'
-                      ? "bg-linear-to-r from-blue-900/30 to-navy-900/30 border border-blue-500/20 text-blue-300 shadow-glass hover:text-white"
-                      : isActive
-                        ? "text-white bg-white/10 shadow-[inset_2px_0_0_0_#60A5FA] border-transparent"
-                        : "text-slate-400 hover:bg-white/5 hover:text-white hover:translate-x-1 border border-transparent"
-                  )}
-                >
-                  {item.id === 'nsg_intelligence' ? (
-                    <BrandAtom className="w-4.5 h-4.5" />
-                  ) : (
-                    <Icon className={clsx(
-                      "w-4.5 h-4.5 transition-colors",
-                      isActive ? "text-blue-400" : "text-slate-500 group-hover:text-blue-400"
-                    )} />
-                  )}
-                  <span className="truncate flex-1">{item.label}</span>
-                  {isComingSoon && (
-                    <span className="text-[0.55rem] font-black px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 uppercase tracking-wider">
-                      Próximamente
-                    </span>
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
+          {/* Dropdown Menu */}
+          {showUserMenu && (
+            <div className="absolute top-full left-6 right-6 mt-2 bg-navy-900 border border-navy-800 rounded-xl shadow-xl z-50 overflow-hidden">
+              <Link
+                href="/dashboard/profile"
+                className="flex items-center gap-3 px-4 py-3 text-sm text-slate-300 hover:bg-white/5 hover:text-white transition cursor-pointer"
+                onClick={() => setShowUserMenu(false)}
+              >
+                <User className="w-4 h-4" />
+                Mi Perfil
+              </Link>
+              <Link
+                href="/dashboard/settings"
+                className="flex items-center gap-3 px-4 py-3 text-sm text-slate-300 hover:bg-white/5 hover:text-white transition cursor-pointer border-t border-navy-800"
+                onClick={() => setShowUserMenu(false)}
+              >
+                <Settings className="w-4 h-4" />
+                Configuración
+              </Link>
+            </div>
+          )}
         </div>
 
-        {/* BOTTOM SECTION: Precision & Logout (Compact & Bottom-aligned) */}
-        <div className="p-4 border-t border-navy-900 space-y-1 bg-navy-950 shrink-0">
-          <div className="flex items-center justify-between px-3 py-2 text-[0.6rem] font-bold text-slate-500 uppercase tracking-widest bg-navy-900/40 rounded-lg">
-            <span className="opacity-60">System Precision</span>
-            <span className="text-emerald-500 flex items-center gap-1.5"><Activity className="w-3 h-3" /> Optimal</span>
+        {/* MENU NAVIGATION with Groups */}
+        <nav className="flex-1 px-4 space-y-4 overflow-y-auto sidebar-scroll pb-6">
+          {/* NSG Intelligence - Special highlighting */}
+          {groupedMenu.intelligence && (
+            <div className="pt-2">
+              <Link
+                href={`/dashboard/${groupedMenu.intelligence.id}`}
+                onClick={() => {
+                  if (window.innerWidth < 1024) toggleSidebar();
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all cursor-pointer group relative overflow-hidden bg-gradient-to-r from-blue-600/20 to-blue-500/10 border border-blue-500/30 text-blue-200 hover:text-white hover:border-blue-400/50 shadow-[0_0_20px_rgba(59,130,246,0.15)] hover:shadow-[0_0_30px_rgba(59,130,246,0.3)]"
+              >
+                <BrandAtom className="w-5 h-5 relative z-10" />
+                <span className="truncate flex-1 relative z-10 font-semibold">{groupedMenu.intelligence.label}</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/0 via-blue-500/10 to-blue-600/0 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              </Link>
+            </div>
+          )}
+
+          {/* NSG Modules Group */}
+          {groupedMenu.nsgModules.length > 0 && (
+            <div>
+              <div className="px-3 mb-2">
+                <p className="text-[0.65rem] font-black text-slate-600 uppercase tracking-widest">NSG Modules</p>
+              </div>
+              <div className="space-y-0.5">
+                {groupedMenu.nsgModules.map((item: any) => {
+                  const Icon = item.icon;
+                  const targetPath = `/dashboard/${item.id}`;
+                  const isActive = pathname === targetPath;
+                  const comingSoonSections = ['nsg_news', 'clinical_radar', 'patients', 'library'];
+                  const isComingSoon = comingSoonSections.includes(item.id);
+
+                  return (
+                    <Link
+                      key={item.id}
+                      href={targetPath}
+                      onClick={() => {
+                        if (window.innerWidth < 1024) toggleSidebar();
+                      }}
+                      className={clsx(
+                        "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all cursor-pointer group relative",
+                        "focus:outline-none active:scale-[0.98]",
+                        isActive
+                          ? "text-white bg-white/10 border-l-4 border-blue-500 pl-3 shadow-[inset_0_0_10px_rgba(59,130,246,0.1)]"
+                          : "text-slate-400 hover:bg-white/5 hover:text-white hover:translate-x-1 border-l-4 border-transparent pl-3"
+                      )}
+                    >
+                      <Icon className={clsx(
+                        "w-4.5 h-4.5 transition-colors",
+                        isActive ? "text-blue-400" : "text-slate-500 group-hover:text-blue-400"
+                      )} />
+                      <span className="truncate flex-1">{item.label}</span>
+                      {isComingSoon && (
+                        <span className="text-[0.55rem] font-black px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 uppercase tracking-wider">
+                          Próximamente
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Other Items Group */}
+          {groupedMenu.other.length > 0 && (
+            <div>
+              <div className="px-3 mb-2">
+                <p className="text-[0.65rem] font-black text-slate-600 uppercase tracking-widest">Tools</p>
+              </div>
+              <div className="space-y-0.5">
+                {groupedMenu.other.map((item: any) => {
+                  const Icon = item.icon;
+                  const targetPath = `/dashboard/${item.id}`;
+                  const isActive = pathname === targetPath;
+                  const comingSoonSections = ['nsg_news', 'clinical_radar', 'patients', 'library'];
+                  const isComingSoon = comingSoonSections.includes(item.id);
+
+                  return (
+                    <Link
+                      key={item.id}
+                      href={targetPath}
+                      onClick={() => {
+                        if (window.innerWidth < 1024) toggleSidebar();
+                      }}
+                      className={clsx(
+                        "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all cursor-pointer group relative",
+                        "focus:outline-none active:scale-[0.98]",
+                        isActive
+                          ? "text-white bg-white/10 border-l-4 border-blue-500 pl-3 shadow-[inset_0_0_10px_rgba(59,130,246,0.1)]"
+                          : "text-slate-400 hover:bg-white/5 hover:text-white hover:translate-x-1 border-l-4 border-transparent pl-3"
+                      )}
+                    >
+                      <Icon className={clsx(
+                        "w-4.5 h-4.5 transition-colors",
+                        isActive ? "text-blue-400" : "text-slate-500 group-hover:text-blue-400"
+                      )} />
+                      <span className="truncate flex-1">{item.label}</span>
+                      {isComingSoon && (
+                        <span className="text-[0.55rem] font-black px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 uppercase tracking-wider">
+                          Próximamente
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </nav>
+
+        {/* BOTTOM SECTION */}
+        <div className="p-4 border-t border-navy-900 bg-navy-950 shrink-0 space-y-3">
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between px-3 py-2.5 text-[0.6rem] font-bold uppercase tracking-widest bg-gradient-to-r from-emerald-500/10 to-emerald-600/5 rounded-lg border border-emerald-500/20">
+              <span className="text-slate-400 flex items-center gap-1.5">
+                <Activity className="w-3 h-3 text-emerald-400" /> System
+              </span>
+              <span className="text-emerald-400 font-black">OPTIMAL</span>
+            </div>
+            <LocationIndicator />
           </div>
+          <div className="border-t border-navy-800/50"></div>
           <button
             onClick={() => {
               authService.logout();
               router.push('/auth/login');
             }}
-            className="flex items-center gap-3 text-[0.75rem] font-bold text-slate-500 hover:text-red-400 transition w-full p-2.5 rounded-lg hover:bg-red-500/5 group cursor-pointer text-left uppercase tracking-tighter"
+            className="flex items-center justify-center gap-2.5 text-xs font-bold text-slate-400 hover:text-red-400 transition-all w-full py-2.5 rounded-lg hover:bg-red-500/10 border border-transparent hover:border-red-500/20 group cursor-pointer uppercase tracking-wider"
           >
-            <LogOut className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform" /> Cerrar Sesión
+            <LogOut className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+            Cerrar Sesión
           </button>
         </div>
       </aside>
+
+      {/* Custom Scrollbar Styles */}
+      <style jsx global>{`
+        .sidebar-scroll::-webkit-scrollbar {
+          width: 6px;
+        }
+        .sidebar-scroll::-webkit-scrollbar-track {
+          background: rgba(15, 23, 42, 0.3);
+          border-radius: 10px;
+        }
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+          background: rgba(100, 116, 139, 0.3);
+          border-radius: 10px;
+        }
+        .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+          background: rgba(148, 163, 184, 0.5);
+        }
+        .sidebar-scroll {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(100, 116, 139, 0.3) rgba(15, 23, 42, 0.3);
+        }
+      `}</style>
     </>
   );
 }
