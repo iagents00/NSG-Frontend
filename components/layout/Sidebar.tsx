@@ -138,7 +138,7 @@ export default function Sidebar() {
                   <span className="truncate flex-1">{item.label}</span>
                   {isComingSoon && (
                     <span className="text-[0.55rem] font-black px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 uppercase tracking-wider">
-                      Soon
+                      Próximamente
                     </span>
                   )}
                 </Link>

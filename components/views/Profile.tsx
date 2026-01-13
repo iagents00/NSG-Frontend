@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { User, Mail, Key, Shield, Edit2, Camera, CheckCircle2, X, Loader2, Calendar as CalendarIcon, ExternalLink, Upload, FileUp, Download, Trash2 } from 'lucide-react';
+import { User, Mail, Key, Shield, Edit2, Camera, CheckCircle2, X, Loader2, Calendar as CalendarIcon, ExternalLink, Upload, FileUp, Download, Trash2, Lock } from 'lucide-react';
 import { useToast } from '@/components/ui/ToastProvider';
 import { useAppStore } from '@/store/useAppStore';
 import { authService } from '@/lib/auth';
@@ -189,15 +189,20 @@ export default function Profile() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8 animate-fade-in-up pb-10 px-4 sm:px-0">
+    <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 animate-fade-in-up pb-10 px-4 sm:px-0">
       
-      {/* Header */}
-      <div className="bg-linear-to-br from-blue-50 to-indigo-50 p-6 rounded-3xl border border-blue-100">
-        <div className="flex items-center gap-3 mb-2">
-          <User className="w-6 h-6 text-blue-600" />
-          <h2 className="font-display font-bold text-3xl text-navy-900">Mi Perfil</h2>
+      {/* Dark Header Banner - Clarity Style */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-navy-950 via-navy-900 to-navy-950 px-8 py-6 rounded-3xl border border-navy-800/50 shadow-xl">
+        <div className="relative z-10">
+          <h2 className="font-display font-bold text-2xl lg:text-3xl tracking-tight">
+            <span className="text-white">Gestión de </span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">Mi Perfil</span>
+            <span className="text-white">.</span>
+          </h2>
+          <p className="text-slate-300 text-sm mt-2 max-w-3xl leading-relaxed">
+            Administra tu información personal, credenciales de acceso y configuración de cuenta. Panel de usuario ejecutándose.
+          </p>
         </div>
-        <p className="text-slate-600 text-sm">Gestiona tu información personal y credenciales de acceso</p>
       </div>
 
       {/* Profile Card */}
@@ -283,81 +288,87 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Document Upload Section */}
-      <div className="bg-white p-8 rounded-3xl shadow-card border border-slate-200">
+      {/* Document Upload Section - DISABLED */}
+      <div className="bg-white p-8 rounded-3xl shadow-card border border-slate-200 relative opacity-60 pointer-events-none">
+        {/* Disabled Overlay Badge */}
+        <div className="absolute top-4 right-4 z-10">
+          <span className="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-sm">
+            <Lock className="w-3.5 h-3.5" />
+            Próximamente
+          </span>
+        </div>
+
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2.5 bg-blue-600 rounded-2xl text-white shadow-lg shadow-blue-200">
+          <div className="p-2.5 bg-slate-200 rounded-2xl text-slate-400 shadow-sm">
             <FileUp className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="font-display font-bold text-xl text-navy-950">Carga de Documentos Estratégicos</h3>
-            <p className="text-slate-500 text-sm">Procesa reportes, PDFs y archivos de inteligencia para alimentar el sistema</p>
+            <h3 className="font-display font-bold text-xl text-slate-400">Carga de Documentos Estratégicos</h3>
+            <p className="text-slate-400 text-sm">Procesa reportes, PDFs y archivos de inteligencia para alimentar el sistema</p>
           </div>
         </div>
 
         <div className="space-y-4">
-          <div className="border-2 border-dashed border-slate-200 rounded-2xl p-6 hover:border-blue-300 transition">
+          <div className="border-2 border-dashed border-slate-200 rounded-2xl p-6 bg-slate-50/50">
             <input
               type="file"
               id="file-upload"
               accept=".pdf"
               onChange={handleFileChange}
               className="hidden"
+              disabled
             />
             <label
-              htmlFor="file-upload"
-              className="flex flex-col items-center justify-center cursor-pointer"
+              className="flex flex-col items-center justify-center cursor-not-allowed"
             >
-              <Upload className="w-12 h-12 text-slate-400 mb-3" />
-              <p className="text-sm font-bold text-navy-900 mb-1">
+              <Upload className="w-12 h-12 text-slate-300 mb-3" />
+              <p className="text-sm font-bold text-slate-400 mb-1">
                 {selectedFile ? selectedFile.name : 'Haz click para seleccionar un archivo'}
               </p>
-              <p className="text-xs text-slate-500">Solo archivos PDF (máx. 10MB)</p>
+              <p className="text-xs text-slate-400">Solo archivos PDF (máx. 10MB)</p>
             </label>
           </div>
 
           <button
-            onClick={handleUploadDocument}
-            disabled={!selectedFile || isUploading}
-            className="w-full py-3 px-6 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            disabled
+            className="w-full py-3 px-6 bg-slate-200 text-slate-400 rounded-xl font-bold cursor-not-allowed flex items-center justify-center gap-2"
           >
-            {isUploading ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Subiendo Documento...
-              </>
-            ) : (
-              <>
-                <FileUp className="w-4 h-4" />
-                Subir Documento
-              </>
-            )}
+            <FileUp className="w-4 h-4" />
+            Subir Documento
           </button>
         </div>
       </div>
 
-      {/* Data Management Section */}
-      <div className="bg-white p-8 rounded-3xl shadow-card border border-slate-200">
+      {/* Data Management Section - DISABLED */}
+      <div className="bg-white p-8 rounded-3xl shadow-card border border-slate-200 relative opacity-60 pointer-events-none">
+        {/* Disabled Overlay Badge */}
+        <div className="absolute top-4 right-4 z-10">
+          <span className="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-sm">
+            <Lock className="w-3.5 h-3.5" />
+            Próximamente
+          </span>
+        </div>
+
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-1 h-8 bg-blue-600 rounded-full"></div>
-          <h3 className="font-display font-bold text-xl text-navy-950">Gestión de Datos</h3>
+          <div className="w-1 h-8 bg-slate-300 rounded-full"></div>
+          <h3 className="font-display font-bold text-xl text-slate-400">Gestión de Datos</h3>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <button
-            onClick={handleExportData}
-            className="flex items-center justify-center gap-3 px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-slate-100 hover:border-slate-300 transition group"
+            disabled
+            className="flex items-center justify-center gap-3 px-6 py-4 bg-slate-100 border border-slate-200 rounded-2xl cursor-not-allowed"
           >
-            <Download className="w-5 h-5 text-slate-600 group-hover:text-blue-600 transition" />
-            <span className="font-bold text-sm text-navy-900">Exportar Datos (JSON)</span>
+            <Download className="w-5 h-5 text-slate-400" />
+            <span className="font-bold text-sm text-slate-400">Exportar Datos (JSON)</span>
           </button>
 
           <button
-            onClick={handlePurgeCache}
-            className="flex items-center justify-center gap-3 px-6 py-4 bg-red-50 border border-red-200 rounded-2xl hover:bg-red-100 hover:border-red-300 transition group"
+            disabled
+            className="flex items-center justify-center gap-3 px-6 py-4 bg-red-50/50 border border-red-200 rounded-2xl cursor-not-allowed"
           >
-            <Trash2 className="w-5 h-5 text-red-600" />
-            <span className="font-bold text-sm text-red-700">Purgar Caché Local</span>
+            <Trash2 className="w-5 h-5 text-red-300" />
+            <span className="font-bold text-sm text-red-300">Purgar Caché Local</span>
           </button>
         </div>
       </div>

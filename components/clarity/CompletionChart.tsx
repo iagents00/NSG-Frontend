@@ -17,16 +17,6 @@ interface CompletionChartProps {
 
 export default function CompletionChart({ data, period = 'week', isLoading = false }: CompletionChartProps) {
 
-    const chartData = useMemo(() => {
-        if (!data || data.length === 0) return [];
-
-        return data.map(item => ({
-            ...item,
-            name: formatDate(item.date, period),
-            total: item.morning_clarity + item.power_check + item.next_day_planning
-        }));
-    }, [data, period]);
-
     const formatDate = (dateStr: string, period: 'week' | 'month') => {
         const date = new Date(dateStr);
         if (period === 'week') {
@@ -37,6 +27,16 @@ export default function CompletionChart({ data, period = 'week', isLoading = fal
             return date.getDate().toString();
         }
     };
+
+    const chartData = useMemo(() => {
+        if (!data || data.length === 0) return [];
+
+        return data.map(item => ({
+            ...item,
+            name: formatDate(item.date, period),
+            total: item.morning_clarity + item.power_check + item.next_day_planning
+        }));
+    }, [data, period]);
 
     const CustomTooltip = ({ active, payload }: any) => {
         if (active && payload && payload.length) {

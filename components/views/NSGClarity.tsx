@@ -200,6 +200,10 @@ export default function NSGClarity() {
   const [isLoadingMetrics, setIsLoadingMetrics] = useState(false);
   const [showMetrics, setShowMetrics] = useState(false); // Toggle for metrics view
 
+  // Confirmation modal states
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pendingTaskId, setPendingTaskId] = useState<string | null>(null);
+
   const fetchStrategies = async () => {
     setIsLoadingStrategies(true);
     try {
@@ -401,6 +405,17 @@ export default function NSGClarity() {
       return;
     }
 
+    // Show confirmation modal
+    setPendingTaskId(id);
+    setShowConfirmModal(true);
+  };
+
+  const confirmCompletion = async () => {
+    if (!pendingTaskId || !userId) return;
+
+    const task = tasks.find(t => t.id === pendingTaskId);
+    if (!task) return;
+
     // Map task ID to protocol name
     const protocolMap: { [key: string]: string; } = {
       "1": "morning_clarity",
@@ -408,8 +423,11 @@ export default function NSGClarity() {
       "3": "next_day_planning"
     };
 
-    const protocol = protocolMap[id];
+    const protocol = protocolMap[pendingTaskId];
     if (!protocol) return;
+
+    // Close modal
+    setShowConfirmModal(false);
 
     try {
       // Call backend to save completion
@@ -428,7 +446,7 @@ export default function NSGClarity() {
 
         // Update local state
         setTasks(prev => prev.map(t => {
-          if (t.id === id) {
+          if (t.id === pendingTaskId) {
             return { ...t, isChecked: true };
           }
           return t;
@@ -453,7 +471,14 @@ export default function NSGClarity() {
         console.error("Error completing protocol:", error);
         showToast("Error al guardar. Inténtalo de nuevo.", "error");
       }
+    } finally {
+      setPendingTaskId(null);
     }
+  };
+
+  const cancelCompletion = () => {
+    setShowConfirmModal(false);
+    setPendingTaskId(null);
   };
 
   return (
@@ -685,6 +710,54 @@ export default function NSGClarity() {
           </div>
         </div>
       </div>
+
+      {/* CONFIRMATION MODAL */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-navy-950/60 backdrop-blur-sm"
+            onClick={cancelCompletion}
+          ></div>
+          
+          {/* Modal */}
+          <div className="relative bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-md w-full p-8 animate-scale-in">
+            {/* Decorative gradient blob */}
+            <div className="absolute -top-20 -right-20 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl"></div>
+            
+            {/* Icon */}
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-violet-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-200">
+              <CheckCircle className="w-8 h-8 text-white" />
+            </div>
+
+            {/* Content */}
+            <div className="text-center mb-8">
+              <h3 className="font-display font-bold text-2xl text-navy-950 mb-3">
+                {pendingTaskId && tasks.find(t => t.id === pendingTaskId)?.title}
+              </h3>
+              <p className="text-slate-600 text-sm leading-relaxed">
+                ¿Confirmás que completaste este protocolo? Esta acción se registrará en tu historial y sumará a tu racha.
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3">
+              <button
+                onClick={cancelCompletion}
+                className="flex-1 px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-bold text-sm transition-all duration-300 hover:scale-105 active:scale-95"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmCompletion}
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white rounded-2xl font-bold text-sm transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg shadow-blue-200"
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
