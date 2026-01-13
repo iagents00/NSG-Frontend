@@ -10,11 +10,11 @@ import { m, AnimatePresence } from "framer-motion";
 // Update Props Interface
 interface DynamicIslandProps {
   currentMode: string;
-  setMode: Dispatch<SetStateAction<string>>;
+  setMode: (mode: string) => void;
   selectedModel?: string; 
-  setSelectedModel?: Dispatch<SetStateAction<string>>;
+  setSelectedModel?: (model: string) => void;
   intelligenceMode?: 'pulse' | 'compare' | 'fusion' | 'deep';
-  setIntelligenceMode?: Dispatch<SetStateAction<'pulse' | 'compare' | 'fusion' | 'deep'>>;
+  setIntelligenceMode?: (mode: 'pulse' | 'compare' | 'fusion' | 'deep') => void;
 }
 
 export default function DynamicIsland({ currentMode, setMode, selectedModel, setSelectedModel, intelligenceMode = 'pulse', setIntelligenceMode }: DynamicIslandProps) {
