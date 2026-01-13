@@ -9,13 +9,18 @@ interface UIState {
   // NEW: Calendar Day Detail Logic
   isDayDetailOpen: boolean;
   selectedCalendarDate: string | null;
+
+  // NEW: AI Tab State
+  activeAIMode: string;
   
   // Actions
   toggleSidebar: () => void;
   toggleAI: () => void;
+  openAI: () => void;
   togglePatientFiles: () => void;
   openDayDetail: (date: string) => void;
   closeDayDetail: () => void;
+  setAIMode: (mode: string) => void;
   closeAll: () => void;
 }
 
@@ -30,10 +35,15 @@ export const useUIStore = create<UIState>((set) => ({
 
   toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
   toggleAI: () => set((state) => ({ isAIOpen: !state.isAIOpen })),
+  openAI: () => set({ isAIOpen: true }), // Explicit open
   togglePatientFiles: () => set((state) => ({ isPatientFilesOpen: !state.isPatientFilesOpen })),
   
   openDayDetail: (date) => set({ isDayDetailOpen: true, selectedCalendarDate: date }),
   closeDayDetail: () => set({ isDayDetailOpen: false, selectedCalendarDate: null }),
+
+  // AI Tab State
+  activeAIMode: 'standard',
+  setAIMode: (mode: string) => set({ activeAIMode: mode }),
 
   closeAll: () => set({ 
     isSidebarOpen: false, 

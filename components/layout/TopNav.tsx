@@ -7,7 +7,7 @@ import { useState, useMemo } from "react";
 import { usePathname } from "next/navigation";
 
 export default function TopNav() {
-  const { toggleSidebar, toggleAI } = useUIStore();
+  const { toggleSidebar, toggleAI, openAI, setAIMode } = useUIStore();
   const { currentRole } = useAppStore();
   const pathname = usePathname();
   const [showNotifs, setShowNotifs] = useState(false);
@@ -112,7 +112,10 @@ export default function TopNav() {
 
         {/* NSG Intelligence AI Trigger Button */}
         <button
-          onClick={toggleAI}
+          onClick={() => {
+            setAIMode('nsg_intelligence');
+            openAI();
+          }}
           className="group flex items-center justify-center gap-2 sm:gap-3 bg-navy-950 text-white px-3 sm:pl-4 sm:pr-6 py-2 sm:py-2.5 rounded-full text-[0.7rem] sm:text-xs font-bold shadow-2xl hover:bg-navy-900 transition-all border border-navy-800 relative overflow-hidden shrink-0 cursor-pointer"
         >
           <div className="w-5 h-5 relative shrink-0 atom-container">

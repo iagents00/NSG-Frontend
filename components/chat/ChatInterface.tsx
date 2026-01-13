@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { useAppStore } from '@/store/useAppStore';
+import { useUIStore } from '@/store/useUIStore';
 // import { CONTEXT, RoleType } from '@/data/context';
 import {
     Paperclip,
@@ -252,7 +253,8 @@ export default function ChatInterface() {
     // Refactored State: Store conversations and loading states by mode
     const [conversations, setConversations] = useState<Record<string, Message[]>>({});
     const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
-    const [mode, setMode] = useState('standard');
+    // const [mode, setMode] = useState('standard');
+    const { activeAIMode: mode, setAIMode: setMode } = useUIStore();
     const [selectedModel, setSelectedModel] = useState('Chat GPT');
 
     const [intelligenceMode, setIntelligenceMode] = useState<'pulse' | 'compare' | 'fusion' | 'deep'>('pulse');
@@ -410,11 +412,8 @@ export default function ChatInterface() {
             };
             updateMessages(activeMode, prev => [...prev, assistantMessage]);
 
-            // DIRECT N8N CONNECTION (For testing/temporary usage as requested)
-            // Note: This may encounter CORS issues if N8N is not configured to allow requests from this origin.
-            const n8nBase = "https://personal-n8n.suwsiw.easypanel.host/webhook/ai";
-            const targetMode = intelligenceMode === 'deep' ? 'pulse' : intelligenceMode; // Fallback 'deep' to 'pulse' if no endpoint
-            const webhookUrl = `${n8nBase}/${targetMode}`;
+            // Use local API proxy
+            const webhookUrl = '/api/chat';
 
             let requestData;
             let headers = { 'Content-Type': 'application/json' };
