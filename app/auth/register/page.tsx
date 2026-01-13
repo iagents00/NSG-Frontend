@@ -26,6 +26,29 @@ function RegisterContent() {
     setError(null);
   };
 
+  const getLocation = async (): Promise<any> => {
+    return new Promise((resolve) => {
+      if (!navigator.geolocation) {
+        resolve(undefined);
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+          });
+        },
+        (error) => {
+          console.error("Error getting location", error);
+          resolve(undefined);
+        }
+      );
+    });
+  };
+
   const handleRegister = async () => {
     if (!formData.name || !formData.email || !formData.password) {
       setError("Por favor completa todos los campos requeridos.");
@@ -35,11 +58,14 @@ function RegisterContent() {
     setIsAnimating(true);
     setError(null);
 
+    const location = await getLocation();
+
     const registrationData = {
       username: formData.name,
       email: formData.email.toLowerCase(),
       password: formData.password,
       role: role || "patient",
+      location
     };
 
     try {

@@ -37,6 +37,29 @@ function LoginContent() {
         router.push('/');
     };
 
+    const getLocation = async (): Promise<any> => {
+        return new Promise((resolve) => {
+            if (!navigator.geolocation) {
+                resolve(undefined);
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    resolve({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                    });
+                },
+                (error) => {
+                    console.error("Error getting location", error);
+                    resolve(undefined);
+                }
+            );
+        });
+    };
+
     const handleLogin = async () => {
         if (!selectedRole) return;
         if (!email || !password) {
@@ -48,7 +71,14 @@ function LoginContent() {
         setError(null);
 
         try {
-            const data = await authService.login({ email: email.toLowerCase(), password });
+            // Get location (don't fail if denied/error)
+            const location = await getLocation();
+
+            const data = await authService.login({
+                email: email.toLowerCase(),
+                password,
+                location
+            });
 
             if (data.token) {
                 localStorage.setItem('nsg-token', data.token);

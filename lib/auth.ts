@@ -1,14 +1,23 @@
 import api from './api';
 
+export interface LocationData {
+  latitude: number;
+  longitude: number;
+  timezone: string;
+}
+
 export interface RegisterData {
   username: string;
   email: string;
   password: string;
+  role?: string;
+  location?: LocationData;
 }
 
 export interface LoginData {
   email: string;
   password: string;
+  location?: LocationData;
 }
 
 export interface AuthResponse {
@@ -29,7 +38,7 @@ export const authService = {
 
   verifySession: async () => {
     if (typeof window !== 'undefined' && !localStorage.getItem('nsg-token')) {
-      return; 
+      return;
     }
     try {
       const response = await api.get('/auth/verify-token');
@@ -44,6 +53,6 @@ export const authService = {
   },
 
   logout: () => {
-      localStorage.removeItem('nsg-token');
+    localStorage.removeItem('nsg-token');
   },
 };
