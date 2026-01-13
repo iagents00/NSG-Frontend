@@ -6,6 +6,7 @@ import { useAppStore } from "@/store/useAppStore";
 import { CONTEXT, RoleType } from "@/data/context";
 import BrandAtom from "@/components/ui/BrandAtom";
 import clsx from "clsx";
+import Link from "next/link";
 import { Lock, ChevronLeft } from "lucide-react";
 import { authService } from '@/lib/auth';
 import { translateAuthError } from '@/lib/error-translator';
@@ -149,6 +150,14 @@ function LoginContent() {
                                             placeholder="Ingresa tu contraseña"
                                         />
                                     </div>
+                                    <div className="flex justify-end pt-1">
+                                        <Link
+                                            href="/auth/forgot-password"
+                                            className="text-[10px] font-bold text-slate-400 hover:text-blue-600 transition-colors uppercase tracking-widest cursor-pointer"
+                                        >
+                                            ¿Olvidaste tu contraseña?
+                                        </Link>
+                                    </div>
                                 </div>
                             </div>
 
@@ -172,12 +181,12 @@ function LoginContent() {
                             {/* Register Link */}
                             <div className="mt-8 pt-6 border-t border-slate-100 flex justify-center text-sm">
                                 <span className="text-slate-500 mr-1">¿No tienes cuenta?</span>
-                                <a
+                                <Link
                                     href={`/auth/register?role=${selectedRole || 'manager'}`}
                                     className="text-blue-600 font-semibold hover:text-blue-700 transition-colors cursor-pointer"
                                 >
                                     Registrarse
-                                </a>
+                                </Link>
                             </div>
                         </form>
                     </div>

@@ -29,6 +29,7 @@ const Views: Record<string, any> = {
   patients: dynamic(() => import("@/components/views/Patients")),
   clinical_radar: dynamic(() => import("@/components/views/ClinicalRadar")),
   deliverables: dynamic(() => import("@/components/views/Deliverables")),
+  profile: dynamic(() => import("@/components/views/Profile")),
   settings: dynamic(() => import("@/components/views/Settings")),
 };
 

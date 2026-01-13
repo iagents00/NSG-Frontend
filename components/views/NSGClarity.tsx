@@ -13,7 +13,9 @@ import {
   Bell,
   Trophy,
   Calendar,
-  LogOut
+  LogOut,
+  BarChart3,
+  TrendingUp
 } from "lucide-react";
 import clsx from "clsx";
 import { useToast } from "@/components/ui/ToastProvider";
@@ -21,6 +23,12 @@ import confetti from "canvas-confetti";
 import { useAppStore } from "@/store/useAppStore";
 import { authService } from "@/lib/auth";
 import api from "@/lib/api";
+
+// Import new metrics components
+import StreakCounter from "@/components/clarity/StreakCounter";
+import MetricsPanel from "@/components/clarity/MetricsPanel";
+import CalendarHeatmap from "@/components/clarity/CalendarHeatmap";
+import CompletionChart from "@/components/clarity/CompletionChart";
 
 // --- AUDIO ENGINE ---
 let _audioCtx: AudioContext | null = null;
@@ -116,7 +124,7 @@ function TimelineItem({ id, time, title, status, color, desc, locked, isChecked,
           {isChecked && <div className={clsx("absolute top-0 left-0 w-full h-full animate-grow-down origin-top", style.active.bar)}></div>}
         </div>
       </div>
-      <div className={clsx("flex-1 p-5 rounded-[2rem] border transition-all duration-500 ease-out relative overflow-hidden", isChecked ? `${style.active.bg} ${style.active.border} shadow-xl shadow-slate-200/50 translate-x-1` : "bg-white border-slate-200 hover:border-slate-300 hover:shadow-2xl hover:shadow-slate-200/40")}>
+      <div className={clsx("flex-1 p-5 rounded-4xl border transition-all duration-500 ease-out relative overflow-hidden", isChecked ? `${style.active.bg} ${style.active.border} shadow-xl shadow-slate-200/50 translate-x-1` : "bg-white border-slate-200 hover:border-slate-300 hover:shadow-2xl hover:shadow-slate-200/40")}>
         {isChecked && <div className={clsx("absolute -right-20 -top-20 w-40 h-40 rounded-full blur-[60px] opacity-20", style.active.dot)}></div>}
         <div className="flex justify-between items-start mb-3 relative z-10">
           <div className="space-y-0.5">
@@ -184,6 +192,18 @@ export default function NSGClarity() {
   const [strategies, setStrategies] = useState<any[]>([]);
   const [isLoadingStrategies, setIsLoadingStrategies] = useState(false);
 
+  // Metrics states
+  const [streakData, setStreakData] = useState<any>(null);
+  const [metricsData, setMetricsData] = useState<any>(null);
+  const [heatmapData, setHeatmapData] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<any[]>([]);
+  const [isLoadingMetrics, setIsLoadingMetrics] = useState(false);
+  const [showMetrics, setShowMetrics] = useState(false); // Toggle for metrics view
+
+  // Confirmation modal states
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pendingTaskId, setPendingTaskId] = useState<string | null>(null);
+
   const fetchStrategies = async () => {
     setIsLoadingStrategies(true);
     try {
@@ -210,6 +230,95 @@ export default function NSGClarity() {
     } catch (e) { } finally { setIsLoadingTelegramData(false); }
   };
 
+  // Fetch all metrics data
+  const fetchAllMetrics = async () => {
+    if (!userId) return;
+
+    setIsLoadingMetrics(true);
+    try {
+      // Fetch streaks
+      const streaksResponse = await api.get(`/clarity/streaks/${userId}`);
+      if (streaksResponse.status === 200) {
+        setStreakData(streaksResponse.data.streaks);
+      }
+
+      // Fetch metrics (monthly)
+      const metricsResponse = await api.get(`/clarity/metrics/${userId}?period=month`);
+      if (metricsResponse.status === 200) {
+        setMetricsData(metricsResponse.data.metrics);
+      }
+
+      // Fetch heatmap data
+      const heatmapResponse = await api.get(`/clarity/heatmap/${userId}?months=1`);
+      if (heatmapResponse.status === 200) {
+        setHeatmapData(heatmapResponse.data.heatmap);
+      }
+
+      // Fetch history for chart (last 7 days)
+      const today = new Date();
+      const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const startDate = sevenDaysAgo.toISOString().split('T')[0];
+      const endDate = today.toISOString().split('T')[0];
+
+      const historyResponse = await api.get(`/clarity/history/${userId}?startDate=${startDate}&endDate=${endDate}`);
+      if (historyResponse.status === 200) {
+        // Transform data for chart
+        const completions = historyResponse.data.completions;
+        const chartMap: any = {};
+
+        // Initialize all 7 days
+        for (let i = 0; i < 7; i++) {
+          const date = new Date(sevenDaysAgo.getTime() + i * 24 * 60 * 60 * 1000);
+          const dateStr = date.toISOString().split('T')[0];
+          chartMap[dateStr] = {
+            date: dateStr,
+            morning_clarity: 0,
+            power_check: 0,
+            next_day_planning: 0
+          };
+        }
+
+        // Fill in completions
+        completions.forEach((c: any) => {
+          if (chartMap[c.date]) {
+            const protocolKey = c.protocol as 'morning_clarity' | 'power_check' | 'next_day_planning';
+            chartMap[c.date][protocolKey] = 1;
+          }
+        });
+
+        setChartData(Object.values(chartMap));
+      }
+
+    } catch (error) {
+      console.error("Error fetching metrics:", error);
+    } finally {
+      setIsLoadingMetrics(false);
+    }
+  };
+
+  // Check today's completions
+  const fetchTodayCompletions = async () => {
+    if (!userId) return;
+
+    try {
+      const response = await api.get(`/clarity/today/${userId}`);
+      if (response.status === 200) {
+        const completed = response.data.completed;
+
+        // Update tasks based on what's completed today
+        setTasks(prev => prev.map(t => {
+          let isChecked = false;
+          if (t.id === "1") isChecked = completed.morning_clarity;
+          if (t.id === "2") isChecked = completed.power_check;
+          if (t.id === "3") isChecked = completed.next_day_planning;
+          return { ...t, isChecked };
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching today completions:", error);
+    }
+  };
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -218,8 +327,10 @@ export default function NSGClarity() {
           if (data.user.telegram_id) setTelegramId(data.user.telegram_id);
           if (data.user.id) {
             useAppStore.getState().setUserId(data.user.id);
+            fetchStrategies();
+            fetchTodayCompletions(); // Load today's completions
+            fetchAllMetrics(); // Load metrics data
           }
-          fetchStrategies();
         }
       } catch (e) { }
     };
@@ -284,32 +395,114 @@ export default function NSGClarity() {
     prevProgressRef.current = progress;
   }, [progress, showToast]);
 
-  const handleTaskToggle = (id: string) => {
-    setTasks(prev => prev.map(t => {
-      if (t.id === id) {
-        if (!t.isChecked) playSound('check');
-        return { ...t, isChecked: !t.isChecked };
+  const handleTaskToggle = async (id: string) => {
+    const task = tasks.find(t => t.id === id);
+    if (!task || !userId) return;
+
+    // Don't allow unchecking (only checking)
+    if (task.isChecked) {
+      showToast("No puedes desmarcar un protocolo completado", "info");
+      return;
+    }
+
+    // Show confirmation modal
+    setPendingTaskId(id);
+    setShowConfirmModal(true);
+  };
+
+  const confirmCompletion = async () => {
+    if (!pendingTaskId || !userId) return;
+
+    const task = tasks.find(t => t.id === pendingTaskId);
+    if (!task) return;
+
+    // Map task ID to protocol name
+    const protocolMap: { [key: string]: string; } = {
+      "1": "morning_clarity",
+      "2": "power_check",
+      "3": "next_day_planning"
+    };
+
+    const protocol = protocolMap[pendingTaskId];
+    if (!protocol) return;
+
+    // Close modal
+    setShowConfirmModal(false);
+
+    try {
+      // Call backend to save completion
+      const response = await api.post('/clarity/complete', {
+        userId,
+        protocol,
+        metadata: {
+          deviceType: /Mobile/.test(navigator.userAgent) ? 'mobile' : 'desktop',
+          completionTime: 0
+        }
+      });
+
+      if (response.status === 201 || response.status === 200) {
+        // Play sound
+        playSound('check');
+
+        // Update local state
+        setTasks(prev => prev.map(t => {
+          if (t.id === pendingTaskId) {
+            return { ...t, isChecked: true };
+          }
+          return t;
+        }));
+
+        // Show success message with streak info
+        const streak = response.data.streak;
+        if (streak) {
+          showToast(`¡Protocolo completado! Racha: ${streak.current} días`, "success");
+        } else {
+          showToast("¡Protocolo completado!", "success");
+        }
+
+        // Refresh metrics
+        fetchAllMetrics();
       }
-      return t;
-    }));
+
+    } catch (error: any) {
+      if (error.response?.status === 409) {
+        showToast("Ya completaste este protocolo hoy", "info");
+      } else {
+        console.error("Error completing protocol:", error);
+        showToast("Error al guardar. Inténtalo de nuevo.", "error");
+      }
+    } finally {
+      setPendingTaskId(null);
+    }
+  };
+
+  const cancelCompletion = () => {
+    setShowConfirmModal(false);
+    setPendingTaskId(null);
   };
 
   return (
     <div className="max-w-7xl mx-auto h-full flex flex-col animate-fade-in-up pb-24">
       {/* 1. HERO BANNER */}
-      <div 
+      <div
         onClick={() => syncObjectives(true)}
         className="w-full relative group cursor-pointer mb-6 shrink-0"
         title="Clic para sincronizar objetivos"
       >
-        <div className="relative w-full h-[180px] rounded-[2rem] overflow-hidden shadow-2xl border border-white/10 transition-all duration-700 hover:shadow-[0_20px_60px_rgba(0,0,0,0.4)]">
+        <div className="relative w-full h-[180px] rounded-4xl overflow-hidden shadow-2xl border border-white/10 transition-all duration-700 hover:shadow-[0_20px_60px_rgba(0,0,0,0.4)]">
           <div className="absolute inset-0 bg-linear-to-br from-navy-950 via-navy-900 to-blue-950"></div>
           <div className="absolute inset-0 opacity-20 mix-blend-overlay bg-[url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center"></div>
           <div className="absolute inset-0 bg-linear-to-t from-navy-950 via-transparent to-transparent"></div>
           <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-600/20 rounded-full blur-[80px] group-hover:bg-blue-500/30 transition-all duration-700"></div>
           <div className="absolute inset-0 flex flex-col justify-center p-8 sm:px-12">
             <div className="overflow-hidden mb-3">
-              <span className="inline-block px-3 py-1 bg-blue-500/20 backdrop-blur-xl border border-blue-400/30 text-blue-200 text-[0.6rem] font-bold uppercase tracking-[0.25em] rounded-lg">Protocolo de Alineación • Sistema Activo</span>
+              <span className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/20 backdrop-blur-xl border border-blue-400/30 text-blue-200 text-[0.6rem] font-bold uppercase tracking-[0.25em] rounded-lg">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                </span>
+                Protocolo de Alineación • Sistema Activo
+              </span>
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-display font-medium text-white mb-4 leading-tight tracking-tight">Diseño de <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-emerald-400 font-bold">Claridad Estratégica.</span></h2>
             <p className="text-slate-300 text-sm sm:text-base lg:text-lg leading-relaxed font-medium max-w-2xl translate-y-1">Sincronización neuronal activa diseñada para la precisión máxima y el alto rendimiento continuo. Protocolo de alineación estratégica ejecutándose.</p>
@@ -323,7 +516,7 @@ export default function NSGClarity() {
           <Zap className="w-3.5 h-3.5 text-blue-600" />
           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Sincronización de Ecosistema</span>
         </div>
-        
+
         {/* Integration Hub */}
         <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full md:w-auto">
           {/* Telegram Button */}
@@ -331,17 +524,17 @@ export default function NSGClarity() {
             onClick={() => handleConnect("Telegram")}
             disabled={telegramId !== null}
             className={clsx(
-              "w-full sm:w-auto group relative flex items-center gap-3 px-4 sm:px-5 py-2 sm:py-2.5 border rounded-2xl sm:rounded-[2rem] transition-all duration-500",
+              "w-full sm:w-auto group relative flex items-center gap-3 px-4 sm:px-5 py-2 sm:py-2.5 border rounded-4xl transition-all duration-500",
               telegramId
                 ? "bg-emerald-50/60 border-emerald-200 shadow-sm cursor-default"
-                : "bg-white border-slate-200 hover:shadow-md hover:border-blue-300 cursor-pointer shadow-sm"
+                : "bg-white border-slate-300 hover:shadow-md hover:border-[#0088cc] cursor-pointer shadow-sm hover:bg-[#0088cc]/5"
             )}
           >
             <div className={clsx(
               "w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center transition-all duration-300 relative overflow-hidden shrink-0",
               telegramId
                 ? "bg-white text-emerald-500 shadow-sm ring-1 ring-emerald-100"
-                : "bg-[#0088cc]/5 text-[#0088cc] group-hover:bg-[#0088cc] group-hover:text-white"
+                : "bg-[#0088cc]/10 text-[#0088cc] group-hover:bg-[#0088cc] group-hover:text-white group-hover:ring-2 group-hover:ring-[#0088cc]/30"
             )}>
               {telegramId && <div className="absolute inset-0 bg-emerald-100/50 animate-pulse"></div>}
               <svg viewBox="0 0 24 24" className="w-4 h-4 sm:w-5 sm:h-5 fill-current relative z-10" xmlns="http://www.w3.org/2000/svg">
@@ -349,33 +542,115 @@ export default function NSGClarity() {
               </svg>
             </div>
             <div className="text-left">
-              <p className="text-[9px] font-bold uppercase tracking-widest opacity-60 leading-none mb-1">Telegram</p>
-              <p className="text-xs font-bold leading-none">{telegramId ? (telegramData?.username ? `@${telegramData.username}` : "Conectado") : "Vincular"}</p>
+              <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500 leading-none mb-1">Telegram</p>
+              <p className="text-xs font-bold leading-none text-navy-900">{telegramId ? (telegramData?.username ? `@${telegramData.username}` : "Conectado") : "Vincular"}</p>
             </div>
           </button>
-          
+
           {/* Calendar Button */}
-          <button onClick={() => handleConnect("Calendar")} className={clsx("w-full sm:w-auto flex items-center gap-3 px-4 py-2 rounded-xl border transition-all duration-300 shadow-sm active:scale-95", isConnected ? "bg-blue-50 border-blue-200 text-blue-700" : "bg-white border-slate-200 text-slate-600 hover:border-blue-300 hover:bg-slate-50")}>
-            <div className="w-6 h-6 bg-white border border-slate-100 rounded-lg flex items-center justify-center p-1 relative overflow-hidden">
-              <svg viewBox="0 0 24 24" className="w-full h-full"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" /><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" /><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" /><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" /></svg>
+          <button
+            onClick={() => handleConnect("Calendar")}
+            className={clsx(
+              "w-full sm:w-auto group relative flex items-center gap-3 px-4 sm:px-5 py-2 sm:py-2.5 border rounded-4xl transition-all duration-500",
+              isConnected
+                ? "bg-blue-50/60 border-blue-200 shadow-sm cursor-default"
+                : "bg-white border-slate-300 hover:shadow-md hover:border-blue-400 cursor-pointer shadow-sm hover:bg-blue-50/30"
+            )}
+          >
+            <div className={clsx(
+              "w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center transition-all duration-300 relative overflow-hidden shrink-0",
+              isConnected
+                ? "bg-white ring-2 ring-blue-200 shadow-sm"
+                : "bg-slate-50 group-hover:bg-white group-hover:ring-2 group-hover:ring-blue-200"
+            )}>
+              <svg viewBox="0 0 24 24" className="w-4 h-4 sm:w-5 sm:h-5">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+              </svg>
               {isConnected && <div className="absolute inset-0 bg-blue-500/5 animate-pulse"></div>}
             </div>
             <div className="text-left">
-              <p className="text-[9px] font-bold uppercase tracking-widest opacity-60 leading-none mb-1">Calendar</p>
-              <p className="text-xs font-bold leading-none">{isConnected ? "Sincronizado" : "Vincular"}</p>
+              <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500 leading-none mb-1">Calendar</p>
+              <p className="text-xs font-bold leading-none text-navy-900">{isConnected ? "Sincronizado" : "Vincular"}</p>
             </div>
           </button>
-          
+
           <button onClick={() => syncObjectives(true)} className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-400 hover:text-blue-600 hover:bg-white hover:border-blue-200 transition-all shadow-sm active:scale-95">
             <RefreshCw className={clsx("w-4 h-4", isLoadingTelegramData && "animate-spin")} />
           </button>
         </div>
       </div>
 
+      {/* METRICS TOGGLE BUTTON */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-violet-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+            <BarChart3 className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h3 className="font-display font-bold text-xl text-navy-950">Métricas de Rendimiento</h3>
+            <p className="text-xs text-slate-500 font-medium">Visualiza tu progreso y achievement</p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => setShowMetrics(!showMetrics)}
+          className={clsx(
+            "px-4 py-2 rounded-xl font-bold text-sm transition-all duration-300 flex items-center gap-2",
+            showMetrics
+              ? "bg-blue-600 text-white shadow-lg shadow-blue-200"
+              : "bg-white border-2 border-slate-200 text-slate-600 hover:border-blue-300"
+          )}
+        >
+          <TrendingUp className="w-4 h-4" />
+          {showMetrics ? "Ocultar Métricas" : "Ver Métricas"}
+        </button>
+      </div>
+
+      {/* METRICS SECTION */}
+      {showMetrics && (
+        <div className="space-y-6 mb-8 animate-fade-in">
+          {/* Streak Counter */}
+          {streakData && (
+            <StreakCounter
+              current={streakData.current}
+              longest={streakData.longest}
+              isLoading={isLoadingMetrics}
+            />
+          )}
+
+          {/* Metrics Panel */}
+          {metricsData && (
+            <MetricsPanel
+              metrics={metricsData}
+              isLoading={isLoadingMetrics}
+            />
+          )}
+
+          {/* Charts Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Completion Chart */}
+            <CompletionChart
+              data={chartData}
+              period="week"
+              isLoading={isLoadingMetrics}
+            />
+
+            {/* Calendar Heatmap */}
+            <CalendarHeatmap
+              data={heatmapData}
+              isLoading={isLoadingMetrics}
+            />
+          </div>
+        </div>
+      )}
+
       {/* 3. MAIN GRID */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-7">
-          <div className="mb-6 p-6 bg-white rounded-[2rem] border border-slate-100 shadow-sm relative overflow-hidden transition-all hover:shadow-md">
+          <div className="mb-6 p-6 bg-white rounded-4xl border border-slate-100 shadow-sm relative overflow-hidden transition-all hover:shadow-md">
             <div className="absolute top-0 right-0 w-48 h-48 bg-blue-50/50 rounded-full blur-3xl -mr-16 -mt-16 opacity-70"></div>
             <CompletionProgress progress={progress} />
             {progress === 100 && (
@@ -414,17 +689,75 @@ export default function NSGClarity() {
                   <StrategyCard key={strategy._id} strategy={strategy} />
                 ))
               ) : (
-                <div className="bg-slate-50 rounded-[2.5rem] border border-dashed border-slate-300 p-12 text-center">
-                  <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+                <div className="bg-white p-10 rounded-[2.5rem] border border-dashed border-slate-200 text-center shadow-sm">
+                  <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner ring-1 ring-slate-100">
                     <Target className="w-8 h-8 text-slate-300" />
                   </div>
-                  <p className="text-slate-400 font-medium italic">No se han detectado estrategias aún.</p>
+                  <h5 className="text-navy-900 font-bold mb-2">Sin estrategias activas</h5>
+                  <p className="text-slate-400 font-medium text-sm mb-8 max-w-[250px] mx-auto">
+                    Analiza una noticia o reunión para generar protocolos de acción inmediata.
+                  </p>
+                  <button
+                    onClick={() => fetchStrategies()}
+                    className="w-full py-3 bg-blue-600 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-blue-700 transition shadow-lg shadow-blue-200 flex items-center justify-center gap-2"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    Actualizar Sistema
+                  </button>
                 </div>
               )}
             </div>
           </div>
         </div>
       </div>
+
+      {/* CONFIRMATION MODAL */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-navy-950/60 backdrop-blur-sm"
+            onClick={cancelCompletion}
+          ></div>
+          
+          {/* Modal */}
+          <div className="relative bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-md w-full p-8 animate-scale-in">
+            {/* Decorative gradient blob */}
+            <div className="absolute -top-20 -right-20 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl"></div>
+            
+            {/* Icon */}
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-violet-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-200">
+              <CheckCircle className="w-8 h-8 text-white" />
+            </div>
+
+            {/* Content */}
+            <div className="text-center mb-8">
+              <h3 className="font-display font-bold text-2xl text-navy-950 mb-3">
+                {pendingTaskId && tasks.find(t => t.id === pendingTaskId)?.title}
+              </h3>
+              <p className="text-slate-600 text-sm leading-relaxed">
+                ¿Confirmás que completaste este protocolo? Esta acción se registrará en tu historial y sumará a tu racha.
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3">
+              <button
+                onClick={cancelCompletion}
+                className="flex-1 px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-bold text-sm transition-all duration-300 hover:scale-105 active:scale-95"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmCompletion}
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white rounded-2xl font-bold text-sm transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg shadow-blue-200"
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

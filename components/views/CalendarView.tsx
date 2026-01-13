@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Plus, LogOut, RefreshCw, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, LogOut, RefreshCw, Search, Calendar } from "lucide-react";
 import { useUIStore } from "@/store/useUIStore";
 import { useToast } from "@/components/ui/ToastProvider";
 import clsx from "clsx";
@@ -134,6 +134,21 @@ export default function CalendarView() {
     });
   };
 
+  // Get today's events
+  const getTodayEvents = () => {
+    const today = new Date();
+    return events.filter(event => {
+      const eventDateStr = event.start.dateTime || event.start.date;
+      if (!eventDateStr) return false;
+      const eventDate = new Date(eventDateStr);
+      return eventDate.getDate() === today.getDate() &&
+        eventDate.getMonth() === today.getMonth() &&
+        eventDate.getFullYear() === today.getFullYear();
+    });
+  };
+
+  const todayEvents = getTodayEvents();
+
   return (
     <div className="h-full flex flex-col animate-fade-in-up px-3 sm:px-0">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 shrink-0">
@@ -183,6 +198,33 @@ export default function CalendarView() {
           <button onClick={() => showToast('Nuevo Evento', 'info')} className="px-3 sm:px-4 py-2 bg-blue-600 text-white text-[0.65rem] sm:text-xs font-bold rounded-lg active:scale-95 transition hover:bg-blue-500 flex items-center gap-1 cursor-pointer shadow-lg shadow-blue-200 shrink-0"><Plus className="w-3 h-3" /> <span className="hidden xs:inline">Evento</span></button>
         </div>
       </div>
+
+      {/* Today's Events Panel */}
+      {isConnected && todayEvents.length > 0 && (
+        <div className="bg-linear-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-4 mb-4 shrink-0 animate-fade-in-up">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="font-bold text-blue-900 flex items-center gap-2 text-sm sm:text-base">
+              <Calendar className="w-4 h-4" />
+              Eventos de Hoy ({todayEvents.length})
+            </h4>
+            <span className="text-xs text-blue-600 font-medium">{new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
+          </div>
+          <div className="space-y-2 max-h-32 overflow-y-auto custom-scroll">
+            {todayEvents.map(event => (
+              <div key={event.id} className="text-xs sm:text-sm bg-white p-3 rounded-xl border border-blue-100 hover:border-blue-300 transition flex items-center gap-2 group">
+                <div className="w-2 h-2 rounded-full bg-blue-500 shrink-0"></div>
+                <span className="font-medium text-navy-900 flex-1">{event.summary}</span>
+                {event.start.dateTime && (
+                  <span className="text-xs text-slate-500 font-medium">
+                    {new Date(event.start.dateTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-4xl shadow-card border border-slate-200 overflow-hidden flex-1 flex flex-col min-h-0">
         <div className="grid grid-cols-7 bg-slate-50/50 border-b border-slate-200 py-3 shrink-0">
           {DAYS.map((d, i) => <div key={i} className="text-center text-[0.65rem] font-bold text-slate-400 uppercase tracking-widest">{d}</div>)}

@@ -50,7 +50,7 @@ export default function Sidebar() {
       {/* Clicking the backdrop closes the sidebar on mobile */}
       <div
         className={clsx(
-          "fixed inset-0 bg-navy-950/80 z-[80] backdrop-blur-sm transition-opacity duration-300 lg:hidden",
+          "fixed inset-0 bg-navy-950/80 z-80 backdrop-blur-sm transition-opacity duration-300 lg:hidden",
           isSidebarOpen ? "opacity-100 block" : "opacity-0 hidden pointer-events-none"
         )}
         onClick={toggleSidebar}
@@ -58,7 +58,7 @@ export default function Sidebar() {
 
       {/* 3. Main Sidebar Container */}
       <aside className={clsx(
-        "fixed lg:static inset-y-0 left-0 w-72 bg-navy-950 flex flex-col text-slate-400 border-r border-navy-900 shadow-2xl z-[90] transition-transform duration-300 ease-in-out transform h-full",
+        "fixed lg:static inset-y-0 left-0 w-72 bg-navy-950 flex flex-col text-slate-400 border-r border-navy-900 shadow-2xl z-90 transition-transform duration-300 ease-in-out transform h-full",
         isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
 
@@ -105,6 +105,10 @@ export default function Sidebar() {
               const Icon = item.icon;
               const targetPath = `/dashboard/${item.id}`;
               const isActive = pathname === targetPath;
+              
+              // Lista de secciones bloqueadas con Coming Soon
+              const comingSoonSections = ['nsg_news', 'clinical_radar', 'patients', 'library'];
+              const isComingSoon = comingSoonSections.includes(item.id);
 
               return (
                 <Link
@@ -117,7 +121,7 @@ export default function Sidebar() {
                     "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all mb-0.5 cursor-pointer group",
                     "focus:outline-none active:scale-[0.98]",
                     item.id === 'nsg_intelligence'
-                      ? "bg-gradient-to-r from-blue-900/30 to-navy-900/30 border border-blue-500/20 text-blue-300 shadow-glass hover:text-white"
+                      ? "bg-linear-to-r from-blue-900/30 to-navy-900/30 border border-blue-500/20 text-blue-300 shadow-glass hover:text-white"
                       : isActive
                         ? "text-white bg-white/10 shadow-[inset_2px_0_0_0_#60A5FA] border-transparent"
                         : "text-slate-400 hover:bg-white/5 hover:text-white hover:translate-x-1 border border-transparent"
@@ -131,7 +135,12 @@ export default function Sidebar() {
                       isActive ? "text-blue-400" : "text-slate-500 group-hover:text-blue-400"
                     )} />
                   )}
-                  <span className="truncate">{item.label}</span>
+                  <span className="truncate flex-1">{item.label}</span>
+                  {isComingSoon && (
+                    <span className="text-[0.55rem] font-black px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 uppercase tracking-wider">
+                      Próximamente
+                    </span>
+                  )}
                 </Link>
               );
             })}

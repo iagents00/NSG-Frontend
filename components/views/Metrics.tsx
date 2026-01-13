@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { DollarSign, Percent, Flame, Calendar } from "lucide-react";
 import { StatCard } from "@/components/ui/StatCard"; 
 import Chart from "chart.js/auto";
+import RoleGuard from "@/components/RoleGuard";
 
 export default function Metrics() {
   const chartRef = useRef<HTMLCanvasElement>(null);
@@ -51,36 +52,38 @@ export default function Metrics() {
   }, []);
 
   return (
-    <div className="max-w-7xl mx-auto flex flex-col gap-6 animate-fade-in-up pb-10">
-      {/* Stat Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard title="Revenue YTD" value="$2.4M" icon={DollarSign} colorClass="text-emerald-600" bgClass="bg-white" />
-        <StatCard title="EBITDA" value="32%" icon={Percent} colorClass="text-blue-600" bgClass="bg-white" />
-        <StatCard title="Burn Rate" value="$45k" icon={Flame} colorClass="text-orange-500" bgClass="bg-white" />
-        <StatCard title="Runway" value="18m" icon={Calendar} colorClass="text-indigo-600" bgClass="bg-white" />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* CHART CONTAINER */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-[2.5rem] shadow-card border border-slate-200">
-          <h3 className="font-bold text-navy-900 mb-4">Proyección Financiera</h3>
-          <div className="h-80 w-full relative">
-            <canvas ref={chartRef}></canvas>
-          </div>
+    <RoleGuard allowedRoles={['admin']}>
+      <div className="max-w-7xl mx-auto flex flex-col gap-6 animate-fade-in-up pb-10">
+        {/* Stat Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <StatCard title="Revenue YTD" value="$2.4M" icon={DollarSign} colorClass="text-emerald-600" bgClass="bg-white" />
+          <StatCard title="EBITDA" value="32%" icon={Percent} colorClass="text-blue-600" bgClass="bg-white" />
+          <StatCard title="Burn Rate" value="$45k" icon={Flame} colorClass="text-orange-500" bgClass="bg-white" />
+          <StatCard title="Runway" value="18m" icon={Calendar} colorClass="text-indigo-600" bgClass="bg-white" />
         </div>
 
-        {/* Transactions */}
-        <div className="bg-white p-6 rounded-[2.5rem] shadow-card border border-slate-200 flex flex-col">
-          <h3 className="font-bold text-navy-900 mb-4">Transacciones Recientes</h3>
-          <div className="space-y-3 overflow-y-auto h-80 custom-scroll pr-2">
-             <TransactionItem name="Stripe Inc." amount="+$12,450" type="Ingreso" />
-             <TransactionItem name="AWS Cloud" amount="-$2,100" type="Gasto" />
-             <TransactionItem name="Consultoría" amount="+$8,500" type="Ingreso" />
-             <TransactionItem name="Nómina" amount="-$15,000" type="Gasto" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* CHART CONTAINER */}
+          <div className="lg:col-span-2 bg-white p-6 rounded-[2.5rem] shadow-card border border-slate-200">
+            <h3 className="font-bold text-navy-900 mb-4">Proyección Financiera</h3>
+            <div className="h-80 w-full relative">
+              <canvas ref={chartRef}></canvas>
+            </div>
+          </div>
+
+          {/* Transactions */}
+          <div className="bg-white p-6 rounded-[2.5rem] shadow-card border border-slate-200 flex flex-col">
+            <h3 className="font-bold text-navy-900 mb-4">Transacciones Recientes</h3>
+            <div className="space-y-3 overflow-y-auto h-80 custom-scroll pr-2">
+               <TransactionItem name="Stripe Inc." amount="+$12,450" type="Ingreso" />
+               <TransactionItem name="AWS Cloud" amount="-$2,100" type="Gasto" />
+               <TransactionItem name="Consultoría" amount="+$8,500" type="Ingreso" />
+               <TransactionItem name="Nómina" amount="-$15,000" type="Gasto" />
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </RoleGuard>
   );
 }
 

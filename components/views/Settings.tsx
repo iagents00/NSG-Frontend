@@ -1,309 +1,375 @@
-"use client";
-import React, { useState, useRef } from 'react';
-import { Bell, Shield, Moon, Download, Trash2, Edit2, FileUp, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+'use client';
+
+import React, { useState } from 'react';
+import { Bell, Shield, Moon, Settings as SettingsIcon, Zap, Globe, ExternalLink, Lock, Sparkles } from "lucide-react";
 import { useToast } from "@/components/ui/ToastProvider";
 import clsx from "clsx";
-import axios from "axios";
-
 import { useAppStore } from "@/store/useAppStore";
+import api from "@/lib/api";
+import { authService } from "@/lib/auth";
 
-import { authService } from "@/lib/auth"; // Import authService
+// Define integration and preference configs by role
+const INTEGRATIONS_CONFIG = {
+  telegram: {
+    id: 'telegram',
+    name: 'Telegram',
+    description: 'Bot de notificaciones inteligentes',
+    roles: ['admin', 'consultant', 'psychologist', 'manager', 'patient'],
+    soon: false,
+    icon: (
+      <svg viewBox="0 0 24 24" className="w-6 h-6 fill-current">
+        <path d="M11.944 0C5.352 0 0 5.352 0 11.944c0 6.592 5.352 11.944 11.944 11.944c6.592 0 11.944-5.352 11.944-11.944C23.888 5.352 18.536 0 11.944 0zm5.66 8.16l-1.928 9.096c-.144.644-.528.804-1.068.5l-2.936-2.164l-1.416 1.364c-.156.156-.288.288-.588.288l.212-3.04l5.524-4.992c.24-.212-.052-.332-.372-.12l-6.828 4.3l-2.948-.92c-.64-.2-.652-.64.132-.948l11.524-4.44c.532-.2.996.12.804.976z" />
+      </svg>
+    ),
+    color: '[#0088cc]'
+  },
+  calendar: {
+    id: 'calendar',
+    name: 'Google Calendar',
+    description: 'Sincronización de eventos y reuniones',
+    roles: ['admin', 'consultant', 'psychologist', 'manager', 'patient'],
+    soon: false,
+    icon: (
+      <svg viewBox="0 0 24 24" className="w-6 h-6">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+      </svg>
+    ),
+    color: 'blue-600'
+  },
+  fathom: {
+    id: 'fathom',
+    name: 'Fathom Analytics',
+    description: 'Análisis de reuniones con IA',
+    roles: ['admin', 'consultant', 'manager'],
+    soon: false,
+    icon: (
+      <svg viewBox="0 0 24 24" className="w-6 h-6 fill-current">
+        <path d="M3 3v18h18V3H3zm16 16H5V5h14v14zm-2-10h-3V7h3v2zm-4 0H6V7h7v2zm4 3h-3v-2h3v2zm-4 0H6v-2h7v2zm4 3h-3v-2h3v2zm-4 0H6v-2h7v2z"/>
+      </svg>
+    ),
+    color: 'purple-600'
+  },
+  slack: {
+    id: 'slack',
+    name: 'Slack',
+    description: 'Notificaciones en tiempo real',
+    roles: ['admin', 'consultant', 'manager'],
+    soon: true,
+    icon: (
+      <svg viewBox="0 0 24 24" className="w-6 h-6 fill-current">
+        <path d="M6 15a2 2 0 0 1-2 2a2 2 0 0 1-2-2a2 2 0 0 1 2-2h2v2m1 0a2 2 0 0 1 2-2a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2a2 2 0 0 1-2-2v-5m2-8a2 2 0 0 1-2-2a2 2 0 0 1 2-2a2 2 0 0 1 2 2v2H9m0 1a2 2 0 0 1 2 2a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2a2 2 0 0 1 2-2h5m8 2a2 2 0 0 1 2-2a2 2 0 0 1 2 2a2 2 0 0 1-2 2h-2v-2m-1 0a2 2 0 0 1-2 2a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2a2 2 0 0 1 2 2v5m-2 8a2 2 0 0 1 2 2a2 2 0 0 1-2 2a2 2 0 0 1-2-2v-2h2m0-1a2 2 0 0 1-2-2a2 2 0 0 1 2-2h5a2 2 0 0 1 2 2a2 2 0 0 1-2 2h-5z"/>
+      </svg>
+    ),
+    color: 'pink-600'
+  }
+};
+
+const PREFERENCES_CONFIG = {
+  notifications: {
+    id: 'notifications',
+    title: 'Notificaciones Inteligentes',
+    desc: 'Recibe alertas basadas en contexto y prioridad',
+    icon: Bell,
+    color: 'blue',
+    roles: ['admin', 'consultant', 'psychologist', 'manager', 'patient'],
+    soon: false
+  },
+  privacy: {
+    id: 'privacy',
+    title: 'Modo Privacidad Avanzada',
+    desc: 'Ocultar datos sensibles en dashboard compartido',
+    icon: Shield,
+    color: 'purple',
+    roles: ['admin', 'psychologist', 'patient'],
+    soon: false
+  },
+  darkMode: {
+    id: 'darkMode',
+    title: 'Modo Oscuro',
+    desc: 'Activar interfaz oscura para reducir fatiga visual',
+    icon: Moon,
+    color: 'indigo',
+    roles: ['admin', 'consultant', 'psychologist', 'manager', 'patient'],
+    soon: false
+  },
+  sync: {
+    id: 'sync',
+    title: 'Sincronización en Tiempo Real',
+    desc: 'Mantener datos sincronizados automáticamente',
+    icon: Globe,
+    color: 'emerald',
+    roles: ['admin', 'consultant', 'psychologist', 'manager'],
+    soon: false
+  },
+  ai: {
+    id: 'ai',
+    title: 'Asistente IA Avanzado',
+    desc: 'Sugerencias predictivas y automatización inteligente',
+    icon: Sparkles,
+    color: 'amber',
+    roles: ['admin', 'consultant', 'manager'],
+    soon: true
+  }
+};
 
 export default function Settings() {
   const { showToast } = useToast();
-  const { theme, setTheme, userId, setUserId } = useAppStore(); // Connect to store
+  const { theme, setTheme, userId, currentRole } = useAppStore();
 
-  const [username, setUsername] = useState<string | null>(null);
+  // Integrations state
+  const [telegramId, setTelegramId] = useState<number | null>(null);
+  const [isCalendarConnected, setIsCalendarConnected] = useState(false);
+  const [isCheckingCalendar, setIsCheckingCalendar] = useState(false);
+  const [isFathomConnected, setIsFathomConnected] = useState(false);
+  const [isCheckingFathom, setIsCheckingFathom] = useState(false);
+
+  // Preferences state
+  const [preferences, setPreferences] = useState({
+    notifications: true,
+    privacy: false,
+    darkMode: theme === 'dark',
+    sync: true,
+    ai: false
+  });
 
   React.useEffect(() => {
     const fetchUser = async () => {
       try {
         const data = await authService.verifySession();
-        if (data?.user?.username) {
-          setUsername(data.user.username);
-        }
-        if (data?.user?.id) {
-          setUserId(data.user.id);
+        if (data?.user?.telegram_id) {
+          setTelegramId(data.user.telegram_id);
         }
       } catch (error) {
         // Silent fail
       }
     };
     fetchUser();
+    
+    // Check Google Calendar connection
+    const checkCalendar = async () => {
+      setIsCheckingCalendar(true);
+      try {
+        const res = await api.get('/google/calendar/events');
+        if (res.status === 200) {
+          setIsCalendarConnected(true);
+        }
+      } catch (e) {
+        setIsCalendarConnected(false);
+      } finally {
+        setIsCheckingCalendar(false);
+      }
+    };
+    checkCalendar();
+
+    // Check Fathom connection
+    const checkFathom = async () => {
+      setIsCheckingFathom(true);
+      try {
+        const res = await api.get('/fathom/status');
+        if (res.status === 200 && res.data?.connected) {
+          setIsFathomConnected(true);
+        }
+      } catch (e) {
+        setIsFathomConnected(false);
+      } finally {
+        setIsCheckingFathom(false);
+      }
+    };
+    checkFathom();
   }, []);
 
-  const toggleTheme = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(newTheme);
-    showToast(`Tema cambiado a ${newTheme === 'dark' ? 'Oscuro' : 'Claro'}`, 'success');
-  };
+  const handleConnectCalendar = async () => {
+    if (isCalendarConnected) {
+      // Confirmation dialog
+      if (!confirm('¿Estás seguro de que deseas desvincular Google Calendar? Perderás el acceso a tus eventos sincronizados.')) {
+        return;
+      }
 
-  // PDF Upload State
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadStatus, setUploadStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [uploadMessage, setUploadMessage] = useState('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && file.type === 'application/pdf') {
-      setSelectedFile(file);
-      setUploadStatus('idle');
-      setUploadMessage('');
+      try {
+        await api.delete('/google/calendar');
+        setIsCalendarConnected(false);
+        showToast('Google Calendar desconectado', 'info');
+      } catch (e) {
+        showToast('Error al desconectar', 'error');
+      }
     } else {
-      setUploadStatus('error');
-      setUploadMessage('Por favor selecciona un archivo PDF válido');
-      setSelectedFile(null);
+      try {
+        const res = await api.get('/google/auth');
+        if (res.data?.url) {
+          window.open(res.data.url, '_blank');
+        }
+      } catch (e) {
+        showToast('Error al conectar', 'error');
+      }
     }
   };
 
-  const handleUpload = async () => {
-    if (!selectedFile) {
-      setUploadStatus('error');
-      setUploadMessage('No hay archivo seleccionado');
-      return;
+  const handleConnectFathom = async () => {
+    if (isFathomConnected) {
+      // Confirmation dialog
+      if (!confirm('¿Estás seguro de que deseas desvincular Fathom Analytics? Se eliminarán todos los datos sincronizados.')) {
+        return;
+      }
+
+      try {
+        await api.delete('/fathom/token');
+        setIsFathomConnected(false);
+        showToast('Fathom Analytics desconectado', 'info');
+      } catch (e) {
+        showToast('Error al desconectar Fathom', 'error');
+      }
+    } else {
+      showToast('Conecta Fathom desde la sección NSG Horizon', 'info');
     }
+  };
 
-    setIsUploading(true);
-    setUploadStatus('idle');
-    setUploadMessage('');
+  const togglePreference = (prefId: string) => {
+    if (prefId === 'darkMode') {
+      const newTheme = theme === 'dark' ? 'light' : 'dark';
+      setTheme(newTheme);
+      setPreferences(prev => ({ ...prev, darkMode: newTheme === 'dark' }));
+      showToast(`Tema cambiado a ${newTheme === 'dark' ? 'Oscuro' : 'Claro'}`, 'success');
+    } else {
+      setPreferences(prev => ({ ...prev, [prefId]: !prev[prefId as keyof typeof prev] }));
+      showToast('Preferencia actualizada', 'info');
+    }
+  };
 
-    try {
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-      formData.append('type', 'pdf_upload');
-      formData.append('fileName', selectedFile.name);
-      formData.append('fileSize', selectedFile.size.toString());
-      formData.append('timestamp', new Date().toISOString());
-      formData.append('userId', userId);
+  // Filter integrations and preferences by role
+  const availableIntegrations = Object.values(INTEGRATIONS_CONFIG).filter(
+    int => int.roles.includes(currentRole || 'patient')
+  );
+  
+  const availablePreferences = Object.values(PREFERENCES_CONFIG).filter(
+    pref => pref.roles.includes(currentRole || 'patient')
+  );
 
-      // Remove manual Content-Type header to allow browser to set boundary automatically
-      const response = await axios.post('/api/chat', formData);
+  // Helper to check connection status
+  const getIntegrationStatus = (integrationId: string) => {
+    switch (integrationId) {
+      case 'telegram':
+        return { connected: !!telegramId, text: telegramId ? `ID: ${telegramId}` : 'No conectado', loading: false };
+      case 'calendar':
+        return { connected: isCalendarConnected, text: isCalendarConnected ? 'Sincronizado' : 'No conectado', loading: isCheckingCalendar };
+      case 'fathom':
+        return { connected: isFathomConnected, text: isFathomConnected ? 'Sincronizado' : 'No conectado', loading: isCheckingFathom };
+      default:
+        return { connected: false, text: 'No disponible', loading: false };
+    }
+  };
 
-      setUploadStatus('success');
-
-      // Extract text from N8N response
-      const responseData = response.data;
-      const responseText = responseData.response ||
-        responseData.output ||
-        responseData.content ||
-        responseData.text ||
-        responseData.message ||
-        `${selectedFile.name} subido exitosamente`;
-
-      setUploadMessage(responseText);
-      setSelectedFile(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-      showToast('Documento subido correctamente', 'success');
-
-    } catch (error: any) {
-
-      let errorMessage = 'Error al subir el PDF';
-      let debugInfo = '';
-
-      if (error.response) {
-        const data = error.response.data;
-
-        if (error.response.status === 404) {
-          errorMessage = 'Error 404: Ruta de API no encontrada (/api/upload)';
-        } else if (error.response.status === 502) {
-          // Try to parse the N8N error details
-          let n8nDetails = data.details;
-          try {
-            const parsed = JSON.parse(data.details);
-            // "The requested webhook is not registered"
-            if (parsed.message) n8nDetails = parsed.message;
-            // "Click the 'Execute workflow' button..."
-            if (parsed.hint) n8nDetails += `\nSuggestion: ${parsed.hint}`;
-
-            // Add method hint
-            n8nDetails += `\nImportant: File uploads require the N8N Webhook to be set to 'POST'.`;
-          } catch (e) { /* use raw details */ }
-
-          errorMessage = `N8N Error (${data.n8n_status})`;
-          debugInfo = n8nDetails;
+  const handleIntegrationAction = (integrationId: string) => {
+    switch (integrationId) {
+      case 'telegram':
+        if (!telegramId) {
+          window.open(`https://t.me/nsg_preguntasyrespuestas_bot?start=${userId}`, '_blank');
         } else {
-          errorMessage = data.error || data.message || `Error del servidor (${error.response.status})`;
-          debugInfo = data.details || '';
+          showToast('Telegram ya conectado', 'info');
         }
-      } else if (error.request) {
-        errorMessage = 'Error de red: No se recibió respuesta del servidor';
-      } else {
-        errorMessage = error.message;
-      }
-
-      setUploadStatus('error');
-      // Use pre-line whitespace for the suggestion newline
-      setUploadMessage(`${errorMessage}: \n${debugInfo}`);
-      showToast(errorMessage, 'error');
-    } finally {
-      setIsUploading(false);
+        break;
+      case 'calendar':
+        handleConnectCalendar();
+        break;
+      case 'fathom':
+        handleConnectFathom();
+        break;
+      default:
+        showToast('Próximamente disponible', 'info');
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8 animate-fade-in-up pb-10 px-4 sm:px-0">
+    <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 animate-fade-in-up pb-10 px-4 sm:px-0">
 
-      {/* 1. Main Config Card */}
-      <div className="bg-white p-5 sm:p-8 rounded-2xl sm:rounded-[2.5rem] shadow-card border border-slate-200">
+      {/* Dark Header Banner - Clarity Style */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-navy-950 via-navy-900 to-navy-950 px-8 py-6 rounded-3xl border border-navy-800/50 shadow-xl">
+        <div className="relative z-10">
+          <h2 className="font-display font-bold text-2xl lg:text-3xl tracking-tight">
+            <span className="text-white">Configuración del </span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">Sistema NSG</span>
+            <span className="text-white">.</span>
+          </h2>
+          <p className="text-slate-300 text-sm mt-2 max-w-3xl leading-relaxed">
+            Personaliza tu experiencia neuronal y gestiona integraciones de protocolo. Sistema de configuración avanzada ejecutándose.
+          </p>
+        </div>
+      </div>
 
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4">
+      {/* Integrations Section */}
+      <div className="bg-white p-6 sm:p-8 rounded-4xl shadow-sm border border-slate-200">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+            <ExternalLink className="w-5 h-5 text-blue-600" />
+          </div>
           <div>
-            <h3 className="font-display font-bold text-xl sm:text-2xl text-navy-900">Configuración del Sistema</h3>
-            <p className="text-slate-500 text-xs sm:text-sm mt-1">Administra tus preferencias y seguridad.</p>
-          </div>
-          <span className="hidden xs:inline-block bg-blue-50 text-blue-600 px-4 py-1.5 rounded-full text-xs font-bold border border-blue-100">
-            Versión 14.4.0
-          </span>
-        </div>
-
-        {/* Profile Section */}
-        <div className="flex flex-col sm:flex-row items-center gap-6 mb-10 p-6 bg-slate-50 rounded-[2rem] border border-slate-100">
-          <div className="relative group cursor-pointer">
-            <div className="w-24 h-24 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-3xl shadow-lg group-hover:scale-105 transition-transform duration-300">
-                <span className="relative z-10">{username ? username.substring(0, 2).toUpperCase() : 'US'}</span>
-                <div className="absolute inset-0 bg-white/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            </div>
-            <div className="absolute -bottom-2 -right-2 bg-white p-1.5 rounded-full shadow-md border border-slate-100">
-              <div className="bg-emerald-500 w-4 h-4 rounded-full border-2 border-white"></div>
-            </div>
-          </div>
-          <div className="text-center sm:text-left">
-            <h4 className="font-bold text-xl text-navy-900">{username || 'Usuario Activo'}</h4>
-            <p className="text-slate-500 text-sm mb-3">
-              NSG-ID: {userId} • <span className="text-emerald-600 font-medium">Online</span>
-            </p>
-            <button
-              onClick={() => showToast('Perfil actualizado', 'success')}
-              className="text-xs font-bold text-white bg-navy-900 px-4 py-2 rounded-lg hover:bg-blue-600 transition shadow-md flex items-center gap-2 mx-auto sm:mx-0 cursor-pointer"
-            >
-              <Edit2 className="w-3 h-3" /> Editar Perfil
-            </button>
+            <h3 className="font-display font-bold text-xl text-navy-950">Integraciones</h3>
+            <p className="text-slate-500 text-sm">Conecta tu cuenta con plataformas externas</p>
           </div>
         </div>
 
-        {/* Toggles List */}
-        <div className="space-y-4">
-          <ToggleItem
-            icon={Bell}
-            title="Notificaciones Inteligentes"
-            desc="Alertas basadas en contexto y prioridad."
-            color="blue"
-            active={true}
-            onClick={() => showToast('Preferencia de notificaciones actualizada', 'info')}
-          />
-          <ToggleItem
-            icon={Shield}
-            title="Modo Privacidad Avanzada"
-            desc="Ocultar datos sensibles en dashboard compartido."
-            color="purple"
-            active={false}
-            onClick={() => showToast('Preferencia de privacidad actualizada', 'info')}
-          />
-          <ToggleItem
-            icon={Moon}
-            title="Modo Oscuro"
-            desc="Activar interfaz oscura estilo Auth."
-            color="orange"
-            active={theme === 'dark'}
-            onClick={toggleTheme}
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {availableIntegrations.map((integration) => {
+            const status = getIntegrationStatus(integration.id);
+            return (
+              <IntegrationCard
+                key={integration.id}
+                name={integration.name}
+                description={integration.description}
+                icon={integration.icon}
+                color={integration.color}
+                connected={status.connected}
+                connectedText={status.text}
+                loading={status.loading}
+                soon={integration.soon}
+                onAction={() => handleIntegrationAction(integration.id)}
+              />
+            );
+          })}
         </div>
       </div>
 
-      {/* 2. Fathom Analytics Connection */}
-      {/* Fathom Connection Removed */}
+      {/* System Preferences Card */}
+      <div className="bg-white p-6 sm:p-8 rounded-4xl shadow-sm border border-slate-200">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 bg-violet-50 rounded-xl flex items-center justify-center">
+            <Zap className="w-5 h-5 text-violet-600" />
+          </div>
+          <div>
+            <h3 className="font-display font-bold text-xl text-navy-950">Preferencias del Sistema</h3>
+            <p className="text-slate-500 text-sm">Ajusta el comportamiento de la aplicación</p>
+          </div>
+        </div>
 
-      {/* 3. PDF Upload Card */}
-      <div className="bg-white p-5 sm:p-8 rounded-2xl sm:rounded-[2.5rem] shadow-card border border-slate-200">
-        <h3 className="font-display font-bold text-lg sm:text-xl text-navy-900 mb-4 sm:mb-6">Subir Documentos</h3>
-        <p className="text-slate-500 text-xs sm:text-sm mb-6">Sube archivos PDF para procesamiento y análisis</p>
-
-        <div className="space-y-4">
-          {/* File Input */}
-          <div className="flex items-center gap-3">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".pdf"
-              onChange={handleFileSelect}
-              disabled={isUploading}
-              className="flex-1 text-sm text-slate-600 file:mr-4 file:py-3 file:px-6 file:rounded-2xl file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100 file:cursor-pointer cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed file:transition-all"
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {availablePreferences.map((pref) => (
+            <ToggleItem
+              key={pref.id}
+              icon={pref.icon}
+              title={pref.title}
+              desc={pref.desc}
+              color={pref.color as any}
+              active={preferences[pref.id as keyof typeof preferences]}
+              soon={pref.soon}
+              onClick={() => togglePreference(pref.id)}
             />
-          </div>
-
-          {/* Selected File Display */}
-          {selectedFile && (
-            <div className="flex items-center gap-3 p-4 bg-blue-50 border border-blue-100 rounded-2xl animate-fade-in-up">
-              <FileUp className="w-5 h-5 text-blue-600" />
-              <span className="text-sm text-blue-900 font-medium flex-1">{selectedFile.name}</span>
-              <span className="text-xs text-blue-600 font-bold">{(selectedFile.size / 1024).toFixed(2)} KB</span>
-            </div>
-          )}
-
-          {/* Upload Button */}
-          <button
-            onClick={handleUpload}
-            disabled={!selectedFile || isUploading}
-            className={clsx(
-              "w-full py-4 px-6 rounded-2xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-3 shadow-md",
-              selectedFile && !isUploading
-                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-slate-900 hover:shadow-lg hover:scale-[1.02] cursor-pointer'
-                : 'bg-slate-100 text-slate-400 cursor-not-allowed'
-            )}
-          >
-            {isUploading ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Subiendo...
-              </>
-            ) : (
-              <>
-                <FileUp className="w-5 h-5" />
-                Subir Documento
-              </>
-            )}
-          </button>
-
-          {/* Status Messages */}
-          {uploadStatus === 'success' && (
-            <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl animate-fade-in-up">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-              <span className="text-sm text-emerald-900 font-medium">{uploadMessage}</span>
-            </div>
-          )}
-
-          {uploadStatus === 'error' && (
-            <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-2xl animate-fade-in-up">
-              <AlertCircle className="w-5 h-5 text-red-600" />
-              <span className="text-sm text-red-900 font-medium">{uploadMessage}</span>
-            </div>
-          )}
+          ))}
         </div>
       </div>
 
-      {/* 4. Data Zone Card */}
-      <div className="bg-white p-5 sm:p-8 rounded-2xl sm:rounded-[2.5rem] shadow-card border border-slate-200">
-        <h3 className="font-display font-bold text-lg sm:text-xl text-navy-900 mb-6">Zona de Datos</h3>
-        <div className="flex flex-col sm:flex-row gap-4">
-          <button
-            onClick={() => showToast('Iniciando descarga...', 'success')}
-            className="flex-1 px-6 py-4 bg-slate-50 text-navy-900 font-bold rounded-2xl border border-slate-200 hover:bg-white hover:shadow-md transition-all flex items-center justify-center gap-3 group cursor-pointer"
-          >
-            <Download className="w-5 h-5 text-slate-400 group-hover:text-blue-600 transition-colors" />
-            Exportar Todo (JSON)
-          </button>
-          <button
-            onClick={() => showToast('Cache eliminado', 'success')}
-            className="flex-1 px-6 py-4 bg-red-50 text-red-600 font-bold rounded-2xl border border-red-100 hover:bg-red-100 hover:shadow-md transition-all flex items-center justify-center gap-3 group cursor-pointer"
-          >
-            <Trash2 className="w-5 h-5 group-hover:scale-110 transition-transform" />
-            Limpiar Cache Local
-          </button>
+      {/* System Info */}
+      <div className="bg-gradient-to-br from-slate-50 to-slate-100 p-6 rounded-3xl border border-slate-200">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Versión del Sistema</p>
+            <p className="font-bold text-2xl text-navy-900">v14.4.1-STABLE</p>
+          </div>
+          <div className="text-left sm:text-right">
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Última Actualización</p>
+            <p className="font-medium text-sm text-slate-700">12 Enero 2026</p>
+          </div>
         </div>
       </div>
 
@@ -311,18 +377,18 @@ export default function Settings() {
   );
 }
 
-// --- SUB-COMPONENT: Toggle Item ---
+// Toggle Item Component
 interface ToggleItemProps {
   icon: React.ElementType;
   title: string;
   desc: string;
-  color: 'blue' | 'purple' | 'orange';
+  color: 'blue' | 'purple' | 'orange' | 'indigo' | 'emerald' | 'amber';
   active: boolean;
+  soon?: boolean;
   onClick?: () => void;
 }
 
-function ToggleItem({ icon: Icon, title, desc, color, active, onClick }: ToggleItemProps) {
-  // Explicit mapping allows Tailwind to scan these classes correctly
+function ToggleItem({ icon: Icon, title, desc, color, active, soon, onClick }: ToggleItemProps) {
   const styles = {
     blue: {
       container: "hover:border-blue-300",
@@ -335,6 +401,18 @@ function ToggleItem({ icon: Icon, title, desc, color, active, onClick }: ToggleI
     orange: {
       container: "hover:border-orange-300",
       iconBox: "bg-orange-50 text-orange-600 group-hover:bg-orange-600 group-hover:text-white"
+    },
+    indigo: {
+      container: "hover:border-indigo-300",
+      iconBox: "bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white"
+    },
+    emerald: {
+      container: "hover:border-emerald-300",
+      iconBox: "bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white"
+    },
+    amber: {
+      container: "hover:border-amber-300",
+      iconBox: "bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white"
     }
   };
 
@@ -343,31 +421,124 @@ function ToggleItem({ icon: Icon, title, desc, color, active, onClick }: ToggleI
   return (
     <div
       className={clsx(
-        "flex items-center justify-between p-5 bg-white rounded-2xl border border-slate-200 transition-colors group cursor-pointer",
+        "relative flex items-center justify-between p-5 bg-white rounded-2xl border border-slate-200 transition-all group",
+        soon ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:shadow-md",
         currentStyle.container
       )}
-      onClick={onClick}
+      onClick={soon ? undefined : onClick}
     >
-      <div className="flex items-center gap-4">
-        <div className={clsx("p-3 rounded-xl transition-colors", currentStyle.iconBox)}>
+      {soon && (
+        <div className="absolute top-3 right-3">
+          <span className="px-2 py-1 bg-purple-100 text-purple-600 rounded-lg text-[0.6rem] font-black uppercase tracking-wider">
+            Próximamente
+          </span>
+        </div>
+      )}
+      
+      <div className="flex items-center gap-4 flex-1">
+        <div className={clsx("p-3 rounded-xl transition-all duration-300", currentStyle.iconBox)}>
           <Icon className="w-5 h-5" />
         </div>
-        <div>
-          <p className="font-bold text-navy-900 text-sm">{title}</p>
-          <p className="text-xs text-slate-500">{desc}</p>
+        <div className="flex-1">
+          <p className="font-bold text-navy-900 text-sm mb-0.5">{title}</p>
+          <p className="text-xs text-slate-500 leading-relaxed">{desc}</p>
         </div>
       </div>
 
       {/* Switch Toggle */}
-      <div className={clsx(
-        "relative w-12 h-6 rounded-full transition-colors",
-        active ? "bg-emerald-500" : "bg-slate-300"
-      )}>
+      {!soon && (
         <div className={clsx(
-          "absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform",
-          active ? "right-1" : "left-1"
-        )} />
+          "relative w-12 h-6 rounded-full transition-colors shrink-0 ml-3",
+          active ? "bg-emerald-500" : "bg-slate-300"
+        )}>
+          <div className={clsx(
+            "absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform",
+            active ? "right-1" : "left-1"
+          )} />
+        </div>
+      )}
+      
+      {soon && (
+        <div className="shrink-0 ml-3">
+          <Lock className="w-5 h-5 text-slate-400" />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Integration Card Component
+interface IntegrationCardProps {
+  name: string;
+  description: string;
+  icon: React.ReactNode;
+  color: string;
+  connected: boolean;
+  connectedText?: string;
+  loading?: boolean;
+  soon?: boolean;
+  onAction: () => void;
+}
+
+function IntegrationCard({ name, description, icon, color, connected, connectedText, loading, soon, onAction }: IntegrationCardProps) {
+  return (
+    <div className={clsx(
+      "relative p-5 rounded-2xl border transition-all group",
+      soon ? "opacity-60 cursor-not-allowed" : "cursor-pointer hover:shadow-md",
+      connected 
+        ? "bg-blue-50/50 border-blue-200" 
+        : "bg-slate-50 border-slate-200 hover:border-slate-300"
+    )}>
+      {soon && (
+        <div className="absolute top-3 right-3 z-10">
+          <span className="px-2 py-1 bg-purple-100 text-purple-600 rounded-lg text-[0.6rem] font-black uppercase tracking-wider flex items-center gap-1">
+            <Lock className="w-3 h-3" />
+            Próximamente
+          </span>
+        </div>
+      )}
+
+      <div className="flex items-start gap-4 mb-4">
+        <div className={clsx(
+          "w-12 h-12 rounded-xl flex items-center justify-center transition-all",
+          connected ? `bg-white shadow-md` : "bg-white"
+        )}>
+          <div className={clsx(connected ? `text-${color}` : "text-slate-400")}>
+            {icon}
+          </div>
+        </div>
+        <div className="flex-1 min-w-0">
+          <h4 className="font-bold text-navy-900 text-sm mb-1">{name}</h4>
+          <p className="text-[0.7rem] text-slate-500 leading-relaxed">
+            {description}
+          </p>
+        </div>
       </div>
+
+      <div className="flex items-center justify-between text-xs mb-3">
+        <span className="text-slate-500 font-medium">Estado:</span>
+        <span className={clsx(
+          "font-bold",
+          connected ? "text-emerald-600" : "text-slate-400"
+        )}>
+          {connectedText || (connected ? 'Conectado' : 'No conectado')}
+        </span>
+      </div>
+
+      <button
+        onClick={soon ? undefined : onAction}
+        disabled={loading || soon}
+        className={clsx(
+          "w-full py-2.5 px-4 rounded-xl text-xs font-bold transition-all",
+          soon && "cursor-not-allowed",
+          connected
+            ? "bg-red-50 text-red-600 hover:bg-red-100"
+            : `bg-${color} text-white hover:opacity-90 shadow-sm hover:shadow-md`,
+          loading && "opacity-50 cursor-not-allowed"
+        )}
+      >
+        {loading ? 'Verificando...' : soon ? 'Próximamente' : connected ? 'Desconectar' : 'Conectar'}
+      </button>
     </div>
   );
 }
