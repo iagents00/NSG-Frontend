@@ -276,12 +276,12 @@ export default function Sidebar() {
 
         {/* BOTTOM SECTION */}
         <div className="p-4 border-t border-navy-900 bg-navy-950 shrink-0 space-y-3">
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between px-3 py-2.5 text-[0.6rem] font-bold uppercase tracking-widest bg-gradient-to-r from-emerald-500/10 to-emerald-600/5 rounded-lg border border-emerald-500/20">
-              <span className="text-slate-400 flex items-center gap-1.5">
-                <Activity className="w-3 h-3 text-emerald-400" /> System
+          <div className="space-y-1">
+            <div className="flex items-center justify-between px-2 py-1 text-[0.5rem] font-medium uppercase tracking-wider bg-emerald-500/5 rounded border border-emerald-500/10">
+              <span className="text-slate-500 flex items-center gap-1">
+                <Activity className="w-2 h-2 text-emerald-400" /> System
               </span>
-              <span className="text-emerald-400 font-black">OPTIMAL</span>
+              <span className="text-emerald-400 font-bold">OPTIMAL</span>
             </div>
             <LocationIndicator />
           </div>

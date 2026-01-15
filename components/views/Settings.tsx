@@ -14,7 +14,7 @@ const INTEGRATIONS_CONFIG = {
     id: 'telegram',
     name: 'Telegram',
     description: 'Bot de notificaciones inteligentes',
-    roles: ['admin', 'consultant', 'psychologist', 'manager', 'patient'],
+    roles: ['admin', 'consultant', 'psychologist', 'manager', 'patient', 'user'],
     soon: false,
     icon: (
       <svg viewBox="0 0 24 24" className="w-6 h-6 fill-current">
@@ -27,7 +27,7 @@ const INTEGRATIONS_CONFIG = {
     id: 'calendar',
     name: 'Google Calendar',
     description: 'Sincronización de eventos y reuniones',
-    roles: ['admin', 'consultant', 'psychologist', 'manager', 'patient'],
+    roles: ['admin', 'consultant', 'psychologist', 'manager', 'patient', 'user'],
     soon: false,
     icon: (
       <svg viewBox="0 0 24 24" className="w-6 h-6">
@@ -74,7 +74,7 @@ const PREFERENCES_CONFIG = {
     desc: 'Recibe alertas basadas en contexto y prioridad',
     icon: Bell,
     color: 'blue',
-    roles: ['admin', 'consultant', 'psychologist', 'manager', 'patient'],
+    roles: ['admin', 'consultant', 'psychologist', 'manager', 'patient', 'user'],
     soon: false
   },
   privacy: {
@@ -83,7 +83,7 @@ const PREFERENCES_CONFIG = {
     desc: 'Ocultar datos sensibles en dashboard compartido',
     icon: Shield,
     color: 'purple',
-    roles: ['admin', 'psychologist', 'patient'],
+    roles: ['admin', 'psychologist', 'patient', 'user'],
     soon: false
   },
   darkMode: {
@@ -92,7 +92,7 @@ const PREFERENCES_CONFIG = {
     desc: 'Activar interfaz oscura para reducir fatiga visual',
     icon: Moon,
     color: 'indigo',
-    roles: ['admin', 'consultant', 'psychologist', 'manager', 'patient'],
+    roles: ['admin', 'consultant', 'psychologist', 'manager', 'patient', 'user'],
     soon: false
   },
   sync: {

@@ -1,4 +1,4 @@
-import { Cpu, Newspaper, Target, Sunrise, Briefcase, Calendar, BarChart2, Settings, Hexagon, Users, BookOpen, PieChart, Trello, FileSpreadsheet, HeartPulse, Crown, User } from "lucide-react";
+import { Cpu, Newspaper, Target, Sunrise, Briefcase, Calendar, BarChart2, Settings, Hexagon, Users, BookOpen, PieChart, Trello, FileSpreadsheet, HeartPulse, Crown, User, Shield } from "lucide-react";
 
 export const CONTEXT = {
     admin: {
@@ -22,6 +22,7 @@ export const CONTEXT = {
             // Common / Util
             { id: 'calendar', label: 'Agenda Maestra', subtitle: 'Cronograma de Actividades', icon: Calendar },
             { id: 'library', label: 'Biblioteca', subtitle: 'Recursos y Documentación', icon: BookOpen },
+            { id: 'user-management', label: 'Gestión de Usuarios', subtitle: 'Administrar Roles y Permisos', icon: Shield },
             { id: 'profile', label: 'Mi Perfil', subtitle: 'Información Personal', icon: User },
             { id: 'settings', label: 'Configuración', subtitle: 'Preferencias del Sistema', icon: Settings }
         ]
@@ -75,6 +76,19 @@ export const CONTEXT = {
             { id: 'profile', label: 'Mi Perfil', subtitle: 'Información Personal', icon: User },
             { id: 'settings', label: 'Configuración', subtitle: 'Preferencias del Sistema', icon: Settings }
 
+        ]
+    },
+    user: {
+        name: "Usuario",
+        avatar: "US",
+        roleDesc: "User",
+        menu: [
+            { id: 'nsg_intelligence', label: 'NSG Intelligence', subtitle: 'Sistema Central de Inteligencia', icon: Cpu, special: true },
+            { id: 'nsg_horizon', label: 'NSG Horizon', subtitle: 'Planificación y Proyección', icon: Sunrise },
+            { id: 'nsg_clarity', label: 'NSG Clarity', subtitle: 'Claridad en tus Objetivos', icon: Target },
+            { id: 'calendar', label: 'Agenda', subtitle: 'Citas y Recordatorios', icon: Calendar },
+            { id: 'profile', label: 'Mi Perfil', subtitle: 'Información Personal', icon: User },
+            { id: 'settings', label: 'Configuración', subtitle: 'Preferencias del Sistema', icon: Settings }
         ]
     },
     patient: {

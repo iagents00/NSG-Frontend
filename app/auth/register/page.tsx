@@ -85,7 +85,7 @@ function RegisterContent() {
       username: formData.name,
       email: formData.email.toLowerCase(),
       password: formData.password,
-      role: role || "patient",
+      // SECURITY: role removed - backend assigns "user" by default
       location
     };
 
@@ -98,7 +98,7 @@ function RegisterContent() {
         router.push("/dashboard");
       } else {
         // Otherwise go to login
-        router.push(`/auth/login?role=${role || 'manager'}`);
+        router.push("/auth/login");
       }
     } catch (err: any) {
       setError(translateAuthError(err.response?.data?.message || err.message) || "Error al registrarse. Intenta nuevamente.");
@@ -217,7 +217,7 @@ function RegisterContent() {
 
               <div className="flex items-center justify-between pt-4">
                 <Link
-                  href={`/auth/login?role=${role || 'clinic_owner'}`}
+                  href="/auth/login"
                   className="text-slate-500 hover:text-slate-800 text-sm font-medium transition-colors flex items-center gap-1 pl-1 cursor-pointer"
                 >
                   <ChevronLeft className="w-4 h-4" /> Volver

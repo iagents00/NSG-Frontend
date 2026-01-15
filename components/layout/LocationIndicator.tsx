@@ -32,13 +32,13 @@ export default function LocationIndicator() {
 
     return (
         <div
-            className="flex items-center justify-between px-3 py-2.5 text-[0.6rem] font-bold uppercase tracking-widest bg-gradient-to-r from-blue-500/10 to-blue-600/5 rounded-lg border border-blue-500/20"
+            className="flex items-center justify-between px-2 py-1 text-[0.5rem] font-medium uppercase tracking-wider bg-blue-500/5 rounded border border-blue-500/10"
             title={`Location: ${locationText}\nTimezone: ${userLocation.timezone || 'N/A'}\nCoordinates: ${userLocation.latitude}, ${userLocation.longitude}`}
         >
-            <span className="text-slate-400 flex items-center gap-1.5">
-                <MapPin className="w-3 h-3 text-blue-400" /> Location
+            <span className="text-slate-500 flex items-center gap-1">
+                <MapPin className="w-2 h-2 text-blue-400" /> Location
             </span>
-            <span className="text-blue-400 flex items-center gap-1.5 truncate max-w-[140px] font-black" title={locationText}>
+            <span className="text-blue-400 flex items-center gap-1 truncate max-w-[110px] font-bold" title={locationText}>
                 {locationText}
             </span>
         </div>
