@@ -62,9 +62,11 @@ export default function MetricsPanel({ metrics, isLoading = false }: MetricsPane
                 "p-6 rounded-3xl border-2 relative overflow-hidden group hover:shadow-lg transition-all duration-500",
                 scoreColors.bg, scoreColors.border
             )}>
-                <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full opacity-20 blur-2xl group-hover:scale-150 transition-transform duration-700"
-                    style={{ background: `currentColor` }}
-                    className={scoreColors.text}></div>
+                <div className={clsx(
+                    "absolute -right-8 -top-8 w-24 h-24 rounded-full opacity-20 blur-2xl group-hover:scale-150 transition-transform duration-700",
+                    scoreColors.text
+                )}
+                    style={{ background: `currentColor` }}></div>
 
                 <div className="relative z-10">
                     <div className="flex items-center justify-between mb-3">
