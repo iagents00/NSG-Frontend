@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Calendar } from "lucide-react";
+import { SkeletonChart } from "@/components/ui/Skeleton";
 
 interface CompletionChartProps {
     data: Array<{
@@ -68,11 +69,7 @@ export default function CompletionChart({ data, period = 'week', isLoading = fal
     };
 
     if (isLoading) {
-        return (
-            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 animate-pulse">
-                <div className="h-64 bg-slate-100 rounded-2xl"></div>
-            </div>
-        );
+        return <SkeletonChart />;
     }
 
     if (!chartData || chartData.length === 0) {

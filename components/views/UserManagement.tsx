@@ -5,6 +5,7 @@ import api from '@/lib/api';
 import { Users, Shield, Crown, Briefcase, HeartPulse, User as UserIcon, RefreshCw, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useToast } from '@/components/ui/ToastProvider';
 import clsx from 'clsx';
+import { SkeletonTable } from '@/components/ui/Skeleton';
 
 interface User {
   _id: string;
@@ -184,6 +185,9 @@ export default function UserManagement() {
       </div>
 
       {/* Users Table */}
+      {loading ? (
+        <SkeletonTable rows={10} columns={5} />
+      ) : (
       <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -197,16 +201,7 @@ export default function UserManagement() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
-              {loading ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
-                    <div className="flex items-center justify-center gap-2">
-                      <RefreshCw className="w-5 h-5 animate-spin" />
-                      Cargando usuarios...
-                    </div>
-                  </td>
-                </tr>
-              ) : paginatedUsers.length === 0 ? (
+              {paginatedUsers.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
                     {searchTerm ? 'No se encontraron usuarios con ese criterio' : 'No hay usuarios registrados'}
@@ -261,12 +256,12 @@ export default function UserManagement() {
                           onChange={(e) => handleRoleChange(user._id, e.target.value, user.role)}
                           disabled={isUpdating}
                           className={clsx(
-                            'border border-slate-300 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all',
+                            'bg-white text-navy-900 border border-slate-300 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all',
                             isUpdating && 'opacity-50 cursor-not-allowed'
                           )}
                         >
                           {Object.entries(ROLE_CONFIG).map(([role, config]) => (
-                            <option key={role} value={role}>
+                            <option key={role} value={role} className="text-navy-900 bg-white">
                               {config.label}
                             </option>
                           ))}
@@ -323,6 +318,7 @@ export default function UserManagement() {
           </div>
         )}
       </div>
+      )}
 
       {/* Legend */}
       <div className="bg-linear-to-br from-slate-50 to-slate-100 p-6 rounded-3xl border border-slate-200">

@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { Flame, Trophy } from "lucide-react";
 import clsx from "clsx";
 import confetti from "canvas-confetti";
+import AtomEffect from "@/components/ui/AtomEffect";
+import { SkeletonStreakCounter } from "./SkeletonStreakCounter";
 
 interface StreakCounterProps {
     current: number;
@@ -45,11 +47,7 @@ export default function StreakCounter({ current, longest, isLoading = false }: S
     }, [current, prevCurrent, longest]);
 
     if (isLoading) {
-        return (
-            <div className="bg-linear-to-br from-orange-50 to-red-50 p-6 rounded-3xl border border-orange-200/50 animate-pulse">
-                <div className="h-20 bg-orange-100 rounded-2xl"></div>
-            </div>
-        );
+        return <SkeletonStreakCounter />;
     }
 
     return (
@@ -57,7 +55,7 @@ export default function StreakCounter({ current, longest, isLoading = false }: S
             {/* Milestone Achievement Banner */}
             {showMilestone && (
                 <div className="absolute -top-12 left-1/2 -translate-x-1/2 z-50 animate-bounce-in">
-                    <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-2 whitespace-nowrap">
+                    <div className="bg-linear-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-2 whitespace-nowrap">
                         <Trophy className="w-5 h-5" />
                         <span className="font-bold text-sm">¡Hito de {current} días alcanzado!</span>
                     </div>
@@ -74,7 +72,7 @@ export default function StreakCounter({ current, longest, isLoading = false }: S
                     <div className="flex items-center gap-4">
                         <div className={clsx(
                             "w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center transition-all duration-500 relative",
-                            current > 0 ? "bg-gradient-to-br from-orange-500 to-red-500 shadow-lg shadow-orange-500/30 scale-100" : "bg-slate-200 scale-90"
+                            current > 0 ? "bg-linear-to-br from-orange-500 to-red-500 shadow-lg shadow-orange-500/30 scale-100" : "bg-slate-200 scale-90"
                         )}>
                             {current > 0 && (
                                 <div className="absolute inset-0 bg-orange-400 rounded-2xl animate-ping opacity-20"></div>
@@ -104,7 +102,7 @@ export default function StreakCounter({ current, longest, isLoading = false }: S
                     </div>
 
                     {/* Divider */}
-                    <div className="hidden sm:block w-px h-16 bg-gradient-to-b from-transparent via-orange-300/50 to-transparent"></div>
+                    <div className="hidden sm:block w-px h-16 bg-linear-to-b from-transparent via-orange-300/50 to-transparent"></div>
 
                     {/* Record + Next Milestone */}
                     <div className="text-right">
@@ -144,10 +142,10 @@ export default function StreakCounter({ current, longest, isLoading = false }: S
                         </div>
                         <div className="h-2 bg-white/50 rounded-full overflow-hidden shadow-inner">
                             <div
-                                className="h-full bg-gradient-to-r from-orange-500 to-red-500 rounded-full transition-all duration-1000 ease-out relative overflow-hidden"
+                                className="h-full bg-linear-to-r from-orange-500 to-red-500 rounded-full transition-all duration-1000 ease-out relative overflow-hidden"
                                 style={{ width: `${Math.min((current / nextMilestone) * 100, 100)}%` }}
                             >
-                                <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
+                                <AtomEffect className="absolute right-0.5 top-1/2 -translate-y-1/2 w-2 h-2 opacity-50" />
                             </div>
                         </div>
                     </div>

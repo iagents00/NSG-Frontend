@@ -16,6 +16,8 @@ import {
 import clsx from "clsx";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import AtomEffect from "@/components/ui/AtomEffect";
+import { SkeletonCard } from "@/components/ui/Skeleton";
 
 // --- Types ---
 interface TranscriptItem {
@@ -557,9 +559,10 @@ export default function NSGHorizon() {
               </div>
 
               {isFathomLoading ? (
-                 <div className="flex flex-col items-center justify-center py-16">
-                    <Loader2 className="w-10 h-10 text-blue-600 animate-spin mb-4" />
-                    <p className="text-slate-500 font-medium">Sincronizando grabaciones...</p>
+                 <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 xs:gap-4">
+                    {Array.from({ length: 8 }).map((_, i) => (
+                      <SkeletonCard key={i} />
+                    ))}
                  </div>
               ) : folders.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-slate-400 border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50/30">
@@ -850,8 +853,8 @@ export default function NSGHorizon() {
                             <p className="text-navy-950 font-bold text-xl">Suelta tu audio aquí</p>
                             <p className="text-slate-400 text-sm mt-1">O haz clic para explorar tus archivos</p>
                           </div>
-                          <div className="h-1.5 w-1/2 bg-slate-100 rounded-full overflow-hidden mt-4">
-                            <div className="h-full bg-blue-500/10 w-full group-hover/drop:animate-shimmer"></div>
+                          <div className="h-1.5 w-1/2 bg-slate-100 rounded-full overflow-hidden mt-4 relative">
+                            <AtomEffect className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 opacity-30" />
                           </div>
                         </>
                       )}

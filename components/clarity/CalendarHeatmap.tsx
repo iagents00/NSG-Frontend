@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import clsx from "clsx";
+import { SkeletonCalendarHeatmap } from "./SkeletonCalendarHeatmap";
 
 interface HeatmapData {
     date: string;
@@ -98,11 +99,7 @@ export default function CalendarHeatmap({ data, isLoading = false }: CalendarHea
     };
 
     if (isLoading) {
-        return (
-            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 animate-pulse">
-                <div className="h-80 bg-slate-100 rounded-2xl"></div>
-            </div>
-        );
+        return <SkeletonCalendarHeatmap />;
     }
 
     return (

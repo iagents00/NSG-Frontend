@@ -2,6 +2,8 @@
 
 import { Target, TrendingUp, Award, Calendar } from "lucide-react";
 import clsx from "clsx";
+import { useMemo } from "react";
+import { SkeletonStatCard } from "@/components/ui/Skeleton";
 
 interface MetricsData {
     totalCompletions: number;
@@ -45,9 +47,9 @@ export default function MetricsPanel({ metrics, isLoading = false }: MetricsPane
 
     if (isLoading) {
         return (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-pulse">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {[1, 2, 3, 4].map(i => (
-                    <div key={i} className="bg-slate-100 h-32 rounded-3xl"></div>
+                    <SkeletonStatCard key={i} />
                 ))}
             </div>
         );
@@ -202,6 +204,3 @@ export default function MetricsPanel({ metrics, isLoading = false }: MetricsPane
         </div>
     );
 }
-
-// Add useMemo import
-import { useMemo } from "react";

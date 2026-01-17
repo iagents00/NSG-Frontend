@@ -29,6 +29,7 @@ import StreakCounter from "@/components/clarity/StreakCounter";
 import MetricsPanel from "@/components/clarity/MetricsPanel";
 import CalendarHeatmap from "@/components/clarity/CalendarHeatmap";
 import CompletionChart from "@/components/clarity/CompletionChart";
+import AtomEffect from "@/components/ui/AtomEffect";
 
 // --- AUDIO ENGINE ---
 let _audioCtx: AudioContext | null = null;
@@ -93,12 +94,12 @@ function CompletionProgress({ progress }: { progress: number; }) {
       <div className="h-4 bg-slate-100/80 rounded-full overflow-hidden shadow-inner relative border border-slate-200/50 backdrop-blur-sm">
         <div
           className={clsx(
-            "h-full transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] relative",
+            "h-full transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] relative overflow-hidden",
             progress === 100 ? "bg-emerald-500" : "bg-blue-600"
           )}
           style={{ width: `${progress}%` }}
         >
-          <div className="absolute inset-0 w-full h-full bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
+          <AtomEffect className="absolute right-1 top-1/2 -translate-y-1/2 w-3 h-3 opacity-40" />
         </div>
       </div>
     </div>
@@ -489,13 +490,13 @@ export default function NSGClarity() {
         className="w-full relative group cursor-pointer mb-4 xs:mb-6 shrink-0"
         title="Clic para sincronizar objetivos"
       >
-        <div className="relative w-full h-[140px] xs:h-[160px] sm:h-[180px] rounded-2xl xs:rounded-3xl md:rounded-4xl overflow-hidden shadow-xl xs:shadow-2xl border border-white/10 transition-all duration-700 hover:shadow-[0_20px_60px_rgba(0,0,0,0.4)]">
+        <div className="relative w-full h-[160px] xs:h-[180px] sm:h-[200px] rounded-2xl xs:rounded-3xl md:rounded-4xl overflow-hidden shadow-xl xs:shadow-2xl border border-white/10 transition-all duration-700 hover:shadow-[0_20px_60px_rgba(0,0,0,0.4)]">
           <div className="absolute inset-0 bg-linear-to-br from-navy-950 via-navy-900 to-blue-950"></div>
           <div className="absolute inset-0 opacity-20 mix-blend-overlay bg-[url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center"></div>
           <div className="absolute inset-0 bg-linear-to-t from-navy-950 via-transparent to-transparent"></div>
           <div className="absolute -top-16 xs:-top-24 -right-16 xs:-right-24 w-48 xs:w-64 h-48 xs:h-64 bg-blue-600/20 rounded-full blur-[60px] xs:blur-[80px] group-hover:bg-blue-500/30 transition-all duration-700"></div>
-          <div className="absolute inset-0 flex flex-col justify-center p-5 xs:p-6 sm:p-8 sm:px-12">
-            <div className="overflow-hidden mb-2 xs:mb-3">
+          <div className="absolute inset-0 flex flex-col justify-center p-4 xs:p-6 sm:p-8 sm:px-12">
+            <div className="overflow-hidden mb-1.5 xs:mb-2">
               <span className="inline-flex items-center gap-1.5 xs:gap-2 px-2 xs:px-3 py-1 bg-blue-500/20 backdrop-blur-xl border border-blue-400/30 text-blue-200 text-[0.5rem] xs:text-[0.6rem] font-bold uppercase tracking-[0.2em] xs:tracking-[0.25em] rounded-lg">
                 <span className="relative flex h-1.5 w-1.5 xs:h-2 xs:w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
@@ -504,21 +505,31 @@ export default function NSGClarity() {
                 Protocolo de Alineación • Sistema Activo
               </span>
             </div>
-            <h2 className="text-2xl xs:text-3xl sm:text-4xl lg:text-5xl font-display font-medium text-white mb-2 xs:mb-3 sm:mb-4 leading-tight tracking-tight">Diseño de <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-emerald-400 font-bold">Claridad Estratégica.</span></h2>
-            <p className="text-slate-300 text-xs xs:text-sm sm:text-base lg:text-lg leading-relaxed font-medium max-w-2xl translate-y-1 line-clamp-2 xs:line-clamp-none">Sincronización neuronal activa diseñada para la precisión máxima y el alto rendimiento continuo. Protocolo de alineación estratégica ejecutándose.</p>
+            <h2 className="text-xl xs:text-2xl sm:text-3xl lg:text-4xl font-display font-medium text-white mb-1.5 xs:mb-2 sm:mb-3 leading-tight tracking-tight">Sistema de <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-emerald-400 font-bold">Claridad y Eficiencia con IA</span></h2>
+            <p className="text-slate-300 text-[11px] xs:text-sm sm:text-base lg:text-lg leading-snug xs:leading-relaxed font-medium max-w-2xl line-clamp-2 xs:line-clamp-none">Sincronización neuronal activa diseñada para la precisión máxima y el alto rendimiento continuo. Protocolo de alineación estratégica ejecutándose.</p>
           </div>
         </div>
       </div>
 
       {/* 2. INTEGRATION BAR */}
-      <div className="flex flex-col xs:flex-row flex-wrap items-start xs:items-center justify-between gap-3 xs:gap-4 mb-6 xs:mb-8 bg-white/50 backdrop-blur-sm p-3 xs:p-4 rounded-xl xs:rounded-2xl border border-slate-200/60 shadow-sm transition-all hover:bg-white/60">
-        <div className="flex items-center gap-2 px-2 xs:px-3 py-1 xs:py-1.5 bg-slate-100 rounded-lg border border-slate-200">
-          <Zap className="w-3 xs:w-3.5 h-3 xs:h-3.5 text-blue-600" />
-          <span className="text-[9px] xs:text-[10px] font-bold text-slate-500 uppercase tracking-widest">Sincronización de Ecosistema</span>
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 lg:gap-4 mb-6 xs:mb-8 bg-white/50 backdrop-blur-sm p-3 xs:p-4 rounded-xl xs:rounded-2xl border border-slate-200/60 shadow-sm transition-all hover:bg-white/60">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 px-2 xs:px-3 py-1 xs:py-1.5 bg-slate-100 rounded-lg border border-slate-200">
+            <Zap className="w-3 xs:w-3.5 h-3 xs:h-3.5 text-blue-600" />
+            <span className="text-[9px] xs:text-[10px] font-bold text-slate-500 uppercase tracking-widest">Sincronización de Ecosistema</span>
+          </div>
+          <button 
+            onClick={() => syncObjectives(true)} 
+            className="group flex items-center gap-1.5 px-2 xs:px-2.5 py-1 xs:py-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-all active:scale-95"
+            disabled={isLoadingTelegramData}
+          >
+            <RefreshCw className={clsx("w-3 xs:w-3.5 h-3 xs:h-3.5", isLoadingTelegramData && "animate-spin")} />
+            <span className="text-[9px] xs:text-[10px] font-semibold uppercase tracking-wide hidden xs:inline">Refrescar</span>
+          </button>
         </div>
 
         {/* Integration Hub */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 xs:gap-3 sm:gap-4 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 xs:gap-3 sm:gap-4 w-full lg:w-auto">
           {/* Telegram Button */}
           <button
             onClick={() => handleConnect("Telegram")}
@@ -551,7 +562,7 @@ export default function NSGClarity() {
           <button
             onClick={() => handleConnect("Calendar")}
             className={clsx(
-              "w-full sm:w-auto group relative flex items-center gap-3 px-4 sm:px-5 py-2 sm:py-2.5 border rounded-4xl transition-all duration-500",
+              "w-full sm:w-auto group relative flex items-center gap-3 px-4 sm:px-5 py-2 sm:py-2.5 border rounded-4xl transition-all duration-500 min-h-[44px]",
               isConnected
                 ? "bg-blue-50/60 border-blue-200 shadow-sm cursor-default"
                 : "bg-white border-slate-300 hover:shadow-md hover:border-blue-400 cursor-pointer shadow-sm hover:bg-blue-50/30"
@@ -575,10 +586,6 @@ export default function NSGClarity() {
               <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500 leading-none mb-1">Calendar</p>
               <p className="text-xs font-bold leading-none text-navy-900">{isConnected ? "Sincronizado" : "Vincular"}</p>
             </div>
-          </button>
-
-          <button onClick={() => syncObjectives(true)} className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-400 hover:text-blue-600 hover:bg-white hover:border-blue-200 transition-all shadow-sm active:scale-95">
-            <RefreshCw className={clsx("w-4 h-4", isLoadingTelegramData && "animate-spin")} />
           </button>
         </div>
       </div>
