@@ -23,13 +23,20 @@ export async function POST(req: Request) {
       const formData = await req.formData();
       bodyData = formData; // Keep as FormData for forwarding
       
-      const contextStr = formData.get('context') as string;
-      if (contextStr) {
-          try {
-              const context = JSON.parse(contextStr);
-              if (context.mode) intelligenceMode = context.mode;
-          } catch (e) {
-              // ignore parse error, use default
+      // 1. Try Root Mode (New structure)
+      const rootMode = formData.get('mode') as string;
+      if (rootMode) {
+          intelligenceMode = rootMode;
+      } else {
+          // 2. Legacy: Check Context Mode
+          const contextStr = formData.get('context') as string;
+          if (contextStr) {
+              try {
+                  const context = JSON.parse(contextStr);
+                  if (context.mode) intelligenceMode = context.mode;
+              } catch (e) {
+                  // ignore parse error, use default
+              }
           }
       }
       
@@ -39,7 +46,9 @@ export async function POST(req: Request) {
       // JSON: Parse to extract mode, then forward
       bodyData = await req.json();
       
-      if (bodyData.context?.mode) {
+      if (bodyData.mode) {
+          intelligenceMode = bodyData.mode;
+      } else if (bodyData.context?.mode) {
           intelligenceMode = bodyData.context.mode;
       }
       

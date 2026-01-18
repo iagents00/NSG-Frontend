@@ -3,7 +3,7 @@
 import React from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Cpu, Lock } from "lucide-react";
+import { ArrowRight, Sparkles, Cpu, Lock, Zap } from "lucide-react";
 import BrandAtom from "@/components/ui/BrandAtom";
 import JarvisAssistant from "@/components/features/JarvisAssistant";
 import { CONTEXT, RoleType } from "@/data/context";
@@ -224,7 +224,7 @@ function ModuleCard({
 
                 {/* Active Indicator Line */}
                 {!isComingSoon && (
-                    <div className="absolute -bottom-2 left-0 h-1 w-0 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 group-hover:w-full transition-all duration-700 ease-in-out rounded-full" />
+                    <div className="absolute -bottom-2 left-0 h-1 w-0 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 group-hover:width-full transition-all duration-700 ease-in-out rounded-full" />
                 )}
             </div>
         </button>

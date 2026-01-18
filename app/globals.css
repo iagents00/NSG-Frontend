@@ -158,13 +158,13 @@ body {
 }
 
 .orbit-1 {
-    animation: fluidCycle1 14s ease-in-out infinite;
+    animation: fluidCycle1 14s linear infinite;
 }
 .orbit-2 {
-    animation: fluidCycle2 14s ease-in-out infinite;
+    animation: fluidCycle2 14s linear infinite;
 }
 .orbit-3 {
-    animation: fluidCycle3 14s ease-in-out infinite;
+    animation: fluidCycle3 14s linear infinite;
 }
 
 /* --- COMPONENTS --- */
@@ -570,8 +570,14 @@ body {
     0% {
         transform: rotate(0deg) scaleY(0.45);
     }
+    25% {
+        transform: rotate(90deg) scaleY(0.85);
+    }
     50% {
         transform: rotate(180deg) scaleY(1);
+    }
+    75% {
+        transform: rotate(270deg) scaleY(0.85);
     }
     100% {
         transform: rotate(360deg) scaleY(0.45);
@@ -581,8 +587,14 @@ body {
     0% {
         transform: rotate(60deg) scaleY(0.45);
     }
+    25% {
+        transform: rotate(150deg) scaleY(0.85);
+    }
     50% {
         transform: rotate(240deg) scaleY(1);
+    }
+    75% {
+        transform: rotate(330deg) scaleY(0.85);
     }
     100% {
         transform: rotate(420deg) scaleY(0.45);
@@ -592,8 +604,14 @@ body {
     0% {
         transform: rotate(120deg) scaleY(0.45);
     }
+    25% {
+        transform: rotate(210deg) scaleY(0.85);
+    }
     50% {
         transform: rotate(300deg) scaleY(1);
+    }
+    75% {
+        transform: rotate(390deg) scaleY(0.85);
     }
     100% {
         transform: rotate(480deg) scaleY(0.45);

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { useUIStore } from "@/store/useUIStore";
-import { CONTEXT } from "@/data/context";
+import { CONTEXT, RoleType } from "@/data/context";
 import {
     LogOut,
     Activity,
@@ -29,8 +29,8 @@ export default function Sidebar() {
     const [username, setUsername] = useState<string | null>(null);
     const [showUserMenu, setShowUserMenu] = useState(false);
 
-    const roleKey = currentRole || "paciente";
-    const config = CONTEXT[roleKey];
+    const roleKey = (currentRole as RoleType) || "patient";
+    const config = CONTEXT[roleKey] || CONTEXT.patient;
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -45,7 +45,7 @@ export default function Sidebar() {
             } catch (error) {}
         };
         fetchUser();
-    }, []);
+    }, [setRole]);
 
     // Generate avatar from username
     const getAvatarInitials = (name: string | null) => {
@@ -62,9 +62,9 @@ export default function Sidebar() {
         if (!name) return "bg-blue-600";
         const colors = [
             "bg-blue-600",
-            "bg-purple-600",
+            "bg-teal-600",
             "bg-emerald-600",
-            "bg-pink-600",
+            "bg-green-600",
             "bg-orange-600",
             "bg-cyan-600",
         ];

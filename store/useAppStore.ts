@@ -51,7 +51,7 @@ export const useAppStore = create<AppState>()(
         patient: [],
         admin: [],
       },
-      userId: 'user_12345', // Default ID for demo/testing
+      userId: '', // Dynamic ID populated via setUserId
       userLocation: null,
 
       setRole: (role) => set({ currentRole: role }),

@@ -29,9 +29,12 @@ export default function BrandAtom({ className, variant = 'white' }: BrandAtomPro
                    )}
                </defs>
                
-               <circle cx="50" cy="50" r="42" className={clsx("morph-orbit orbit-1", orbitClass)} stroke={`url(#${gradientId})`} />
-               <circle cx="50" cy="50" r="42" className={clsx("morph-orbit orbit-2", orbitClass)} stroke={`url(#${gradientId})`} style={{transform: 'rotate(60deg) scaleY(0.45)'}} />
-               <circle cx="50" cy="50" r="42" className={clsx("morph-orbit orbit-3", orbitClass)} stroke={`url(#${gradientId})`} style={{transform: 'rotate(120deg) scaleY(0.45)'}} />
+               {/* Smooth Spinning Group */}
+               <g className="origin-center animate-[spin_12s_linear_infinite]" style={{ transformBox: 'fill-box' }}>
+                   <circle cx="50" cy="50" r="42" className={clsx("morph-orbit", orbitClass)} stroke={`url(#${gradientId})`} style={{ transform: 'rotate(0deg) scaleY(0.45)' }} />
+                   <circle cx="50" cy="50" r="42" className={clsx("morph-orbit", orbitClass)} stroke={`url(#${gradientId})`} style={{ transform: 'rotate(60deg) scaleY(0.45)' }} />
+                   <circle cx="50" cy="50" r="42" className={clsx("morph-orbit", orbitClass)} stroke={`url(#${gradientId})`} style={{ transform: 'rotate(120deg) scaleY(0.45)' }} />
+               </g>
                
                {isColored ? (
                    <>
