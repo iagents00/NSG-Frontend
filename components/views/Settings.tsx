@@ -5,7 +5,6 @@ import {
     Bell,
     Shield,
     Moon,
-    Settings as SettingsIcon,
     Activity,
     Globe,
     ExternalLink,

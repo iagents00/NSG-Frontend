@@ -31,7 +31,7 @@ export async function POST(req: Request) {
       // Try to parse if it's a stringified JSON
       try {
         data = JSON.parse(data);
-      } catch (e) {
+      } catch {
         // keep as text
       }
     }
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json(data);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to process request' },
       { status: 500 }

@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+
 import { GoogleAICacheManager } from "@google/generative-ai/server";
 import { SYSTEM_INSTRUCTIONS } from "./systemInstructions";
 
@@ -33,7 +33,7 @@ export async function getOrCreateCache(role: keyof typeof SYSTEM_INSTRUCTIONS) {
       return cache.name;
     }
     return null;
-  } catch (error) {
+  } catch {
     return null;
   }
 }

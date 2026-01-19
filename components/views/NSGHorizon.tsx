@@ -1727,12 +1727,12 @@ export default function NSGHorizon() {
                                             />
                                         </div>
                                         <p className="text-sm text-emerald-900 italic font-bold leading-relaxed">
-                                            "
+                                            &quot;
                                             {
                                                 selectedFolder.aiInfo
                                                     .oportunidad.nuevo_enfoque
                                             }
-                                            "
+                                            &quot;
                                         </p>
                                     </div>
                                 </div>
@@ -1852,13 +1852,13 @@ export default function NSGHorizon() {
                                                 Recomendación Estratégica NSG
                                             </p>
                                             <p className="text-lg font-medium leading-relaxed italic opacity-90 pr-10">
-                                                "
+                                                &quot;
                                                 {
                                                     selectedFolder.aiInfo
                                                         .herramienta
                                                         .recomendacion_de_uso
                                                 }
-                                                "
+                                                &quot;
                                             </p>
                                         </div>
                                     </div>

@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       name: uploadResponse.file.name
     });
 
-  } catch (error: any) {
-    return Response.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return Response.json({ error: (error as Error).message }, { status: 500 });
   }
 }

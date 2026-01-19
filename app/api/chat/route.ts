@@ -14,7 +14,7 @@ export async function POST(req: Request) {
 
     // 2. Parse Body & Determine Target Path
     let bodyData: any;
-    let fetchOptions: RequestInit = { method: 'POST' };
+    const fetchOptions: RequestInit = { method: 'POST' };
 
     let intelligenceMode = 'pulse'; // Default
 
@@ -34,7 +34,7 @@ export async function POST(req: Request) {
               try {
                   const context = JSON.parse(contextStr);
                   if (context.mode) intelligenceMode = context.mode;
-              } catch (e) {
+              } catch {
                   // ignore parse error, use default
               }
           }
@@ -44,15 +44,16 @@ export async function POST(req: Request) {
       fetchOptions.body = formData; 
     } else {
       // JSON: Parse to extract mode, then forward
-      bodyData = await req.json();
+      const jsonData = await req.json();
+      bodyData = jsonData;
       
-      if (bodyData.mode) {
-          intelligenceMode = bodyData.mode;
-      } else if (bodyData.context?.mode) {
-          intelligenceMode = bodyData.context.mode;
+      if (jsonData.mode) {
+          intelligenceMode = jsonData.mode;
+      } else if (jsonData.context?.mode) {
+          intelligenceMode = jsonData.context.mode;
       }
       
-      fetchOptions.body = JSON.stringify(bodyData);
+      fetchOptions.body = JSON.stringify(jsonData);
       fetchOptions.headers = { 'Content-Type': 'application/json' };
     }
     
@@ -90,9 +91,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: responseText });
     }
 
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
-      { error: error.message || "Internal Server Error" },
+      { error: (error as Error).message || "Internal Server Error" },
       { status: 500 }
     );
   }

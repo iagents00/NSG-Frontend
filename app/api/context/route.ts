@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     const cacheName = await getOrCreateCache(role as keyof typeof SYSTEM_INSTRUCTIONS);
 
     return Response.json({ cacheName });
-  } catch (error: any) {
-    return Response.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return Response.json({ error: (error as Error).message }, { status: 500 });
   }
 }

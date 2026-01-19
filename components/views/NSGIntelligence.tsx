@@ -3,7 +3,7 @@
 import React from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Sparkles, Cpu, Lock, Zap } from "lucide-react";
+import { ArrowRight, Cpu, Lock } from "lucide-react";
 import BrandAtom from "@/components/ui/BrandAtom";
 import JarvisAssistant from "@/components/features/JarvisAssistant";
 import { CONTEXT, RoleType } from "@/data/context";

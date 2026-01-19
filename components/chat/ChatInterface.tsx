@@ -748,6 +748,7 @@ export default function ChatInterface() {
                                                         <button
                                                             key={m.id}
                                                             type="button"
+                                                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                                             onClick={() => { setIntelligenceMode(m.id as any); setIsModeOpen(false); }}
                                                             className={clsx(
                                                                 "group relative flex items-start gap-3.5 p-3 rounded-2xl transition-all duration-200 text-left",

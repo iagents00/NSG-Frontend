@@ -2,7 +2,7 @@
 
 import { useAppStore } from "@/store/useAppStore";
 import Link from "next/link";
-import { ArrowRight, Activity, Users, DollarSign, TrendingUp, Briefcase, Building2 } from "lucide-react";
+import { ArrowRight, Activity, Users, DollarSign, TrendingUp, Building2 } from "lucide-react";
 import DashboardCard from "@/components/dashboard/DashboardCard";
 import RoleSelector from "@/components/controls/RoleSelector";
 import ThemeToggle from "@/components/controls/ThemeToggle";

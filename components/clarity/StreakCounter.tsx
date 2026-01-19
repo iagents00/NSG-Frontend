@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Flame, Trophy } from "lucide-react";
 import clsx from "clsx";
 import confetti from "canvas-confetti";
-import AtomEffect from "@/components/ui/AtomEffect";
 import { SkeletonStreakCounter } from "./SkeletonStreakCounter";
 
 interface StreakCounterProps {
@@ -144,9 +143,7 @@ export default function StreakCounter({ current, longest, isLoading = false }: S
                             <div
                                 className="h-full bg-linear-to-r from-orange-500 to-red-500 rounded-full transition-all duration-1000 ease-out relative overflow-hidden"
                                 style={{ width: `${Math.min((current / nextMilestone) * 100, 100)}%` }}
-                            >
-                                <AtomEffect className="absolute right-0.5 top-1/2 -translate-y-1/2 w-2 h-2 opacity-50" />
-                            </div>
+                            />
                         </div>
                     </div>
                 )}

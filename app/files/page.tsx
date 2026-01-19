@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Upload, FileText, Search, Filter, MoreVertical, Trash2, Download, Eye } from "lucide-react";
+import { Upload, FileText, Search, Filter, Trash2, Download, Eye } from "lucide-react";
 import DashboardCard from "@/components/dashboard/DashboardCard";
 
 interface FileItem {

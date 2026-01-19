@@ -23,7 +23,7 @@ export interface LoginData {
 }
 
 export interface AuthResponse {
-  user: any; // Adjustable based on actual response
+  user: unknown; // Adjustable based on actual response
   token: string;
 }
 
@@ -45,9 +45,10 @@ export const authService = {
     try {
       const response = await api.get('/auth/verify-token');
       return response.data;
-    } catch (error: any) {
+    } catch (error) {
       // Only remove token if the error is explicitly an authentication error (401)
-      if (typeof window !== 'undefined' && error.response && error.response.status === 401) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (typeof window !== 'undefined' && (error as any)?.response && (error as any)?.response?.status === 401) {
         localStorage.removeItem('nsg-token');
       }
       throw error;

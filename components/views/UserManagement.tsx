@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import api from "@/lib/api";
 import {
     Users,
@@ -69,22 +69,22 @@ export default function UserManagement() {
     const [currentPage, setCurrentPage] = useState(1);
     const usersPerPage = 10;
 
-    useEffect(() => {
-        fetchUsers();
-    }, []);
-
-    const fetchUsers = async () => {
+    const fetchUsers = useCallback(async () => {
         setLoading(true);
         try {
             const response = await api.get("/user/get_all");
             setUsers(response.data);
-        } catch (error: any) {
+        } catch (error) {
             console.error("Error fetching users:", error);
             showToast("Error al cargar usuarios", "error");
         } finally {
             setLoading(false);
         }
-    };
+    }, [showToast]);
+
+    useEffect(() => {
+        fetchUsers();
+    }, [fetchUsers]);
 
     const handleRoleChange = async (
         userId: string,
@@ -105,12 +105,11 @@ export default function UserManagement() {
                 `Rol actualizado exitosamente a ${roleConfig.label}`,
                 "success",
             );
-        } catch (error: any) {
+        } catch (error) {
             console.error("Error updating role:", error);
-            showToast(
-                error.response?.data?.message || "Error al actualizar el rol",
-                "error",
-            );
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const message = (error as any)?.response?.data?.message || "Error al actualizar el rol";
+            showToast(message, "error");
         } finally {
             setUpdatingUserId(null);
         }

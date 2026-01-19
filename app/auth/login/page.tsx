@@ -106,12 +106,12 @@ function LoginContent() {
             }
 
             // Save real user ID from backend response
-            if (data.user?.id) {
-                setUserId(data.user.id);
+            if ((data.user as any)?.id) {
+                setUserId((data.user as any).id);
             }
 
-            if (data.user?.role) {
-                setRole(data.user.role as RoleType);
+            if ((data.user as any)?.role) {
+                setRole((data.user as any).role as RoleType);
             } else {
                 setRole(selectedRole);
             }

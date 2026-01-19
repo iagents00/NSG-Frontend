@@ -2,11 +2,7 @@
 import { useToast } from "@/components/ui/ToastProvider";
 import RoleGuard from "@/components/RoleGuard";
 
-interface PipelineItem {
-  name: string;
-  value: string;
-  tag: string;
-}
+
 
 const COLUMNS = [
   { title: "Scouting", count: 3, color: "blue", items: [{ name: "TechCorp SA", value: "$5M", tag: "SaaS B2B" }, { name: "LogiTrans", value: "$2M", tag: "Logística" }] },

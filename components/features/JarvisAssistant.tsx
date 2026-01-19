@@ -52,30 +52,6 @@ export default function JarvisAssistant() {
     }, []);
 
     // --- AUDIO UTILS ---
-    const pcmToWav = (pcmData: Int16Array, sampleRate: number) => {
-        const buffer = new ArrayBuffer(44 + pcmData.length * 2);
-        const view = new DataView(buffer);
-        const writeString = (offset: number, string: string) => {
-            for (let i = 0; i < string.length; i++)
-                view.setUint8(offset + i, string.charCodeAt(i));
-        };
-        writeString(0, "RIFF");
-        view.setUint32(4, 32 + pcmData.length * 2, true);
-        writeString(8, "WAVE");
-        writeString(12, "fmt ");
-        view.setUint32(16, 16, true);
-        view.setUint16(20, 1, true);
-        view.setUint16(22, 1, true);
-        view.setUint32(24, sampleRate, true);
-        view.setUint32(28, sampleRate * 2, true);
-        view.setUint16(32, 2, true);
-        view.setUint16(34, 16, true);
-        writeString(36, "data");
-        view.setUint32(40, pcmData.length * 2, true);
-        for (let i = 0; i < pcmData.length; i++)
-            view.setInt16(44 + i * 2, pcmData[i], true);
-        return new Blob([buffer], { type: "audio/wav" });
-    };
 
     const cleanTextForSpeech = (text: string) => {
         return text
@@ -259,9 +235,12 @@ export default function JarvisAssistant() {
                 setInput("");
             };
 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             recognition.onresult = (e: any) => {
                 const transcript = Array.from(e.results)
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     .map((result: any) => (result as any)[0])
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     .map((result: any) => result.transcript)
                     .join(" ");
 
@@ -274,6 +253,7 @@ export default function JarvisAssistant() {
                 }, 1500);
             };
 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             recognition.onerror = (e: any) => {
                 if (e.error === "no-speech") return;
                 if (e.error !== "aborted") {
@@ -295,7 +275,7 @@ export default function JarvisAssistant() {
 
             try {
                 recognition.start();
-            } catch (err) {
+            } catch {
                  // ignore
             }
         } else {
