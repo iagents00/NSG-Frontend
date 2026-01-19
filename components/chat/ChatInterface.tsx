@@ -730,78 +730,6 @@ export default function ChatInterface() {
                                             <ChevronDown className={clsx("w-3.5 h-3.5 opacity-40 transition-transform duration-300", isModeOpen && "rotate-180")} />
                                         </button>
 
-<<<<<<< HEAD
-                                        {/* SEPARATOR */}
-                                        <div className="w-px h-5 bg-slate-200 mx-1" />
-
-                                        {/* INTELLIGENCE MODE SELECTOR (Pro-Futuristic) */}
-                                        {/* INTELLIGENCE MODE SELECTOR (Pro-Futuristic) */}
-                                        <div className="relative">
-                                            <button
-                                                type="button"
-                                                onClick={() => setIsModeOpen(!isModeOpen)}
-                                                className={clsx(
-                                                    "flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-semibold transition-all duration-300 border shadow-sm group",
-                                                    "bg-blue-50/80 border-blue-200 text-blue-600 ring-2 ring-blue-100/50"
-                                                )}
-                                            >
-                                                {intelligenceMode === 'pulse' && <Activity className="w-4 h-4 transition-colors text-blue-500" />}
-                                                {intelligenceMode === 'compare' && <Layers className="w-4 h-4 text-blue-500" />}
-                                                {intelligenceMode === 'fusion' && <Scale className="w-4 h-4 text-blue-500" />}
-
-                                                <span className="font-display tracking-tight">
-                                                    {intelligenceMode === 'pulse' ? 'Pulso' :
-                                                        intelligenceMode === 'compare' ? 'Comparar' : 'Fusión'}
-                                                </span>
-                                                <ChevronDown className={clsx("w-3.5 h-3.5 opacity-40 transition-transform duration-300", isModeOpen && "rotate-180")} />
-                                            </button>
-
-                                            <AnimatePresence>
-                                                {isModeOpen && (
-                                                    <motion.div
-                                                        initial={{ opacity: 0, scale: 0.96, y: 8, filter: 'blur(4px)' }}
-                                                        animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
-                                                        exit={{ opacity: 0, scale: 0.96, y: 8, filter: 'blur(4px)' }}
-                                                        transition={{ type: "spring", stiffness: 400, damping: 35 }}
-                                                        className="absolute bottom-full left-0 mb-3 w-64 p-2 bg-white/95 backdrop-blur-[24px] rounded-[20px] shadow-[0_20px_40px_-10px_rgba(0,0,0,0.15)] border border-white/60 flex flex-col gap-1 z-50 ring-1 ring-slate-900/5"
-                                                    >
-                                                        {[
-                                                            { id: 'pulse', label: 'Pulso', icon: Activity, desc: 'Respuesta instantánea' },
-                                                            { id: 'compare', label: 'Comparar', icon: Layers, desc: 'Ejecución en paralelo' },
-                                                            { id: 'fusion', label: 'Fusión', icon: Scale, desc: 'Consenso de 3 modelos' },
-                                                        ].map(m => (
-                                                            <button
-                                                                key={m.id}
-                                                                type="button"
-                                                                onClick={() => { setIntelligenceMode(m.id as any); setIsModeOpen(false); }}
-                                                                className={clsx(
-                                                                    "group relative flex items-start gap-3.5 p-3 rounded-2xl transition-all duration-200 text-left",
-                                                                    intelligenceMode === m.id ? "bg-blue-50/80" : "hover:bg-slate-50"
-                                                                )}
-                                                            >
-                                                                <div className={clsx("relative z-10 p-2 rounded-xl border shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-all duration-300 group-hover:scale-105 group-hover:shadow-md bg-white",
-                                                                    intelligenceMode === m.id ? "border-blue-100 text-blue-500 ring-2 ring-blue-50" : "border-slate-100 text-slate-400 group-hover:text-slate-600 group-hover:border-slate-200"
-                                                                )}>
-                                                                    <m.icon className="w-4 h-4" />
-                                                                </div>
-                                                                <div className="relative z-10 flex flex-col pt-0.5">
-                                                                    <span className={clsx("text-[14px] font-bold tracking-tight font-display transition-colors", intelligenceMode === m.id ? "text-blue-700" : "text-slate-600 group-hover:text-slate-800")}>
-                                                                        {m.label}
-                                                                    </span>
-                                                                    <span className="text-[11px] text-slate-400 font-medium transition-all duration-300 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5">
-                                                                        {m.desc}
-                                                                    </span>
-                                                                </div>
-                                                                {intelligenceMode === m.id && (
-                                                                    <motion.div layoutId="activeCheck" className="absolute right-3 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]" />
-                                                                )}
-                                                            </button>
-                                                        ))}
-                                                    </motion.div>
-                                                )}
-                                            </AnimatePresence>
-                                        </div>
-=======
                                         <AnimatePresence>
                                             {isModeOpen && (
                                                 <motion.div
@@ -846,7 +774,6 @@ export default function ChatInterface() {
                                                 </motion.div>
                                             )}
                                         </AnimatePresence>
->>>>>>> 66ccd083dfcc925b65cdefb1e3877b4cce562d80
                                     </div>
                                 </div>
 
