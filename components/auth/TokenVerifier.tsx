@@ -14,7 +14,16 @@ export default function TokenVerifier({ children }: { children: React.ReactNode;
   useEffect(() => {
     const checkAuth = async () => {
       // 1. Check if we are on a public path
-      const isPublicPath = ['/auth/login', '/auth/register', '/auth/forgot-password', '/'].includes(pathname);
+      const publicPaths = [
+        '/',
+        '/auth/login',
+        '/auth/register',
+        '/auth/forgot-password',
+        '/privacy',
+        '/politica-de-privacidad',
+        '/condiciones-del-servicio'
+      ];
+      const isPublicPath = publicPaths.some(path => pathname.startsWith(path));
       const token = localStorage.getItem('nsg-token');
 
       // 2. Logic to determine authorization

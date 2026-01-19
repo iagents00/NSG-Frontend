@@ -17,7 +17,7 @@ function LoginContent() {
     const setRole = useAppStore((state) => state.setRole);
     const setUserId = useAppStore((state) => state.setUserId);
 
-    const [selectedRole, setSelectedRole] = useState<RoleType | null>(null);
+    const [selectedRole, setSelectedRole] = useState<RoleType>('manager');
     const [isAnimating, setIsAnimating] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -27,11 +27,8 @@ function LoginContent() {
         const roleParam = searchParams.get('role') as RoleType | null;
         if (roleParam && CONTEXT[roleParam]) {
             setSelectedRole(roleParam);
-        } else {
-            // Enforce flow: If no role is selected, go back to landing
-            router.push('/');
         }
-    }, [searchParams, router]);
+    }, [searchParams]);
 
     const handleBack = () => {
         router.push('/');
@@ -82,7 +79,6 @@ function LoginContent() {
     };
 
     const handleLogin = async () => {
-        if (!selectedRole) return;
         if (!email || !password) {
             setError("Por favor ingresa usuario y contraseña.");
             return;
@@ -124,8 +120,6 @@ function LoginContent() {
         }
     };
 
-    // If we are redirecting or don't have a role yet, show nothing or a loader
-    if (!selectedRole) return null;
 
     return (
         <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 relative overflow-hidden">
@@ -204,6 +198,10 @@ function LoginContent() {
                                     <div className="flex justify-end pt-1">
                                         <Link
                                             href="/auth/forgot-password"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                router.push('/auth/forgot-password');
+                                            }}
                                             className="text-[10px] font-bold text-slate-400 hover:text-blue-600 transition-colors uppercase tracking-widest cursor-pointer"
                                         >
                                             ¿Olvidaste tu contraseña?
