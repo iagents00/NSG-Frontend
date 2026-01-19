@@ -3,18 +3,18 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/ToastProvider";
 
-const inter = Inter({ 
+const inter = Inter({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-inter" 
+  variable: "--font-inter"
 });
 
 
 
-const mono = JetBrains_Mono({ 
+const mono = JetBrains_Mono({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-mono" 
+  variable: "--font-mono"
 });
 
 export const metadata: Metadata = {
@@ -35,7 +35,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={`${inter.variable} ${mono.variable} antialiased h-full`} suppressHydrationWarning>
-      <body className="h-full overflow-hidden font-sans selection:bg-blue-100 selection:text-blue-900" suppressHydrationWarning>
+      <body className="h-full overflow-auto font-sans selection:bg-blue-100 selection:text-blue-900" suppressHydrationWarning>
         <ThemeProvider>
           <TokenVerifier>
             <ToastProvider>{children}</ToastProvider>

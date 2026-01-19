@@ -895,7 +895,7 @@ export default function NSGClarity() {
                             )}
                         />
                         <span className="text-[9px] xs:text-[10px] font-semibold uppercase tracking-wide">
-                            Refrescar
+                            Refrescar@
                         </span>
                     </button>
                     {/* Desktop Refresh Button */}

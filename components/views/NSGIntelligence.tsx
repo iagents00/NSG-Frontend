@@ -5,7 +5,7 @@ import { useAppStore } from "@/store/useAppStore";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Cpu, Lock } from "lucide-react";
 import BrandAtom from "@/components/ui/BrandAtom";
-import JarvisAssistant from "@/components/features/JarvisAssistant";
+import ProjectSlider from "@/components/features/ProjectSlider";
 import { CONTEXT, RoleType } from "@/data/context";
 
 export default function NSGIntelligence() {
@@ -31,11 +31,9 @@ export default function NSGIntelligence() {
 
     return (
         <div className="flex-1 overflow-y-auto custom-scroll safe-bottom-scroll scroll-smooth w-full animate-fade-in-up flex flex-col items-center bg-white text-slate-900 selection:bg-blue-100">
-            {/* Jarvis Assistant - Compact */}
-            <div className="w-full relative z-20 mb-6 pt-6 px-2 xs:px-4 lg:px-12">
-                <div className="relative mx-auto max-w-3xl">
-                    <JarvisAssistant />
-                </div>
+            {/* Project Slider - Full Width */}
+            <div className="w-full px-2 xs:px-4 lg:px-12 pt-6 pb-6 max-w-[1700px] relative z-20">
+                <ProjectSlider />
             </div>
 
             <div className="w-full px-2 xs:px-4 lg:px-12 pb-24 max-w-[1700px] relative z-10">
@@ -145,11 +143,10 @@ function ModuleCard({
         shadow-sm transition-all duration-500 cubic-bezier(0.25,1,0.5,1) 
         overflow-hidden p-5 xs:p-8 flex flex-col justify-between animate-fade-in-up fill-mode-backwards 
         will-change-transform
-        ${
-            isComingSoon
-                ? "opacity-60 cursor-not-allowed"
-                : "hover:border-blue-300 hover:shadow-[0_20px_50px_-10px_rgba(59,130,246,0.2)] hover:scale-[1.02] cursor-pointer"
-        }
+        ${isComingSoon
+                    ? "opacity-60 cursor-not-allowed"
+                    : "hover:border-blue-300 hover:shadow-[0_20px_50px_-10px_rgba(59,130,246,0.2)] hover:scale-[1.02] cursor-pointer"
+                }
       `}
         >
             {/* Coming Soon Badge */}
@@ -178,11 +175,10 @@ function ModuleCard({
                     className={`
           w-16 h-16 rounded-2xl border flex items-center justify-center 
           transition-all duration-500 shadow-md
-          ${
-              isComingSoon
-                  ? "bg-slate-100 border-slate-200 text-slate-400"
-                  : "bg-white border-slate-200 text-slate-400 group-hover:bg-gradient-to-br group-hover:from-blue-500 group-hover:to-blue-600 group-hover:border-transparent group-hover:text-white group-hover:shadow-lg group-hover:shadow-blue-200"
-          }
+          ${isComingSoon
+                            ? "bg-slate-100 border-slate-200 text-slate-400"
+                            : "bg-white border-slate-200 text-slate-400 group-hover:bg-gradient-to-br group-hover:from-blue-500 group-hover:to-blue-600 group-hover:border-transparent group-hover:text-white group-hover:shadow-lg group-hover:shadow-blue-200"
+                        }
         `}
                 >
                     <Icon strokeWidth={1.5} className="w-8 h-8" />
@@ -200,11 +196,10 @@ function ModuleCard({
                 <h3
                     className={`
           text-2xl font-bold tracking-tight mb-3 transition-colors duration-300
-          ${
-              isComingSoon
-                  ? "text-slate-400"
-                  : "text-navy-950 group-hover:text-blue-600"
-          }
+          ${isComingSoon
+                            ? "text-slate-400"
+                            : "text-navy-950 group-hover:text-blue-600"
+                        }
         `}
                 >
                     {title}
@@ -212,11 +207,10 @@ function ModuleCard({
                 <p
                     className={`
           text-[15px] font-medium leading-relaxed transition-colors line-clamp-2 pr-4
-          ${
-              isComingSoon
-                  ? "text-slate-400"
-                  : "text-slate-500 group-hover:text-slate-700"
-          }
+          ${isComingSoon
+                            ? "text-slate-400"
+                            : "text-slate-500 group-hover:text-slate-700"
+                        }
         `}
                 >
                     {description}

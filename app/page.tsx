@@ -1,181 +1,277 @@
-'use client'; // Required for interactivity (onClick)
+'use client';
 
-import {
-    ShieldCheck,
-    Check,
-    Briefcase,
-    ArrowRight,
-    Brain,
-    Building2,
-    HeartPulse
-} from 'lucide-react';
+import { ArrowRight, Target, Zap, Shield, Menu, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useState } from 'react';
+import BrandAtom from '@/components/ui/BrandAtom';
 
 export default function LandingPage() {
     const router = useRouter();
-
-    // Logic for the profile selection buttons
-    const selectProfile = (profile: string) => {
-        // Redirect to Auth page with selected role
-        router.push(`/auth/login?role=${profile}`);
-    };
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     return (
-        /* VIEW 1: LANDING PAGE */
-        <div id="view-landing" className="absolute inset-0 z-[60] flex flex-col min-h-[100dvh] bg-white custom-scroll w-full h-full">
+        <div className="min-h-screen bg-white overflow-x-hidden">
+            {/* NAVIGATION */}
+            <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/60">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex items-center justify-between h-16 sm:h-18">
+                        {/* Logo */}
+                        <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => router.push('/')}>
+                            <BrandAtom className="w-7 h-7 sm:w-8 sm:h-8" />
+                            <span className="text-base sm:text-lg font-bold text-navy-950 tracking-tight">NSG Intelligence</span>
+                        </div>
 
-            {/* BACKGROUND AMBIENCE */}
-            <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-50/40 via-white to-white pointer-events-none"></div>
-            <div className="fixed top-[-20%] right-[-10%] w-[90vw] h-[90vw] bg-indigo-50/30 rounded-full blur-[150px] pointer-events-none animate-pulse-slow"></div>
+                        {/* Desktop Navigation */}
+                        <div className="hidden md:flex items-center gap-6">
+                            <a href="#features" className="text-sm font-medium text-slate-600 hover:text-navy-950 transition-colors">Features</a>
+                            <a href="#about" className="text-sm font-medium text-slate-600 hover:text-navy-950 transition-colors">About Us</a>
+                            <Link href="/privacy" className="text-sm font-medium text-slate-600 hover:text-navy-950 transition-colors">Privacy</Link>
+                            <Link href="/auth/login" className="text-sm font-medium text-slate-600 hover:text-navy-950 transition-colors">Login</Link>
+                            <Link href="/auth/register" className="px-4 py-2 bg-navy-900 text-white text-sm font-bold rounded-xl hover:bg-blue-600 transition-all shadow-lg">
+                                Get Started
+                            </Link>
+                        </div>
 
-            {/* TOP LEFT BRAND MARK */}
-            <div className="absolute top-6 left-6 md:top-8 md:left-10 z-50 flex items-center gap-4 opacity-100 cursor-default flex-nowrap min-w-max pointer-events-auto">
-                <div className="w-10 h-10 relative shrink-0 atom-container">
-                    <div className="w-full h-full atom-breathe">
-                        <svg viewBox="0 0 100 100" className="w-full h-full overflow-visible drop-shadow-md">
-                            <defs>
-                                <linearGradient id="brandAtomGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stopColor="#2563EB" />
-                                    <stop offset="100%" stopColor="#4F46E5" />
-                                </linearGradient>
-                            </defs>
-                            <circle cx="50" cy="50" r="42" className="morph-orbit orbit-1 landing-orbit" stroke="url(#brandAtomGrad)" />
-                            <circle cx="50" cy="50" r="42" className="morph-orbit orbit-2 landing-orbit" stroke="url(#brandAtomGrad)" style={{ transform: 'rotate(60deg) scaleY(0.45)' }} />
-                            <circle cx="50" cy="50" r="42" className="morph-orbit orbit-3 landing-orbit" stroke="url(#brandAtomGrad)" style={{ transform: 'rotate(120deg) scaleY(0.45)' }} />
-                            <circle cx="50" cy="50" r="10" fill="#3B82F6" className="filter drop-shadow-md" />
-                            <circle cx="50" cy="50" r="4" fill="white" />
-                        </svg>
+                        {/* Mobile Menu Button */}
+                        <button
+                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                            className="md:hidden p-2 text-slate-600 hover:text-navy-950"
+                        >
+                            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                        </button>
                     </div>
+
+                    {/* Mobile Menu */}
+                    {mobileMenuOpen && (
+                        <div className="md:hidden py-4 border-t border-slate-200/60">
+                            <div className="flex flex-col gap-3">
+                                <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-sm font-medium text-slate-600 hover:text-navy-950 px-2">Features</a>
+                                <a href="#about" onClick={() => setMobileMenuOpen(false)} className="text-sm font-medium text-slate-600 hover:text-navy-950 px-2">About Us</a>
+                                <Link href="/privacy" className="text-sm font-medium text-slate-600 hover:text-navy-950 px-2">Privacy</Link>
+                                <Link href="/auth/login" className="text-sm font-medium text-slate-600 hover:text-navy-950 px-2">Login</Link>
+                                <Link href="/auth/register" className="px-4 py-2 bg-navy-900 text-white text-sm font-bold rounded-xl text-center">Get Started</Link>
+                            </div>
+                        </div>
+                    )}
                 </div>
-                <div className="flex items-center shrink-0 h-10">
-                    <span className="text-base font-system font-semibold text-navy-950 tracking-tight leading-none whitespace-nowrap drop-shadow-sm">NSG Intelligence</span>
+            </nav>
+
+            {/* HERO SECTION */}
+            <section className="relative pt-24 sm:pt-28 pb-12 sm:pb-16 px-4">
+                <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
+                    <div className="absolute top-0 right-[-10%] w-[500px] h-[500px] bg-blue-100/40 rounded-full blur-[100px]"></div>
                 </div>
-            </div>
 
-            {/* MAIN CONTENT CONTAINER - Reduced top padding from pt-32 to pt-24 */}
-            <div className="flex-1 flex flex-col items-center justify-start pt-10 xs:pt-14 lg:pt-20 pb-16 xs:pb-20 relative z-10 w-full max-w-5xl lg:max-w-6xl mx-auto px-4 xs:px-6 lg:px-12 safe-bottom-scroll">
+                <div className="max-w-5xl mx-auto text-center relative z-10">
+                    {/* 3D Static Atom */}
+                    <div className="flex justify-center mb-6">
+                        <div className="relative w-20 h-20 sm:w-24 sm:h-24">
+                            <svg viewBox="0 0 100 100" className="w-full h-full" style={{ filter: 'drop-shadow(0 10px 30px rgba(59, 130, 246, 0.3))' }}>
+                                <defs>
+                                    <linearGradient id="orbit-gradient-1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stopColor="#3b82f6" />
+                                        <stop offset="50%" stopColor="#60a5fa" />
+                                        <stop offset="100%" stopColor="#2563eb" />
+                                    </linearGradient>
+                                    <linearGradient id="orbit-gradient-2" x1="100%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" stopColor="#4f46e5" />
+                                        <stop offset="50%" stopColor="#6366f1" />
+                                        <stop offset="100%" stopColor="#4338ca" />
+                                    </linearGradient>
+                                    <linearGradient id="orbit-gradient-3" x1="0%" y1="100%" x2="100%" y2="0%">
+                                        <stop offset="0%" stopColor="#2563eb" />
+                                        <stop offset="50%" stopColor="#3b82f6" />
+                                        <stop offset="100%" stopColor="#1d4ed8" />
+                                    </linearGradient>
+                                    <radialGradient id="core-gradient" cx="50%" cy="40%">
+                                        <stop offset="0%" stopColor="#ffffff" />
+                                        <stop offset="40%" stopColor="#93c5fd" />
+                                        <stop offset="100%" stopColor="#3b82f6" />
+                                    </radialGradient>
+                                </defs>
 
-                {/* 1. IDENTITY SECTION */}
-                <div className="w-full text-center flex flex-col items-center animate-fade-in-up">
+                                {/* Orbital rings with 3D effect */}
+                                <ellipse cx="50" cy="50" rx="42" ry="42" fill="none" stroke="url(#orbit-gradient-1)" strokeWidth="2" opacity="0.8" />
+                                <ellipse cx="50" cy="50" rx="42" ry="18" fill="none" stroke="url(#orbit-gradient-2)" strokeWidth="2" opacity="0.8" transform="rotate(60 50 50)" />
+                                <ellipse cx="50" cy="50" rx="42" ry="18" fill="none" stroke="url(#orbit-gradient-3)" strokeWidth="2" opacity="0.8" transform="rotate(120 50 50)" />
 
-                    {/* LANDING ATOM - Significantly increased size */}
-                    <div className="w-44 h-44 xs:w-56 xs:h-56 sm:w-64 sm:h-64 md:w-72 md:h-72 lg:w-80 lg:h-80 mb-6 xs:mb-8 lg:mb-10 relative atom-container">
-                        <div className="absolute inset-0 bg-blue-600/5 blur-[80px] xs:blur-[100px] rounded-full scale-125 animate-pulse-slow"></div>
-                        <div className="w-full h-full atom-breathe">
-                            <svg viewBox="0 0 100 100" className="w-full h-full overflow-visible drop-shadow-2xl">
-                                <defs><linearGradient id="landingGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#2563EB" /><stop offset="100%" stopColor="#6366f1" /></linearGradient><radialGradient id="coreLanding" cx="50%" cy="50%" r="50%"><stop offset="0%" stopColor="#FFFFFF" /><stop offset="100%" stopColor="#3B82F6" /></radialGradient></defs>
-                                <circle cx="50" cy="50" r="45" className="morph-orbit orbit-1 landing-orbit" stroke="url(#landingGrad)" />
-                                <circle cx="50" cy="50" r="45" className="morph-orbit orbit-2 landing-orbit" stroke="url(#landingGrad)" style={{ transform: 'rotate(60deg) scaleY(0.45)' }} />
-                                <circle cx="50" cy="50" r="45" className="morph-orbit orbit-3 landing-orbit" stroke="url(#landingGrad)" style={{ transform: 'rotate(120deg) scaleY(0.45)' }} />
-                                <circle cx="50" cy="50" r="10" fill="url(#coreLanding)" className="filter drop-shadow-lg" />
-                                <circle cx="50" cy="50" r="3" fill="white" opacity="0.8" />
+                                {/* Core with 3D effect */}
+                                <circle cx="50" cy="50" r="11" fill="url(#core-gradient)" style={{ filter: 'drop-shadow(0 2px 8px rgba(59, 130, 246, 0.6))' }} />
+                                <circle cx="50" cy="47" r="4" fill="white" opacity="0.9" />
                             </svg>
                         </div>
                     </div>
 
-                    {/* PRECISE COPY - Strengthened Title */}
-                    <div className="space-y-4 xs:space-y-6 lg:space-y-6 max-w-3xl lg:max-w-4xl mx-auto">
-                        <p className="text-[0.6rem] xs:text-[0.65rem] md:text-xs lg:text-xs font-bold text-slate-400 tracking-[0.25em] xs:tracking-[0.3em] uppercase pl-1">NSG SYSTEM OS • Enterprise</p>
-                        <h1 className="font-display text-4xl xs:text-5xl sm:text-6xl lg:text-7xl font-black tracking-tighter text-navy-950 leading-[1.05] drop-shadow-sm px-2 xs:px-0">
-                            Sistema personalizado <br /><span className="text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-indigo-600">de inteligencia profesional.</span>
+                    {/* Headline */}
+                    <div className="space-y-5">
+                        <div className="inline-block px-3 py-1.5 bg-blue-50 border border-blue-100 rounded-full">
+                            <span className="text-xs font-bold text-blue-700 uppercase tracking-wide">Neural Strategic Gateway</span>
+                        </div>
+
+                        <h1 className="font-display text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-navy-950 leading-tight">
+                            Transform Data Into
+                            <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+                                Strategic Intelligence
+                            </span>
                         </h1>
-                        <div className="relative pl-4 xs:pl-6 border-l-4 border-blue-100 text-left mx-auto max-w-md md:max-w-lg lg:max-w-xl mt-5 xs:mt-6 lg:mt-8">
-                            <p className="text-base xs:text-lg md:text-xl lg:text-xl text-slate-600 font-system font-normal leading-relaxed italic">
-                                &quot;Transformamos datos clínicos y corporativos en estrategias inteligentes.&quot;
+
+                        <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto">
+                            Professional AI-powered platform that converts complex data into actionable insights for modern executives.
+                        </p>
+
+                        {/* CTAs */}
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                            <Link href="/auth/register" className="w-full sm:w-auto px-7 py-3 bg-navy-900 text-white font-bold rounded-xl hover:bg-blue-600 transition-all shadow-lg flex items-center justify-center gap-2 group">
+                                Get Started Free
+                                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                            </Link>
+                            <a href="#features" className="w-full sm:w-auto px-7 py-3 bg-white border-2 border-slate-200 text-navy-950 font-bold rounded-xl hover:border-slate-300 transition-all">
+                                Learn More
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* 3 MAIN FEATURES */}
+            <section id="features" className="py-12 sm:py-16 px-4 bg-slate-50">
+                <div className="max-w-6xl mx-auto">
+                    <div className="text-center mb-10">
+                        <h2 className="text-2xl sm:text-4xl font-display font-bold text-navy-950 mb-2">
+                            What NSG Does
+                        </h2>
+                        <p className="text-sm sm:text-base text-slate-600">
+                            Three powerful tools to transform your workflow
+                        </p>
+                    </div>
+
+                    <div className="grid md:grid-cols-3 gap-5">
+                        {/* NSG Clarity */}
+                        <div className="bg-white p-6 rounded-2xl border border-slate-200 hover:border-blue-200 hover:shadow-lg transition-all">
+                            <div className="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-4">
+                                <Target className="w-5 h-5" />
+                            </div>
+                            <h3 className="text-lg font-bold text-navy-950 mb-2">NSG Clarity</h3>
+                            <p className="text-sm text-slate-600 leading-relaxed mb-3">
+                                Daily execution protocols that align your tasks with strategic goals. Track progress and manage workflows effectively.
+                            </p>
+                            <div className="text-xs text-blue-600 font-semibold">Daily Protocols • Progress Tracking</div>
+                        </div>
+
+                        {/* NSG Horizon */}
+                        <div className="bg-white p-6 rounded-2xl border border-slate-200 hover:border-emerald-200 hover:shadow-lg transition-all">
+                            <div className="w-11 h-11 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 mb-4">
+                                <Zap className="w-5 h-5" />
+                            </div>
+                            <h3 className="text-lg font-bold text-navy-950 mb-2">NSG Horizon</h3>
+                            <p className="text-sm text-slate-600 leading-relaxed mb-3">
+                                AI-powered meeting analysis that converts conversations into actionable roadmaps with strategic insights.
+                            </p>
+                            <div className="text-xs text-emerald-600 font-semibold">AI Analysis • Action Plans</div>
+                        </div>
+
+                        {/* NSG Intelligence */}
+                        <div className="bg-white p-6 rounded-2xl border border-slate-200 hover:border-indigo-200 hover:shadow-lg transition-all">
+                            <div className="w-11 h-11 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 mb-4">
+                                <Shield className="w-5 h-5" />
+                            </div>
+                            <h3 className="text-lg font-bold text-navy-950 mb-2">NSG Intelligence</h3>
+                            <p className="text-sm text-slate-600 leading-relaxed mb-3">
+                                Your AI assistant for strategic queries. Get instant answers and access your knowledge base 24/7.
+                            </p>
+                            <div className="text-xs text-indigo-600 font-semibold">AI Assistant • Knowledge Base</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ABOUT US */}
+            <section id="about" className="py-12 sm:py-16 px-4">
+                <div className="max-w-4xl mx-auto text-center">
+                    <div className="inline-block px-3 py-1.5 bg-indigo-50 border border-indigo-100 rounded-full mb-4">
+                        <span className="text-xs font-bold text-indigo-700 uppercase tracking-wide">About NSG</span>
+                    </div>
+
+                    <h2 className="text-2xl sm:text-4xl font-display font-bold text-navy-950 mb-4">
+                        Built by Strategists, for Decision Makers
+                    </h2>
+
+                    <p className="text-sm sm:text-base text-slate-600 leading-relaxed mb-6">
+                        NSG Intelligence democratizes advanced strategic intelligence tools. We believe every professional deserves access to enterprise-grade AI capabilities.
+                    </p>
+
+                    <div className="grid grid-cols-3 gap-6 mt-8">
+                        <div className="text-center">
+                            <div className="text-3xl font-bold text-blue-600 mb-1">1,000+</div>
+                            <div className="text-xs text-slate-500 uppercase">Conversations</div>
+                        </div>
+                        <div className="text-center">
+                            <div className="text-3xl font-bold text-emerald-600 mb-1">100+</div>
+                            <div className="text-xs text-slate-500 uppercase">Reviews</div>
+                        </div>
+                        <div className="text-center">
+                            <div className="text-3xl font-bold text-indigo-600 mb-1">24/7</div>
+                            <div className="text-xs text-slate-500 uppercase">Support</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* CTA */}
+            <section className="py-12 sm:py-16 px-4 bg-gradient-to-r from-navy-950 to-navy-900">
+                <div className="max-w-4xl mx-auto text-center">
+                    <h2 className="text-2xl sm:text-4xl font-display font-bold text-white mb-3">
+                        Ready to Transform Your Strategy?
+                    </h2>
+                    <p className="text-sm sm:text-base text-slate-300 mb-6">
+                        Join executives leveraging AI-powered intelligence for better decisions.
+                    </p>
+                    <Link href="/auth/register" className="inline-flex items-center gap-2 px-7 py-3 bg-white text-navy-950 font-bold rounded-xl hover:bg-blue-50 transition-all shadow-xl group">
+                        Start Your Free Trial
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </Link>
+                </div>
+            </section>
+
+            {/* FOOTER */}
+            <footer className="py-8 px-4 border-t border-slate-200">
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid md:grid-cols-4 gap-6 mb-6">
+                        <div className="md:col-span-2">
+                            <div className="flex items-center gap-2 mb-3">
+                                <BrandAtom className="w-6 h-6" />
+                                <span className="text-base font-bold text-navy-950">NSG Intelligence</span>
+                            </div>
+                            <p className="text-xs text-slate-600">
+                                Professional AI platform for strategic intelligence.
                             </p>
                         </div>
-                    </div>
 
-                    {/* CERTIFICATE */}
-                    <div className="mt-10 xs:mt-12 lg:mt-16 w-full max-w-lg lg:max-w-xl mx-auto transform transition-all hover:scale-[1.02] duration-500">
-                        <div className="bg-white/95 backdrop-blur-xl border border-slate-200/80 p-1 rounded-2xl shadow-sovereign w-full text-left">
-                            <div className="bg-gradient-to-br from-white to-slate-50 rounded-xl p-5 sm:p-6 lg:p-8 flex flex-col sm:flex-row items-center gap-6 relative overflow-hidden">
-                                <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
-                                <div className="relative shrink-0">
-                                    <div className="w-14 h-14 lg:w-16 lg:h-16 rounded-full bg-gradient-to-br from-navy-900 to-blue-900 flex items-center justify-center shadow-lg shadow-navy-900/20">
-                                        <ShieldCheck className="w-7 h-7 lg:w-8 lg:h-8 text-white stroke-[1.5]" />
-                                    </div>
-                                    <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-white text-[0.4rem] lg:text-[0.5rem] font-bold px-1.5 py-0.5 rounded-full border-2 border-white flex items-center gap-0.5 shadow-sm">
-                                        <Check className="w-2 h-2" /> ISO
-                                    </div>
-                                </div>
-                                <div className="text-center sm:text-left flex-1">
-                                    <p className="text-[0.55rem] lg:text-xs font-system font-semibold text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100 inline-block mb-1">Officially Verified</p>
-                                    <h3 className="text-sm lg:text-base text-navy-900 font-system font-medium leading-tight mb-2">Verified by <span className="font-system font-semibold text-navy-950">New Strategy Group</span></h3>
-                                    <div className="flex gap-6 justify-center sm:justify-start pt-3 border-t border-slate-100">
-                                        <div className="text-center sm:text-left"><p className="text-lg lg:text-xl font-system font-semibold text-blue-600 leading-none">1,000+</p><p className="text-[0.5rem] lg:text-[0.6rem] font-system font-medium text-slate-400 uppercase tracking-wide mt-0.5">Conversaciones</p></div>
-                                        <div className="text-center sm:text-left border-l border-slate-100 pl-6"><p className="text-lg lg:text-xl font-system font-semibold text-indigo-600 leading-none">100+</p><p className="text-[0.5rem] lg:text-[0.6rem] font-system font-medium text-slate-400 uppercase tracking-wide mt-0.5">Reseñas Positivas</p></div>
-                                    </div>
-                                </div>
+                        <div>
+                            <h4 className="text-xs font-bold text-navy-950 mb-2 uppercase">Platform</h4>
+                            <div className="flex flex-col gap-2">
+                                <a href="#features" className="text-xs text-slate-600 hover:text-navy-950">Features</a>
+                                <Link href="/auth/login" className="text-xs text-slate-600 hover:text-navy-950">Login</Link>
+                                <Link href="/auth/register" className="text-xs text-slate-600 hover:text-navy-950">Register</Link>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 className="text-xs font-bold text-navy-950 mb-2 uppercase">Legal</h4>
+                            <div className="flex flex-col gap-2">
+                                <Link href="/privacy" className="text-xs text-slate-600 hover:text-navy-950">Privacy Policy</Link>
+                                <Link href="/condiciones-del-servicio" className="text-xs text-slate-600 hover:text-navy-950">Terms</Link>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                {/* 2. ROLE SELECTION */}
-                <div className="w-full animate-fade-in-up mt-12 xs:mt-16 lg:mt-24" style={{ animationDelay: '0.15s' }}>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 xs:gap-5 lg:gap-6 w-full">
-                        {/* Consultor */}
-                        <button onClick={() => selectProfile('consultant')} className="group bg-white p-5 xs:p-6 lg:p-8 rounded-3xl xs:rounded-[2rem] text-left border border-slate-100 hover:border-blue-200 hover:shadow-precision transition-all duration-500 transform hover:-translate-y-1 cursor-pointer min-h-[140px] xs:min-h-auto">
-                            <div className="flex justify-between mb-4 xs:mb-5 lg:mb-6">
-                                <div className="w-10 h-10 xs:w-12 xs:h-12 lg:w-14 lg:h-14 bg-slate-50 text-navy-950 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:text-blue-600 group-hover:bg-blue-50">
-                                    <Briefcase className="w-5 h-5 xs:w-6 xs:h-6 lg:w-7 lg:h-7" />
-                                </div>
-                                <ArrowRight className="w-4 h-4 xs:w-5 xs:h-5 lg:w-6 lg:h-6 text-slate-300 group-hover:text-blue-600 transition-transform group-hover:translate-x-1" />
-                            </div>
-                            <h3 className="font-system font-semibold text-base xs:text-lg lg:text-xl text-navy-900">Consultor</h3>
-                            <p className="text-[11px] xs:text-xs lg:text-sm text-slate-500 mt-1 font-system font-normal">Gestión de Activos & Data Strategy</p>
-                        </button>
-
-                        {/* Psicologo */}
-                        <button onClick={() => selectProfile('psychologist')} className="group bg-white p-5 xs:p-6 lg:p-8 rounded-3xl xs:rounded-[2rem] text-left border border-slate-100 hover:border-sky-200 hover:shadow-precision transition-all duration-500 transform hover:-translate-y-1 cursor-pointer min-h-[140px] xs:min-h-auto">
-                            <div className="flex justify-between mb-4 xs:mb-5 lg:mb-6">
-                                <div className="w-10 h-10 xs:w-12 xs:h-12 lg:w-14 lg:h-14 bg-slate-50 text-navy-950 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:text-sky-600 group-hover:bg-sky-50">
-                                    <Brain className="w-5 h-5 xs:w-6 xs:h-6 lg:w-7 lg:h-7" />
-                                </div>
-                                <ArrowRight className="w-4 h-4 xs:w-5 xs:h-5 lg:w-6 lg:h-6 text-slate-300 group-hover:text-sky-600 transition-transform group-hover:translate-x-1" />
-                            </div>
-                            <h3 className="font-system font-semibold text-base xs:text-lg lg:text-xl text-navy-900">Psicólogo</h3>
-                            <p className="text-[11px] xs:text-xs lg:text-sm text-slate-500 mt-1 font-system font-normal">Clínica & Análisis de Conducta</p>
-                        </button>
-
-                        {/* Directivo */}
-                        <button onClick={() => selectProfile('manager')} className="group bg-white p-5 xs:p-6 lg:p-8 rounded-3xl xs:rounded-[2rem] text-left border border-slate-100 hover:border-emerald-200 hover:shadow-precision transition-all duration-500 transform hover:-translate-y-1 cursor-pointer min-h-[140px] xs:min-h-auto">
-                            <div className="flex justify-between mb-4 xs:mb-5 lg:mb-6">
-                                <div className="w-10 h-10 xs:w-12 xs:h-12 lg:w-14 lg:h-14 bg-slate-50 text-navy-950 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:text-emerald-600 group-hover:bg-emerald-50">
-                                    <Building2 className="w-5 h-5 xs:w-6 xs:h-6 lg:w-7 lg:h-7" />
-                                </div>
-                                <ArrowRight className="w-4 h-4 xs:w-5 xs:h-5 lg:w-6 lg:h-6 text-slate-300 group-hover:text-emerald-600 transition-transform group-hover:translate-x-1" />
-                            </div>
-                            <h3 className="font-system font-semibold text-base xs:text-lg lg:text-xl text-navy-900">CEO / Directivo</h3>
-                            <p className="text-[11px] xs:text-xs lg:text-sm text-slate-500 mt-1 font-system font-normal">Inteligencia de Datos & KPIs</p>
-                        </button>
-
-                        {/* Paciente */}
-                        <button onClick={() => selectProfile('patient')} className="group bg-white p-5 xs:p-6 lg:p-8 rounded-3xl xs:rounded-[2rem] text-left border border-slate-100 hover:border-teal-200 hover:shadow-precision transition-all duration-500 transform hover:-translate-y-1 cursor-pointer min-h-[140px] xs:min-h-auto">
-                            <div className="flex justify-between mb-4 xs:mb-5 lg:mb-6">
-                                <div className="w-10 h-10 xs:w-12 xs:h-12 lg:w-14 lg:h-14 bg-slate-50 text-navy-950 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:text-teal-600 group-hover:bg-teal-50">
-                                    <HeartPulse className="w-5 h-5 xs:w-6 xs:h-6 lg:w-7 lg:h-7" />
-                                </div>
-                                <ArrowRight className="w-4 h-4 xs:w-5 xs:h-5 lg:w-6 lg:h-6 text-slate-300 group-hover:text-teal-600 transition-transform group-hover:translate-x-1" />
-                            </div>
-                            <h3 className="font-system font-semibold text-base xs:text-lg lg:text-xl text-navy-900">Paciente</h3>
-                            <p className="text-[11px] xs:text-xs lg:text-sm text-slate-500 mt-1 font-system font-normal">Bienestar Integral & Tracking</p>
-                        </button>
+                    <div className="pt-4 border-t border-slate-200 text-center">
+                        <p className="text-xs text-slate-500">© 2024 NSG Intelligence. All rights reserved.</p>
                     </div>
                 </div>
-
-                {/* FOOTER */}
-                <div className="mt-16 xs:mt-20 lg:mt-24 w-full pt-8 xs:pt-10 pb-6 xs:pb-8 text-center flex flex-col items-center gap-4 xs:gap-6 border-t border-slate-100/50">
-                    <div><p className="text-[0.65rem] font-system font-medium text-slate-400 uppercase tracking-widest">&copy; 2024 NSG Intelligence. All rights reserved.</p></div>
-                    <div className="flex items-center gap-6 text-[0.7rem] font-system font-medium text-slate-500">
-                        <Link href="/politica-de-privacidad" className="hover:text-blue-600 transition">Política de Privacidad</Link>
-                        <span className="w-1 h-1 rounded-full bg-slate-300"></span>
-                        <Link href="/condiciones-del-servicio" className="hover:text-blue-600 transition">Condiciones del Servicio</Link>
-                    </div>
-                </div>
-            </div>
+            </footer>
         </div>
     );
 }

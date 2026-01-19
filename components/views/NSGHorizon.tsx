@@ -298,18 +298,18 @@ export default function NSGHorizon() {
                             // Map Transcripts
                             transcripts: Array.isArray(tList)
                                 ? tList.map((t: any) => ({
-                                      speakerName:
-                                          t.speaker?.display_name ||
-                                          "Desconocido",
-                                      time: t.timestamp || "",
-                                      text: t.text || "",
-                                      // Robust check: Look at root OR inside speaker object
-                                      isUser: !!(
-                                          t.matched_calendar_invitee_email ||
-                                          t.speaker
-                                              ?.matched_calendar_invitee_email
-                                      ),
-                                  }))
+                                    speakerName:
+                                        t.speaker?.display_name ||
+                                        "Desconocido",
+                                    time: t.timestamp || "",
+                                    text: t.text || "",
+                                    // Robust check: Look at root OR inside speaker object
+                                    isUser: !!(
+                                        t.matched_calendar_invitee_email ||
+                                        t.speaker
+                                            ?.matched_calendar_invitee_email
+                                    ),
+                                }))
                                 : [],
 
                             // Map AI Info (Attempt to retrieve from backend)
@@ -476,7 +476,7 @@ export default function NSGHorizon() {
                         }
                     }
                 }
-            } catch (error) {}
+            } catch (error) { }
         };
 
         checkExistingAnalysis();
@@ -966,7 +966,7 @@ export default function NSGHorizon() {
                                                 onChange={(e) =>
                                                     setSelectedFile(
                                                         e.target.files?.[0] ||
-                                                            null,
+                                                        null,
                                                     )
                                                 }
                                             />
@@ -1020,7 +1020,7 @@ export default function NSGHorizon() {
                                                                     formData.append(
                                                                         "userId",
                                                                         userId ||
-                                                                            "",
+                                                                        "",
                                                                     );
                                                                     formData.append(
                                                                         "fileName",
@@ -1034,10 +1034,10 @@ export default function NSGHorizon() {
                                                                             formData,
                                                                             {
                                                                                 headers:
-                                                                                    {
-                                                                                        "Content-Type":
-                                                                                            "multipart/form-data",
-                                                                                    },
+                                                                                {
+                                                                                    "Content-Type":
+                                                                                        "multipart/form-data",
+                                                                                },
                                                                             },
                                                                         );
 
@@ -1054,33 +1054,33 @@ export default function NSGHorizon() {
                                                                             (
                                                                                 prev,
                                                                             ) => [
-                                                                                {
-                                                                                    id: savedDoc._id,
-                                                                                    title:
-                                                                                        savedDoc.content.substring(
-                                                                                            0,
-                                                                                            30,
-                                                                                        ) +
-                                                                                        "...",
-                                                                                    fullContent:
-                                                                                        savedDoc.content,
-                                                                                    date: new Date(
-                                                                                        savedDoc.createdAt,
-                                                                                    ).toLocaleDateString(),
-                                                                                    type: "audio",
-                                                                                    size:
-                                                                                        (
-                                                                                            savedDoc
-                                                                                                .content
-                                                                                                .length /
-                                                                                            1000
-                                                                                        ).toFixed(
-                                                                                            1,
-                                                                                        ) +
-                                                                                        "k chars",
-                                                                                },
-                                                                                ...prev,
-                                                                            ],
+                                                                                    {
+                                                                                        id: savedDoc._id,
+                                                                                        title:
+                                                                                            savedDoc.content.substring(
+                                                                                                0,
+                                                                                                30,
+                                                                                            ) +
+                                                                                            "...",
+                                                                                        fullContent:
+                                                                                            savedDoc.content,
+                                                                                        date: new Date(
+                                                                                            savedDoc.createdAt,
+                                                                                        ).toLocaleDateString(),
+                                                                                        type: "audio",
+                                                                                        size:
+                                                                                            (
+                                                                                                savedDoc
+                                                                                                    .content
+                                                                                                    .length /
+                                                                                                1000
+                                                                                            ).toFixed(
+                                                                                                1,
+                                                                                            ) +
+                                                                                            "k chars",
+                                                                                    },
+                                                                                    ...prev,
+                                                                                ],
                                                                         );
 
                                                                         showToast(
@@ -1304,27 +1304,27 @@ export default function NSGHorizon() {
                                             onClick={() => {
                                                 // Map manual recording to MeetingFolder structure to reuse the Detail View
                                                 const manualFolder: MeetingFolder =
-                                                    {
-                                                        id: rec.id,
-                                                        title: "Análisis Manual", // Or rec.title if it wasn't truncated
-                                                        description: rec.title, // Use the content snippet as description
-                                                        date: rec.date,
-                                                        timeStr: "N/A",
-                                                        shareUrl: "#",
-                                                        type: "Manual",
-                                                        insights: 0,
-                                                        source: "manual",
-                                                        transcripts: [
-                                                            {
-                                                                speakerName:
-                                                                    "Texto Original",
-                                                                time: "",
-                                                                text:
-                                                                    rec.fullContent ||
-                                                                    rec.title,
-                                                            },
-                                                        ],
-                                                    };
+                                                {
+                                                    id: rec.id,
+                                                    title: "Análisis Manual", // Or rec.title if it wasn't truncated
+                                                    description: rec.title, // Use the content snippet as description
+                                                    date: rec.date,
+                                                    timeStr: "N/A",
+                                                    shareUrl: "#",
+                                                    type: "Manual",
+                                                    insights: 0,
+                                                    source: "manual",
+                                                    transcripts: [
+                                                        {
+                                                            speakerName:
+                                                                "Texto Original",
+                                                            time: "",
+                                                            text:
+                                                                rec.fullContent ||
+                                                                rec.title,
+                                                        },
+                                                    ],
+                                                };
                                                 setSelectedFolder(manualFolder);
                                             }}
                                             className="bg-white p-6 rounded-4xl border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group cursor-pointer"
@@ -1597,7 +1597,7 @@ export default function NSGHorizon() {
 
                                     {selectedFolder.description &&
                                         selectedFolder.description.length >
-                                            200 && (
+                                        200 && (
                                             <button
                                                 onClick={() =>
                                                     setIsSummaryExpanded(
@@ -1745,7 +1745,7 @@ export default function NSGHorizon() {
 
                                     <div className="flex items-start justify-between mb-10 relative z-10">
                                         <div className="flex items-center gap-6">
-                                            <div className="w-20 h-20 bg-blue-600 rounded-4xl flex items-center justify-center text-slate-900 shadow-2xl shadow-blue-200">
+                                            <div className="w-20 h-20 bg-blue-600 rounded-4xl flex items-center justify-center text-white shadow-2xl shadow-blue-200">
                                                 <ListTodo className="w-10 h-10" />
                                             </div>
                                             <div>
@@ -2022,11 +2022,10 @@ export default function NSGHorizon() {
                                             <div
                                                 className={`
                            group relative max-w-[85%] px-5 py-4 shadow-sm transition-all duration-300
-                           ${
-                               isMe
-                                   ? "bg-white text-slate-900 rounded-2xl rounded-tr-none"
-                                   : "bg-white text-slate-800 rounded-2xl rounded-tl-none border border-slate-200"
-                           }
+                           ${isMe
+                                                        ? "bg-white text-slate-900 rounded-2xl rounded-tr-none"
+                                                        : "bg-white text-slate-800 rounded-2xl rounded-tl-none border border-slate-200"
+                                                    }
                         `}
                                             >
                                                 {!isMe && (

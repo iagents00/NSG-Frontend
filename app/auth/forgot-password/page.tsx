@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from "next/navigation";
 import BrandAtom from "@/components/ui/BrandAtom";
 import clsx from "clsx";
-import { Lock, Mail, ChevronLeft, ShieldCheck, Send } from "lucide-react";
+import { Lock, Mail, ChevronLeft, ShieldCheck, Send, MessageCircle } from "lucide-react";
 import api from '@/lib/api';
 import { useToast } from "@/components/ui/ToastProvider";
 import confetti from "canvas-confetti";
@@ -17,6 +17,7 @@ export default function ForgotPasswordPage() {
     const [email, setEmail] = useState('');
     const [code, setCode] = useState('');
     const [newPassword, setNewPassword] = useState('');
+    const [method, setMethod] = useState<'telegram' | 'email'>('telegram'); // Método de envío
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -28,11 +29,23 @@ export default function ForgotPasswordPage() {
         setIsLoading(true);
         setError(null);
         try {
-            await api.post('/auth/forgot-password-telegram', { email: email.toLowerCase() });
-            showToast("Código enviado a Telegram", "success");
+            const endpoint = method === 'telegram'
+                ? '/auth/forgot-password-telegram'
+                : '/auth/forgot-password-email';
+
+            await api.post(endpoint, { email: email.toLowerCase() });
+
+            const successMessage = method === 'telegram'
+                ? "Código enviado a Telegram"
+                : "Código enviado a tu correo";
+
+            showToast(successMessage, "success");
             setStep(2);
         } catch (err: any) {
-            setError(err.response?.data?.message || "Error al enviar el código. Verifica tu email y conexión.");
+            console.error('Error en handleSendCode:', err);
+            const errorMessage = err.response?.data?.message || "Error al enviar el código. Verifica tu email y conexión.";
+            setError(errorMessage);
+            showToast(errorMessage, "error");
         } finally {
             setIsLoading(false);
         }
@@ -43,6 +56,10 @@ export default function ForgotPasswordPage() {
             setError("Completa todos los campos.");
             return;
         }
+        if (newPassword.length < 6) {
+            setError("La contraseña debe tener al menos 6 caracteres.");
+            return;
+        }
         setIsLoading(true);
         setError(null);
         try {
@@ -51,7 +68,10 @@ export default function ForgotPasswordPage() {
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
             showToast("Contraseña actualizada exitosamente", "success");
         } catch (err: any) {
-            setError(err.response?.data?.message || "Código inválido o error del sistema.");
+            console.error('Error en handleResetPassword:', err);
+            const errorMessage = err.response?.data?.message || "Código inválido o expirado.";
+            setError(errorMessage);
+            showToast(errorMessage, "error");
         } finally {
             setIsLoading(false);
         }
@@ -85,7 +105,7 @@ export default function ForgotPasswordPage() {
                                     <ShieldCheck className="w-8 h-8" />
                                 </div>
                                 <h2 className="font-display font-bold text-2xl text-slate-900 mb-2">Recuperar Acceso</h2>
-                                <p className="text-slate-500 text-sm">Ingresa tu email para recibir un código de seguridad vía Telegram.</p>
+                                <p className="text-slate-500 text-sm">Ingresa tu email y elige cómo recibir el código de seguridad.</p>
                             </div>
 
                             {error && <div className="mb-6 p-3 bg-rose-50 border border-rose-100 text-rose-600 text-[13px] font-medium rounded-xl text-center">{error}</div>}
@@ -102,6 +122,37 @@ export default function ForgotPasswordPage() {
                                             className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl py-3.5 pl-12 pr-4 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
                                             placeholder="ejemplo@nsg.com"
                                         />
+                                    </div>
+                                </div>
+
+                                {/* Método de envío */}
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Método de Envío</label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <button
+                                            onClick={() => setMethod('telegram')}
+                                            className={clsx(
+                                                "flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 transition-all font-semibold text-sm",
+                                                method === 'telegram'
+                                                    ? "border-blue-500 bg-blue-50 text-blue-700"
+                                                    : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                                            )}
+                                        >
+                                            <MessageCircle className="w-4 h-4" />
+                                            Telegram
+                                        </button>
+                                        <button
+                                            onClick={() => setMethod('email')}
+                                            className={clsx(
+                                                "flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 transition-all font-semibold text-sm",
+                                                method === 'email'
+                                                    ? "border-blue-500 bg-blue-50 text-blue-700"
+                                                    : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                                            )}
+                                        >
+                                            <Mail className="w-4 h-4" />
+                                            Email
+                                        </button>
                                     </div>
                                 </div>
 
