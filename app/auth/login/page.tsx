@@ -30,9 +30,6 @@ function LoginContent() {
         }
     }, [searchParams]);
 
-    const handleBack = () => {
-        router.push('/');
-    };
 
     const getLocation = async (): Promise<any> => {
         return new Promise((resolve) => {
@@ -210,18 +207,11 @@ function LoginContent() {
                                 </div>
                             </div>
 
-                            <div className="flex items-center justify-between pt-2">
-                                <button
-                                    type="button"
-                                    onClick={handleBack}
-                                    className="text-slate-500 hover:text-slate-800 text-sm font-medium transition-colors flex items-center gap-1 pl-1 cursor-pointer"
-                                >
-                                    <ChevronLeft className="w-4 h-4" /> Atrás
-                                </button>
+                            <div className="flex justify-end pt-2">
                                 <button
                                     type="submit"
                                     disabled={isAnimating}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 px-6 rounded-xl shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 px-6 rounded-xl shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
                                 >
                                     {isAnimating ? "Verificando..." : "Acceder"}
                                 </button>

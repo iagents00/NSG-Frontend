@@ -51,9 +51,9 @@ export default function LandingPage() {
                             <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-base font-medium text-slate-600 hover:text-navy-950 py-1">Funcionalidades</a>
                             <a href="#about" onClick={() => setMobileMenuOpen(false)} className="text-base font-medium text-slate-600 hover:text-navy-950 py-1">Nosotros</a>
                             <Link href="/privacy" className="text-base font-medium text-slate-600 hover:text-navy-950 py-1">Privacidad</Link>
-                            
+
                             <div className="h-[1px] bg-slate-100 w-full my-2"></div>
-                            
+
                             <div className="flex flex-col gap-3">
                                 <Link href="/auth/login?role=user" className="w-full text-center px-5 py-3 text-sm font-bold text-slate-600 hover:text-navy-950 hover:bg-slate-50 rounded-full transition-all duration-300 border border-transparent hover:border-slate-200">
                                     Iniciar Sesión
@@ -136,17 +136,17 @@ export default function LandingPage() {
                         {/* NSG Clarity */}
                         <div className="group relative bg-white p-12 rounded-[2.5rem] border border-slate-100 shadow-[0_2px_20px_rgb(0,0,0,0.02)] hover:shadow-[0_20px_50px_rgb(0,0,0,0.06)] transition-all duration-700 hover:-translate-y-1 overflow-hidden flex flex-col justify-between h-full">
                             <div className="absolute inset-0 bg-gradient-to-b from-slate-50/0 via-slate-50/0 to-blue-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                            
+
                             <div className="relative z-10">
                                 <h3 className="text-4xl sm:text-5xl font-display font-medium text-slate-900 mb-6 tracking-tighter group-hover:text-blue-600 transition-colors duration-500">
                                     Clarity.
                                 </h3>
-                                
+
                                 <p className="text-lg text-slate-500 leading-relaxed font-normal max-w-sm">
                                     Protocolos diarios alineados con tu estrategia. Ejecución precisa, cada día.
                                 </p>
                             </div>
-                            
+
                             <div className="relative z-10 mt-12 flex items-center gap-3">
                                 <div className="h-[1px] w-8 bg-slate-200 group-hover:bg-blue-300 transition-colors duration-500"></div>
                                 <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest group-hover:text-blue-500 transition-colors duration-500">Ejecución</span>
@@ -156,17 +156,17 @@ export default function LandingPage() {
                         {/* NSG Horizon */}
                         <div className="group relative bg-white p-12 rounded-[2.5rem] border border-slate-100 shadow-[0_2px_20px_rgb(0,0,0,0.02)] hover:shadow-[0_20px_50px_rgb(0,0,0,0.06)] transition-all duration-700 hover:-translate-y-1 overflow-hidden flex flex-col justify-between h-full">
                             <div className="absolute inset-0 bg-gradient-to-b from-slate-50/0 via-slate-50/0 to-cyan-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                            
+
                             <div className="relative z-10">
                                 <h3 className="text-4xl sm:text-5xl font-display font-medium text-slate-900 mb-6 tracking-tighter group-hover:text-cyan-600 transition-colors duration-500">
                                     Horizon.
                                 </h3>
-                                
+
                                 <p className="text-lg text-slate-500 leading-relaxed font-normal max-w-sm">
                                     Tu visión a futuro, estructurada por IA. Convierte conversaciones en planes.
                                 </p>
                             </div>
-                            
+
                             <div className="relative z-10 mt-12 flex items-center gap-3">
                                 <div className="h-[1px] w-8 bg-slate-200 group-hover:bg-cyan-300 transition-colors duration-500"></div>
                                 <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest group-hover:text-cyan-500 transition-colors duration-500">Planificación</span>
@@ -176,17 +176,17 @@ export default function LandingPage() {
                         {/* NSG Intelligence */}
                         <div className="group relative bg-white p-12 rounded-[2.5rem] border border-slate-100 shadow-[0_2px_20px_rgb(0,0,0,0.02)] hover:shadow-[0_20px_50px_rgb(0,0,0,0.06)] transition-all duration-700 hover:-translate-y-1 overflow-hidden flex flex-col justify-between h-full">
                             <div className="absolute inset-0 bg-gradient-to-b from-slate-50/0 via-slate-50/0 to-slate-100/50 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                            
+
                             <div className="relative z-10">
                                 <h3 className="text-4xl sm:text-5xl font-display font-medium text-slate-900 mb-6 tracking-tighter group-hover:text-slate-700 transition-colors duration-500">
                                     Intelligence.
                                 </h3>
-                                
+
                                 <p className="text-lg text-slate-500 leading-relaxed font-normal max-w-sm">
                                     Base de conocimiento activa 24/7. Respuestas estratégicas al instante.
                                 </p>
                             </div>
-                            
+
                             <div className="relative z-10 mt-12 flex items-center gap-3">
                                 <div className="h-[1px] w-8 bg-slate-200 group-hover:bg-slate-400 transition-colors duration-500"></div>
                                 <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest group-hover:text-slate-600 transition-colors duration-500">Conocimiento</span>
@@ -199,7 +199,7 @@ export default function LandingPage() {
             {/* ONBOARDING STEPS */}
             <section className="py-24 px-4 bg-white border-y border-slate-100">
                 <div className="max-w-6xl mx-auto">
-                    <div className="mb-20 max-w-2xl text-center md:text-left">
+                    <div className="mb-20 max-w-2xl mx-auto text-center md:text-left md:mx-0">
                         <h2 className="text-3xl sm:text-4xl font-display font-bold text-navy-950 tracking-tight mb-4">
                             Protocolo de Iniciación
                         </h2>
@@ -213,7 +213,7 @@ export default function LandingPage() {
                         <div className="hidden md:block absolute top-10 left-0 w-full h-[2px] bg-slate-100 z-0"></div>
 
                         {/* Step 1 */}
-                        <div className="relative z-10 group">
+                        <div className="relative z-10 group text-center md:text-left flex flex-col items-center md:items-start">
                             <div className="w-20 h-20 bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-center text-3xl font-bold text-navy-950 mb-8 shadow-sm group-hover:border-blue-600 group-hover:text-blue-600 transition-all duration-300">
                                 01
                             </div>
@@ -229,14 +229,14 @@ export default function LandingPage() {
                         </div>
 
                         {/* Step 2 */}
-                        <div className="relative z-10 group">
+                        <div className="relative z-10 group text-center md:text-left flex flex-col items-center md:items-start">
                             <div className="w-20 h-20 bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-center text-3xl font-bold text-navy-950 mb-8 shadow-sm group-hover:border-blue-600 group-hover:text-blue-600 transition-all duration-300">
                                 02
                             </div>
                             <h3 className="text-xl font-bold text-navy-950 mb-3">
                                 Conecta Telegram
                             </h3>
-                            <div className="text-slate-500 leading-relaxed mb-6 font-medium text-sm space-y-2">
+                            <div className="text-slate-500 leading-relaxed mb-6 font-medium text-sm space-y-2 w-full">
                                 <p>Una vez dentro de la plataforma selecciona:</p>
                                 <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 text-xs font-mono text-slate-600">
                                     Ajustes &gt; Integraciones &gt; Telegram: Conectar
@@ -245,7 +245,7 @@ export default function LandingPage() {
                         </div>
 
                         {/* Step 3 */}
-                        <div className="relative z-10 group">
+                        <div className="relative z-10 group text-center md:text-left flex flex-col items-center md:items-start">
                             <div className="w-20 h-20 bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-center text-3xl font-bold text-navy-950 mb-8 shadow-sm group-hover:border-blue-600 group-hover:text-blue-600 transition-all duration-300">
                                 03
                             </div>
@@ -280,20 +280,20 @@ export default function LandingPage() {
 
                     <div className="grid grid-cols-3 gap-8 border-t border-slate-200 pt-12">
                         <div className="relative">
-                            <AnimatedCounter 
-                                end={1000} 
-                                suffix="+" 
-                                className="text-4xl sm:text-5xl font-display font-bold text-navy-950 mb-2 tracking-tight" 
+                            <AnimatedCounter
+                                end={1000}
+                                suffix="+"
+                                className="text-4xl sm:text-5xl font-display font-bold text-navy-950 mb-2 tracking-tight"
                             />
                             <div className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Conversaciones</div>
                             {/* Divider */}
                             <div className="absolute top-2 right-0 h-12 w-[1px] bg-slate-200 hidden md:block"></div>
                         </div>
                         <div className="relative">
-                            <AnimatedCounter 
-                                end={100} 
-                                suffix="+" 
-                                className="text-4xl sm:text-5xl font-display font-bold text-navy-950 mb-2 tracking-tight" 
+                            <AnimatedCounter
+                                end={100}
+                                suffix="+"
+                                className="text-4xl sm:text-5xl font-display font-bold text-navy-950 mb-2 tracking-tight"
                             />
                             <div className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Reseñas</div>
                             {/* Divider */}
@@ -320,11 +320,11 @@ export default function LandingPage() {
                     <h2 className="text-5xl sm:text-7xl font-display font-medium text-white mb-10 tracking-tight leading-tight">
                         ¿Listo para Transformar<br />tu Estrategia?
                     </h2>
-                    
+
                     <p className="text-xl sm:text-2xl text-slate-400 font-light leading-relaxed mb-16 max-w-2xl mx-auto">
                         Únete a los ejecutivos que ya están aprovechando la inteligencia estratégica impulsada por IA.
                     </p>
-                    
+
                     <Link href="/auth/register" className="inline-flex items-center gap-3 px-10 py-5 bg-white text-navy-950 text-lg font-bold rounded-full hover:bg-slate-50 transition-all duration-300 shadow-[0_0_30px_-5px_rgba(255,255,255,0.15)] hover:shadow-[0_0_50px_-5px_rgba(255,255,255,0.3)] hover:-translate-y-1 group">
                         Comienza tu Prueba
                         <ArrowRight className="w-5 h-5 text-blue-600 group-hover:translate-x-1 transition-transform" />
@@ -366,7 +366,7 @@ export default function LandingPage() {
                     <div className="pt-8 border-t border-navy-900 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
                         <p className="text-xs text-slate-500 font-light">© 2024 NSG Intelligence. Todos los derechos reservados.</p>
                         <div className="flex gap-6">
-                           {/* Socials could go here if requested, leaving empty for now to maintain clean look */}
+                            {/* Socials could go here if requested, leaving empty for now to maintain clean look */}
                         </div>
                     </div>
                 </div>
