@@ -105,10 +105,15 @@ export default function UserManagement() {
                 `Rol actualizado exitosamente a ${roleConfig.label}`,
                 "success",
             );
-        } catch (error) {
+        } catch (error: unknown) {
             console.error("Error updating role:", error);
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const message = (error as any)?.response?.data?.message || "Error al actualizar el rol";
+            let message = "Error al actualizar el rol";
+            if (error && typeof error === "object" && "response" in error) {
+                const axiosError = error as {
+                    response: { data: { message?: string } };
+                };
+                message = axiosError.response.data.message || message;
+            }
             showToast(message, "error");
         } finally {
             setUpdatingUserId(null);
@@ -238,19 +243,19 @@ export default function UserManagement() {
                         <table className="w-full">
                             <thead className="bg-slate-50 border-b border-slate-200">
                                 <tr>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
+                                    <th className="px-3 xs:px-6 py-3 sm:py-4 text-left text-[11px] sm:text-xs font-bold text-slate-600 uppercase tracking-wider">
                                         Usuario
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
+                                    <th className="px-2 xs:px-6 py-3 sm:py-4 text-left text-[11px] sm:text-xs font-bold text-slate-600 uppercase tracking-wider">
                                         Email
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
+                                    <th className="hidden md:table-cell px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
                                         Rol Actual
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
+                                    <th className="hidden lg:table-cell px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
                                         Fecha Registro
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
+                                    <th className="px-2 xs:px-6 py-3 sm:py-4 text-right sm:text-left text-[11px] sm:text-xs font-bold text-slate-600 uppercase tracking-wider">
                                         Acciones
                                     </th>
                                 </tr>
@@ -280,28 +285,28 @@ export default function UserManagement() {
                                         return (
                                             <tr
                                                 key={user._id}
-                                                className="hover:bg-slate-50 transition-colors"
+                                                className="hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-0"
                                             >
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                                <td className="px-1 xs:px-2 py-2 sm:py-4">
+                                                    <div className="flex items-center gap-2 xs:gap-3">
+                                                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-linear-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-[10px] sm:text-sm shrink-0">
                                                             {user.username
                                                                 .substring(0, 2)
                                                                 .toUpperCase()}
                                                         </div>
-                                                        <div>
-                                                            <p className="font-semibold text-navy-900">
+                                                        <div className="min-w-0">
+                                                            <p className="font-bold text-navy-900 text-xs sm:text-sm md:text-base truncate">
                                                                 {user.username}
                                                             </p>
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4">
-                                                    <p className="text-sm text-slate-600">
+                                                <td className="px-1 xs:px-2 py-2 sm:py-4">
+                                                    <p className="text-[9px] xs:text-[10px] sm:text-xs md:text-sm text-slate-500 truncate max-w-[80px] xs:max-w-[120px] sm:max-w-none">
                                                         {user.email}
                                                     </p>
                                                 </td>
-                                                <td className="px-6 py-4">
+                                                <td className="hidden md:table-cell px-6 py-4">
                                                     <div className="flex items-center gap-2">
                                                         <div
                                                             className={clsx(
@@ -321,7 +326,7 @@ export default function UserManagement() {
                                                         </span>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4">
+                                                <td className="hidden lg:table-cell px-6 py-4">
                                                     <p className="text-sm text-slate-600">
                                                         {new Date(
                                                             user.createdAt,
@@ -335,7 +340,7 @@ export default function UserManagement() {
                                                         )}
                                                     </p>
                                                 </td>
-                                                <td className="px-6 py-4">
+                                                <td className="px-2 xs:px-4 py-2 sm:py-4 text-right sm:text-left">
                                                     <select
                                                         value={user.role}
                                                         onChange={(e) =>
@@ -347,7 +352,7 @@ export default function UserManagement() {
                                                         }
                                                         disabled={isUpdating}
                                                         className={clsx(
-                                                            "bg-white text-navy-900 border border-slate-300 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all",
+                                                            "bg-slate-50 text-navy-950 border border-slate-200 rounded-lg px-2 py-1 sm:px-3 sm:py-2 text-[10px] xs:text-[11px] sm:text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all w-auto min-w-[85px] xs:min-w-[100px] sm:min-w-0 cursor-pointer",
                                                             isUpdating &&
                                                                 "opacity-50 cursor-not-allowed",
                                                         )}
@@ -383,10 +388,10 @@ export default function UserManagement() {
                     {/* Pagination Controls */}
                     {!loading && filteredUsers.length > 0 && (
                         <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
-                            <div className="text-sm text-slate-600">
-                                Mostrando {startIndex + 1}-
+                            <div className="text-[10px] sm:text-sm text-slate-500 font-medium">
+                                {startIndex + 1}-
                                 {Math.min(endIndex, filteredUsers.length)} de{" "}
-                                {filteredUsers.length} usuarios
+                                {filteredUsers.length}
                             </div>
                             <div className="flex items-center gap-2">
                                 <button
@@ -396,10 +401,12 @@ export default function UserManagement() {
                                         )
                                     }
                                     disabled={currentPage === 1}
-                                    className="px-3 py-2 border border-slate-300 rounded-lg text-sm font-medium hover:bg-slate-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                                    className="px-2 py-1.5 sm:px-3 sm:py-2 border border-slate-300 rounded-lg text-xs sm:text-sm font-medium hover:bg-slate-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
                                 >
                                     <ChevronLeft className="w-4 h-4" />
-                                    Anterior
+                                    <span className="hidden xs:inline">
+                                        Anterior
+                                    </span>
                                 </button>
                                 <div className="flex items-center gap-1">
                                     {Array.from(
@@ -410,9 +417,9 @@ export default function UserManagement() {
                                             key={page}
                                             onClick={() => setCurrentPage(page)}
                                             className={clsx(
-                                                "px-3 py-2 rounded-lg text-sm font-medium transition-all",
+                                                "px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all",
                                                 currentPage === page
-                                                    ? "bg-blue-600 text-white"
+                                                    ? "bg-blue-600 text-white shadow-sm"
                                                     : "border border-slate-300 hover:bg-slate-50",
                                             )}
                                         >
@@ -427,9 +434,11 @@ export default function UserManagement() {
                                         )
                                     }
                                     disabled={currentPage === totalPages}
-                                    className="px-3 py-2 border border-slate-300 rounded-lg text-sm font-medium hover:bg-slate-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                                    className="px-2 py-1.5 sm:px-3 sm:py-2 border border-slate-300 rounded-lg text-xs sm:text-sm font-medium hover:bg-slate-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
                                 >
-                                    Siguiente
+                                    <span className="hidden xs:inline">
+                                        Siguiente
+                                    </span>
                                     <ChevronRight className="w-4 h-4" />
                                 </button>
                             </div>
