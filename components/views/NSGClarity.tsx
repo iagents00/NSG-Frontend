@@ -3,22 +3,16 @@
 import { useState, useEffect, useRef } from "react";
 import {
     Target,
-    MessageCircle,
     ArrowRight,
     CheckCircle,
     Circle,
     Lock,
     RefreshCw,
-    Bell,
     Trophy,
-    Calendar,
-    LogOut,
     BarChart3,
     TrendingUp,
     Activity,
     Flame,
-    Clock,
-    ChevronRight,
 } from "lucide-react";
 import clsx from "clsx";
 import { useToast } from "@/components/ui/ToastProvider";
@@ -28,7 +22,6 @@ import { authService } from "@/lib/auth";
 import api from "@/lib/api";
 
 // Import new metrics components
-import StreakCounter from "@/components/clarity/StreakCounter";
 import MetricsPanel from "@/components/clarity/MetricsPanel";
 import CalendarHeatmap from "@/components/clarity/CalendarHeatmap";
 import CompletionChart from "@/components/clarity/CompletionChart";
@@ -90,51 +83,88 @@ const playSound = (type: "check" | "success") => {
 };
 
 // --- SUB-COMPONENTS ---
-function CompletionProgress({ progress }: { progress: number }) {
-    return (
-        <div className="w-full mb-4 animate-fade-in group">
-            <div className="flex justify-between items-end mb-2">
-                <label className="text-sm font-bold text-navy-900 group-hover:text-blue-600 transition-colors">
-                    Progreso Diario
-                </label>
-                <span
-                    className={clsx(
-                        "text-xs font-bold px-3 py-1 rounded-full transition-all duration-500",
-                        progress === 100
-                            ? "bg-emerald-100 text-emerald-600 scale-110"
-                            : "bg-blue-50 text-blue-600",
-                    )}
-                >
-                    {Math.round(progress)}%
-                </span>
-            </div>
-            <div className="h-4 bg-slate-100/80 rounded-full overflow-hidden shadow-inner relative border border-slate-200/50 backdrop-blur-sm">
-                <div
-                    className={clsx(
-                        "h-full transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] relative overflow-hidden",
-                        progress === 100 ? "bg-emerald-500" : "bg-blue-600",
-                    )}
-                    style={{ width: `${progress}%` }}
-                />
-            </div>
-        </div>
-    );
+// --- Types ---
+interface Strategy {
+    _id: string;
+    meta_detectada: string;
+    accion_1: string;
+    accion_2: string;
+    accion_3: string;
+}
+
+interface MetricsData {
+    totalCompletions: number;
+    byProtocol: {
+        morning_clarity: number;
+        power_check: number;
+        next_day_planning: number;
+    };
+    completionRate: number;
+    completion_rate?: number; // Map both to avoid breakages
+    activeDays: number;
+    perfectDays: number;
+    period: "week" | "month";
+}
+
+interface ActionStyle {
+    active: {
+        bg: string;
+        border: string;
+        text: string;
+        accent: string;
+        dot: string;
+        iconBg: string;
+        bar: string;
+    };
+    inactive: {
+        border: string;
+        dotBorder: string;
+    };
+}
+
+interface StrategyStyle {
+    bg: string;
+    border: string;
+    text: string;
+    accent: string;
+    numBg: string;
+}
+
+interface StreakData {
+    current: number;
+    longest: number;
+    last_completion_date: string;
+}
+
+interface HistoryItem {
+    date: string;
+    morning_clarity: number;
+    power_check: number;
+    next_day_planning: number;
+}
+
+interface TimelineItemProps {
+    id: string;
+    time: string;
+    title: string;
+    color: "emerald" | "blue" | "indigo";
+    desc: string;
+    locked: boolean;
+    isChecked: boolean;
+    onToggle: (id: string) => void;
 }
 
 function TimelineItem({
     id,
     time,
     title,
-    status,
     color,
     desc,
     locked,
     isChecked,
     onToggle,
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-}: any) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const styles: any = {
+}: TimelineItemProps) {
+    const styles: Record<string, ActionStyle> = {
         emerald: {
             active: {
                 bg: "bg-emerald-50/50",
@@ -300,7 +330,7 @@ function TimelineItem({
     );
 }
 
-function StrategyCard({ strategy }: { strategy: any }) {
+function StrategyCard({ strategy }: { strategy: Strategy }) {
     const parseAction = (text: string, index: number) => {
         const keywords = [
             { kw: "Quick Win", label: "Ejecución Inmediata", color: "emerald" },
@@ -356,6 +386,7 @@ function StrategyCard({ strategy }: { strategy: any }) {
                         const { title, label, description, color } =
                             parseAction(action, i);
 
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         const styles: any = {
                             emerald: {
                                 bg: "bg-emerald-50/40",
@@ -379,7 +410,8 @@ function StrategyCard({ strategy }: { strategy: any }) {
                                 numBg: "bg-indigo-500",
                             },
                         };
-                        const style = styles[color] || styles.blue;
+                        const style = (styles[color] ||
+                            styles.blue) as StrategyStyle;
 
                         return (
                             <div
@@ -430,67 +462,111 @@ function StrategyCard({ strategy }: { strategy: any }) {
     );
 }
 
+import { useCallback } from "react";
+
 // --- MAIN COMPONENT ---
 export default function NSGClarity() {
     const { showToast } = useToast();
     const { userId } = useAppStore();
     const [isConnected, setIsConnected] = useState(false);
     const [telegramId, setTelegramId] = useState<number | null>(null);
-    const [telegramData, setTelegramData] = useState<any>(null);
+    const [telegramData, setTelegramData] = useState<{
+        username?: string;
+    } | null>(null);
     const [isLoadingTelegramData, setIsLoadingTelegramData] = useState(false);
-    const [strategies, setStrategies] = useState<any[]>([]);
+    const [strategies, setStrategies] = useState<Strategy[]>([]);
     const [isLoadingStrategies, setIsLoadingStrategies] = useState(false);
 
     // Metrics states
-    const [streakData, setStreakData] = useState<any>(null);
-    const [metricsData, setMetricsData] = useState<any>(null);
-    const [heatmapData, setHeatmapData] = useState<any[]>([]);
-    const [chartData, setChartData] = useState<any[]>([]);
+    const [streakData, setStreakData] = useState<StreakData | null>(null);
+    const [metricsData, setMetricsData] = useState<MetricsData | null>(null);
+    const [heatmapData, setHeatmapData] = useState<any[]>([]); // eslint-disable-line @typescript-eslint/no-explicit-any
+    const [chartData, setChartData] = useState<HistoryItem[]>([]);
     const [isLoadingMetrics, setIsLoadingMetrics] = useState(false);
     const [activeTab, setActiveTab] = useState<"execution" | "analysis">(
         "execution",
     ); // Toggle for execution/metrics view
 
-    const fetchStrategies = async () => {
+    const [tasks, setTasks] = useState([
+        {
+            id: "1",
+            time: "Morning",
+            title: "Morning Clarity",
+            status: "Pendiente",
+            color: "emerald" as const,
+            desc: "Establecimiento de la intención estratégica. Sincronización con la Hoja de Alineación y blindaje de prioridades para una ejecución de alto impacto.",
+            locked: false,
+            isChecked: false,
+        },
+        {
+            id: "2",
+            time: "Noon",
+            title: "Power Check",
+            status: "Pendiente",
+            color: "blue" as const,
+            desc: "Sincronización táctica y control de flujo. Evaluación de hitos alcanzados y recalibración de energía para asegurar un cierre de jornada resolutivo.",
+            locked: false,
+            isChecked: false,
+        },
+        {
+            id: "3",
+            time: "Night",
+            title: "Next Day Planning",
+            status: "Pendiente",
+            color: "indigo" as const,
+            desc: "Arquitectura del éxito anticipado. Auditoría de resultados daily, optimización de la Hoja de Alineación y diseño proactivo de la jornada de mañana.",
+            locked: false,
+            isChecked: false,
+        },
+    ]);
+
+    const fetchStrategies = useCallback(async () => {
         setIsLoadingStrategies(true);
         try {
             const response = await api.get(`/strategies/get`);
             if (response.status === 200) {
                 setStrategies(response.data);
             }
-        } catch (e) {
+        } catch (error) {
             // For new users without strategies, this is expected - don't log as error
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            if ((e as any).response?.status === 404 || (e as any).response?.status === 401) {
+            if (
+                (error as any).response?.status === 404 || // eslint-disable-line @typescript-eslint/no-explicit-any
+                (error as any).response?.status === 401 // eslint-disable-line @typescript-eslint/no-explicit-any
+            ) {
                 console.log(
                     "[INFO] No strategies found for user (expected for new users)",
                 );
                 setStrategies([]);
             } else {
-                console.error("Error fetching strategies:", e);
+                console.error("Error fetching strategies:", error);
             }
         } finally {
             setIsLoadingStrategies(false);
         }
-    };
+    }, [setStrategies, setIsLoadingStrategies]);
 
-    const syncObjectives = async (isManual = false) => {
-        if (!telegramId) return;
-        setIsLoadingTelegramData(true);
-        try {
-            const response = await api.get(`/telegram/user/${telegramId}`);
-            if (response.status === 200) {
-                setTelegramData(response.data);
-                if (isManual) showToast("Objetivos sincronizados", "success");
+    const syncObjectives = useCallback(
+        async (isManual = false) => {
+            if (!telegramId) return;
+            setIsLoadingTelegramData(true);
+            try {
+                const response = await api.get(`/telegram/user/${telegramId}`);
+                if (response.status === 200) {
+                    setTelegramData(response.data);
+                    if (isManual)
+                        showToast("Objetivos sincronizados", "success");
+                }
+            } catch (error) {
+                console.error("Error syncing objectives:", error);
+            } finally {
+                setIsLoadingTelegramData(false);
             }
-        } catch (e) {
-        } finally {
-            setIsLoadingTelegramData(false);
-        }
-    };
+        },
+        [telegramId, setTelegramData, setIsLoadingTelegramData, showToast],
+    );
 
     // Fetch all metrics data
-    const fetchAllMetrics = async () => {
+    const fetchAllMetrics = useCallback(async () => {
         if (!userId) return;
 
         setIsLoadingMetrics(true);
@@ -503,9 +579,9 @@ export default function NSGClarity() {
                 if (streaksResponse.status === 200) {
                     setStreakData(streaksResponse.data.streaks);
                 }
-            } catch (e) {
+            } catch (error) {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                if ((e as any).response?.status === 404) {
+                if ((error as any).response?.status === 404) {
                     console.log(
                         "[INFO] No streak data found (expected for new users)",
                     );
@@ -521,9 +597,9 @@ export default function NSGClarity() {
                 if (metricsResponse.status === 200) {
                     setMetricsData(metricsResponse.data.metrics);
                 }
-            } catch (e) {
+            } catch (error) {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                if ((e as any).response?.status === 404) {
+                if ((error as any).response?.status === 404) {
                     console.log(
                         "[INFO] No metrics data found (expected for new users)",
                     );
@@ -539,9 +615,9 @@ export default function NSGClarity() {
                 if (heatmapResponse.status === 200) {
                     setHeatmapData(heatmapResponse.data.heatmap);
                 }
-            } catch (e) {
+            } catch (error) {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                if ((e as any).response?.status === 404) {
+                if ((error as any).response?.status === 404) {
                     console.log(
                         "[INFO] No heatmap data found (expected for new users)",
                     );
@@ -564,8 +640,7 @@ export default function NSGClarity() {
                 if (historyResponse.status === 200) {
                     // Transform data for chart
                     const completions = historyResponse.data.completions;
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    const chartMap: any = {};
+                    const chartMap: Record<string, HistoryItem> = {};
 
                     // Initialize all 7 days
                     for (let i = 0; i < 7; i++) {
@@ -582,22 +657,23 @@ export default function NSGClarity() {
                     }
 
                     // Fill in completions
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    completions.forEach((c: any) => {
-                        if (chartMap[c.date]) {
-                            const protocolKey = c.protocol as
-                                | "morning_clarity"
-                                | "power_check"
-                                | "next_day_planning";
-                            chartMap[c.date][protocolKey] = 1;
-                        }
-                    });
+                    completions.forEach(
+                        (c: { date: string; protocol: string }) => {
+                            if (chartMap[c.date]) {
+                                const protocolKey = c.protocol as
+                                    | "morning_clarity"
+                                    | "power_check"
+                                    | "next_day_planning";
+                                chartMap[c.date][protocolKey] = 1;
+                            }
+                        },
+                    );
 
                     setChartData(Object.values(chartMap));
                 }
-            } catch (e) {
+            } catch (error) {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                if ((e as any).response?.status === 404) {
+                if ((error as any).response?.status === 404) {
                     console.log(
                         "[INFO] No history data found (expected for new users)",
                     );
@@ -609,10 +685,17 @@ export default function NSGClarity() {
         } finally {
             setIsLoadingMetrics(false);
         }
-    };
+    }, [
+        userId,
+        setStreakData,
+        setMetricsData,
+        setHeatmapData,
+        setChartData,
+        setIsLoadingMetrics,
+    ]);
 
     // Check today's completions
-    const fetchTodayCompletions = async () => {
+    const fetchTodayCompletions = useCallback(async () => {
         if (!userId) return;
 
         try {
@@ -643,7 +726,7 @@ export default function NSGClarity() {
                 console.error("Error fetching today completions:", error);
             }
         }
-    };
+    }, [userId, setTasks]);
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -659,25 +742,32 @@ export default function NSGClarity() {
                         fetchAllMetrics(); // Load metrics data
                     }
                 }
-            } catch (e) {}
+            } catch (error) {
+                console.error("Error fetching user session:", error);
+            }
         };
         fetchUser();
         window.addEventListener("focus", fetchUser);
         return () => window.removeEventListener("focus", fetchUser);
-    }, []);
+    }, [fetchAllMetrics, fetchStrategies, fetchTodayCompletions]);
 
     useEffect(() => {
         if (telegramId) syncObjectives();
         // No llamamos a fetchStrategies aquí porque ya se llama en el useEffect de fetchUser
         // o al montar el componente si ya hay una sesión.
-    }, [telegramId]);
+    }, [telegramId, syncObjectives]);
 
     useEffect(() => {
         const checkGoogle = async () => {
             try {
                 const res = await api.get("/google/calendar/events");
                 if (res.status === 200) setIsConnected(true);
-            } catch {}
+            } catch (error) {
+                console.error(
+                    "Error checking Google Calendar association:",
+                    error,
+                );
+            }
         };
         checkGoogle();
     }, []);
@@ -715,39 +805,6 @@ export default function NSGClarity() {
             }
         }
     };
-
-    const [tasks, setTasks] = useState([
-        {
-            id: "1",
-            time: "Morning",
-            title: "Morning Clarity",
-            status: "Pendiente",
-            color: "emerald",
-            desc: "Establecimiento de la intención estratégica. Sincronización con la Hoja de Alineación y blindaje de prioridades para una ejecución de alto impacto.",
-            locked: false,
-            isChecked: false,
-        },
-        {
-            id: "2",
-            time: "Noon",
-            title: "Power Check",
-            status: "Pendiente",
-            color: "blue",
-            desc: "Sincronización táctica y control de flujo. Evaluación de hitos alcanzados y recalibración de energía para asegurar un cierre de jornada resolutivo.",
-            locked: false,
-            isChecked: false,
-        },
-        {
-            id: "3",
-            time: "Night",
-            title: "Next Day Planning",
-            status: "Pendiente",
-            color: "indigo",
-            desc: "Arquitectura del éxito anticipado. Auditoría de resultados daily, optimización de la Hoja de Alineación y diseño proactivo de la jornada de mañana.",
-            locked: false,
-            isChecked: false,
-        },
-    ]);
 
     const progress =
         (tasks.filter((t) => t.isChecked).length / tasks.length) * 100;
@@ -853,12 +910,12 @@ export default function NSGClarity() {
             {/* 1. HERO BANNER */}
             <div
                 onClick={() => syncObjectives(true)}
-                className="relative overflow-hidden bg-gradient-to-r from-navy-950 via-navy-900 to-navy-950 px-5 py-6 sm:px-8 sm:py-6 rounded-3xl border border-navy-800/50 shadow-xl cursor-pointer group transition-all duration-700 hover:shadow-2xl mb-5 shrink-0"
+                className="relative overflow-hidden bg-linear-to-r from-navy-950 via-navy-900 to-navy-950 px-5 py-6 sm:px-8 sm:py-6 rounded-3xl border border-navy-800/50 shadow-xl cursor-pointer group transition-all duration-700 hover:shadow-2xl mb-5 shrink-0"
                 title="Clic para sincronizar objetivos"
             >
                 <div className="relative z-10">
                     <h2 className="font-display font-bold text-2xl lg:text-3xl tracking-tight mb-2">
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
+                        <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-emerald-400">
                             Claridad y Eficiencia con IA
                         </span>
                     </h2>
@@ -1115,7 +1172,13 @@ export default function NSGClarity() {
                                 {tasks.map((t) => (
                                     <TimelineItem
                                         key={t.id}
-                                        {...t}
+                                        id={t.id}
+                                        time={t.time}
+                                        title={t.title}
+                                        color={t.color}
+                                        desc={t.desc}
+                                        locked={t.locked}
+                                        isChecked={t.isChecked}
                                         onToggle={handleTaskToggle}
                                     />
                                 ))}
@@ -1190,7 +1253,7 @@ export default function NSGClarity() {
                 <div className="space-y-4 xs:space-y-6 mb-6 xs:mb-8 animate-fade-in">
                     <div className="bg-white/50 backdrop-blur-sm p-5 sm:p-6 rounded-[2.5rem] border border-slate-200/60 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                            <div className="w-12 h-12 bg-linear-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
                                 <TrendingUp className="w-6 h-6 text-white" />
                             </div>
                             <div>
@@ -1207,7 +1270,7 @@ export default function NSGClarity() {
                         {/* Strategic Stats Micro-Cards */}
                         <div className="flex items-center gap-2 xs:gap-3">
                             {/* Streak Mini-Card */}
-                            <div className="flex-1 sm:flex-none flex items-center gap-3 px-4 py-2.5 bg-gradient-to-br from-orange-500/10 to-red-500/5 rounded-2xl border border-orange-200/50 shadow-sm group/streak transition-all hover:shadow-md hover:scale-[1.02]">
+                            <div className="flex-1 sm:flex-none flex items-center gap-3 px-4 py-2.5 bg-linear-to-br from-orange-500/10 to-red-500/5 rounded-2xl border border-orange-200/50 shadow-sm group/streak transition-all hover:shadow-md hover:scale-[1.02]">
                                 <div className="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/20 group-hover/streak:animate-pulse">
                                     <Flame className="w-4 h-4 text-white" />
                                 </div>
@@ -1222,7 +1285,7 @@ export default function NSGClarity() {
                             </div>
 
                             {/* Efficiency Mini-Card */}
-                            <div className="flex-1 sm:flex-none flex items-center gap-3 px-4 py-2.5 bg-gradient-to-br from-blue-500/10 to-indigo-500/5 rounded-2xl border border-blue-200/50 shadow-sm group/eff transition-all hover:shadow-md hover:scale-[1.02]">
+                            <div className="flex-1 sm:flex-none flex items-center gap-3 px-4 py-2.5 bg-linear-to-br from-blue-500/10 to-indigo-500/5 rounded-2xl border border-blue-200/50 shadow-sm group/eff transition-all hover:shadow-md hover:scale-[1.02]">
                                 <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/20">
                                     <TrendingUp className="w-4 h-4 text-white" />
                                 </div>
@@ -1231,7 +1294,10 @@ export default function NSGClarity() {
                                         Eficiencia Global
                                     </p>
                                     <p className="text-sm font-bold text-navy-950">
-                                        {metricsData?.completion_rate || 0}%
+                                        {metricsData?.completion_rate ||
+                                            metricsData?.completionRate ||
+                                            0}
+                                        %
                                     </p>
                                 </div>
                             </div>

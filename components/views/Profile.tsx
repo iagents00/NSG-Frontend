@@ -4,26 +4,18 @@ import React, { useState } from "react";
 import {
     User,
     Mail,
-    Key,
-    Shield,
     Edit2,
     Camera,
     CheckCircle2,
     X,
-    Loader2,
-    Calendar as CalendarIcon,
-    ExternalLink,
-    Upload,
     FileUp,
-    Download,
-    Trash2,
-    Lock,
+    Shield,
+    Key,
 } from "lucide-react";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useAppStore } from "@/store/useAppStore";
 import { authService } from "@/lib/auth";
 import api from "@/lib/api";
-import clsx from "clsx";
 
 export default function Profile() {
     const { showToast } = useToast();
@@ -48,10 +40,6 @@ export default function Profile() {
     const [isUpdatingUsername, setIsUpdatingUsername] = useState(false);
     const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
-    // Document upload state
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [isUploading, setIsUploading] = useState(false);
-
     React.useEffect(() => {
         const fetchUser = async () => {
             try {
@@ -65,8 +53,8 @@ export default function Profile() {
                         setTelegramId(data.user.telegram_id);
                     }
                 }
-            } catch (error) {
-                // Silent fail
+            } catch (err) {
+                console.error("Error fetching user session:", err);
             }
         };
         fetchUser();
@@ -89,12 +77,9 @@ export default function Profile() {
                 setNewUsername("");
                 showToast("Nombre de usuario actualizado", "success");
             }
-        } catch (error: any) {
-            showToast(
-                error.response?.data?.message ||
-                    "Error al actualizar nombre de usuario",
-                "error",
-            );
+        } catch (error) {
+            console.error(error);
+            showToast("Error al actualizar nombre de usuario", "error");
         } finally {
             setIsUpdatingUsername(false);
         }
@@ -133,99 +118,11 @@ export default function Profile() {
                 setConfirmPassword("");
                 showToast("Contraseña actualizada correctamente", "success");
             }
-        } catch (error: any) {
-            showToast(
-                error.response?.data?.message || "Error al cambiar contraseña",
-                "error",
-            );
+        } catch (error) {
+            console.error(error);
+            showToast("Error al cambiar contraseña", "error");
         } finally {
             setIsUpdatingPassword(false);
-        }
-    };
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            if (file.type !== "application/pdf") {
-                showToast("Solo se permiten archivos PDF", "error");
-                return;
-            }
-            if (file.size > 10 * 1024 * 1024) {
-                // 10MB
-                showToast("El archivo no puede superar 10MB", "error");
-                return;
-            }
-            setSelectedFile(file);
-        }
-    };
-
-    const handleUploadDocument = async () => {
-        if (!selectedFile) {
-            showToast("Por favor selecciona un archivo", "error");
-            return;
-        }
-
-        setIsUploading(true);
-        try {
-            const formData = new FormData();
-            formData.append("document", selectedFile);
-
-            await api.post("/documents/upload", formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
-
-            showToast("Documento subido exitosamente", "success");
-            setSelectedFile(null);
-            // Reset file input
-            const fileInput = document.getElementById(
-                "file-upload",
-            ) as HTMLInputElement;
-            if (fileInput) fileInput.value = "";
-        } catch (error: any) {
-            showToast(
-                error.response?.data?.message || "Error al subir documento",
-                "error",
-            );
-        } finally {
-            setIsUploading(false);
-        }
-    };
-
-    const handleExportData = () => {
-        const data = {
-            username,
-            email,
-            role,
-            userId,
-            telegramId,
-            exportDate: new Date().toISOString(),
-        };
-
-        const blob = new Blob([JSON.stringify(data, null, 2)], {
-            type: "application/json",
-        });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `nsg-profile-${username || "user"}-${Date.now()}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-
-        showToast("Datos exportados exitosamente", "success");
-    };
-
-    const handlePurgeCache = () => {
-        if (
-            confirm(
-                "¿Estás seguro de que quieres limpiar el caché local? Esta acción no se puede deshacer.",
-            )
-        ) {
-            localStorage.clear();
-            sessionStorage.clear();
-            showToast("Caché local purgado exitosamente", "success");
-            setTimeout(() => window.location.reload(), 1500);
         }
     };
 
@@ -253,10 +150,9 @@ export default function Profile() {
             <div className="bg-white p-5 sm:p-8 rounded-2xl xs:rounded-3xl shadow-card border border-slate-200">
                 {/* Avatar Section */}
                 <div className="flex flex-col sm:flex-row items-center gap-5 xs:gap-6 sm:gap-8 mb-6 xs:mb-8 sm:mb-10 p-4 xs:p-5 sm:p-6 bg-slate-50/50 rounded-2xl xs:rounded-3xl border border-slate-100 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-48 xs:w-64 h-48 xs:h-64 bg-blue-100/30 rounded-full blur-3xl -mr-24 xs:-mr-32 -mt-24 xs:-mt-32 opacity-60"></div>
-
+                    <div className="absolute top-0 right-0 w-48 h-48 bg-blue-100/30 rounded-full blur-3xl -mr-24 -mt-24 opacity-60"></div>
                     <div className="relative">
-                        <div className="w-24 h-24 xs:w-28 xs:h-28 sm:w-32 sm:h-32 bg-linear-to-br from-blue-600 to-indigo-700 rounded-full flex items-center justify-center text-white font-bold text-4xl xs:text-5xl shadow-xl shadow-blue-200 relative overflow-hidden">
+                        <div className="w-24 h-24 xs:w-28 xs:h-28 sm:w-32 sm:h-32 bg-linear-to-br from-blue-600 to-indigo-700 rounded-full flex items-center justify-center text-white font-bold text-4xl shadow-xl shadow-blue-200 relative overflow-hidden">
                             <span className="relative z-10">
                                 {username
                                     ? username.substring(0, 2).toUpperCase()
@@ -267,43 +163,33 @@ export default function Profile() {
                             onClick={() =>
                                 showToast("Funcionalidad en desarrollo", "info")
                             }
-                            className="absolute -bottom-1 -right-1 xs:-bottom-2 xs:-right-2 bg-white p-2 xs:p-3 rounded-full shadow-lg border border-slate-200 hover:bg-blue-50 transition cursor-pointer group/btn min-w-[40px] min-h-[40px] flex items-center justify-center"
+                            className="absolute -bottom-1 -right-1 bg-white p-2 rounded-full shadow-lg border border-slate-200 hover:bg-blue-50 transition cursor-pointer min-w-[40px] min-h-[40px] flex items-center justify-center"
                         >
-                            <Camera className="w-3.5 h-3.5 xs:w-4 xs:h-4 text-slate-600 group-hover/btn:text-blue-600" />
+                            <Camera className="w-3.5 h-3.5 text-slate-600" />
                         </button>
-                        <div className="absolute -bottom-1 -left-1 xs:-bottom-2 xs:-left-2 bg-white p-1.5 xs:p-2 rounded-full shadow-lg border border-slate-100">
-                            <div className="bg-emerald-500 w-4 h-4 xs:w-5 xs:h-5 rounded-full border-2 border-white animate-pulse"></div>
-                        </div>
                     </div>
-
                     <div className="text-center sm:text-left relative z-10 flex-1">
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 xs:gap-3 mb-2 xs:mb-3">
-                            <h3 className="font-bold text-2xl xs:text-3xl text-navy-950">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+                            <h3 className="font-bold text-2xl text-navy-950">
                                 {username || "Usuario Activo"}
                             </h3>
-                            <span className="inline-flex items-center px-2.5 xs:px-3 py-1 rounded-lg bg-emerald-100 text-emerald-700 text-[10px] xs:text-xs font-bold uppercase w-fit mx-auto sm:mx-0">
-                                <CheckCircle2 className="w-2.5 h-2.5 xs:w-3 xs:h-3 mr-1" />
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase w-fit mx-auto sm:mx-0">
+                                <CheckCircle2 className="w-2.5 h-2.5 mr-1" />
                                 Verificado
                             </span>
                         </div>
-                        <p className="text-slate-500 mb-3 xs:mb-4 text-sm xs:text-base">
+                        <p className="text-slate-500 mb-3 text-sm">
                             {email || "usuario@nsg.com"}
                         </p>
                         <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
-                            <span className="px-2.5 xs:px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-[10px] xs:text-xs font-bold uppercase">
+                            <span className="px-2.5 py-1 bg-blue-100 text-blue-700 rounded-lg text-[10px] font-bold uppercase">
                                 Role: {role || "User"}
                             </span>
-                            <span className="px-2.5 xs:px-3 py-1 bg-purple-100 text-purple-700 rounded-lg text-[10px] xs:text-xs font-bold">
+                            <span className="px-2.5 py-1 bg-purple-100 text-purple-700 rounded-lg text-[10px] font-bold">
                                 ID: {userId || "N/A"}
                             </span>
                             {telegramId && (
-                                <span className="px-2.5 xs:px-3 py-1 bg-[#0088cc]/10 text-[#0088cc] rounded-lg text-[10px] xs:text-xs font-bold flex items-center gap-1">
-                                    <svg
-                                        viewBox="0 0 24 24"
-                                        className="w-2.5 h-2.5 xs:w-3 xs:h-3 fill-current"
-                                    >
-                                        <path d="M11.944 0C5.352 0 0 5.352 0 11.944c0 6.592 5.352 11.944 11.944 11.944c6.592 0 11.944-5.352 11.944-11.944C23.888 5.352 18.536 0 11.944 0zm5.66 8.16l-1.928 9.096c-.144.644-.528.804-1.068.5l-2.936-2.164l-1.416 1.364c-.156.156-.288.288-.588.288l.212-3.04l5.524-4.992c.24-.212-.052-.332-.372-.12l-6.828 4.3l-2.948-.92c-.64-.2-.652-.64.132-.948l11.524-4.44c.532-.2.996.12.804.976z" />
-                                    </svg>
+                                <span className="px-2.5 py-1 bg-[#0088cc]/10 text-[#0088cc] rounded-lg text-[10px] font-bold flex items-center gap-1">
                                     Telegram: {telegramId}
                                 </span>
                             )}
@@ -345,107 +231,24 @@ export default function Profile() {
                 </div>
             </div>
 
-            {/* Document Upload Section - DISABLED */}
-            <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-card border border-slate-200 relative opacity-60 pointer-events-none overflow-hidden group">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2.5 bg-slate-200 rounded-2xl text-slate-400 shadow-sm shrink-0">
-                            <FileUp className="w-5 h-5" />
-                        </div>
-                        <div>
-                            <h3 className="font-display font-bold text-lg xs:text-xl text-slate-400">
-                                Carga de Documentos Estratégicos
-                            </h3>
-                            <p className="text-slate-400 text-xs sm:text-sm">
-                                Procesa reportes, PDFs y archivos de
-                                inteligencia para alimentar el sistema
-                            </p>
-                        </div>
+            {/* Coming Soon Sections */}
+            <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-card border border-slate-200 relative opacity-60 pointer-events-none">
+                <div className="flex items-center gap-3">
+                    <div className="p-2.5 bg-slate-200 rounded-2xl text-slate-400 shrink-0">
+                        <FileUp className="w-5 h-5" />
                     </div>
-
-                    <div className="shrink-0 w-fit">
-                        <span className="px-3 py-1.5 bg-blue-50 text-blue-600 border border-blue-100 rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center gap-2 shadow-sm">
-                            <Lock className="w-3 h-3" />
-                            Próximamente
-                        </span>
-                    </div>
-                </div>
-
-                <div className="space-y-4">
-                    <div className="border-2 border-dashed border-slate-200 rounded-2xl p-6 bg-slate-50/50">
-                        <input
-                            type="file"
-                            id="file-upload"
-                            accept=".pdf"
-                            onChange={handleFileChange}
-                            className="hidden"
-                            disabled
-                        />
-                        <label className="flex flex-col items-center justify-center cursor-not-allowed">
-                            <Upload className="w-12 h-12 text-slate-300 mb-3" />
-                            <p className="text-sm font-bold text-slate-400 mb-1">
-                                {selectedFile
-                                    ? selectedFile.name
-                                    : "Haz click para seleccionar un archivo"}
-                            </p>
-                            <p className="text-xs text-slate-400">
-                                Solo archivos PDF (máx. 10MB)
-                            </p>
-                        </label>
-                    </div>
-
-                    <button
-                        disabled
-                        className="w-full py-3 px-6 bg-slate-200 text-slate-400 rounded-xl font-bold cursor-not-allowed flex items-center justify-center gap-2"
-                    >
-                        <FileUp className="w-4 h-4" />
-                        Subir Documento
-                    </button>
-                </div>
-            </div>
-
-            {/* Data Management Section - DISABLED */}
-            <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-card border border-slate-200 relative opacity-60 pointer-events-none overflow-hidden group">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                    <div className="flex items-center gap-3">
-                        <div className="w-1 h-8 bg-slate-300 rounded-full shrink-0"></div>
-                        <h3 className="font-display font-bold text-lg xs:text-xl text-slate-400">
-                            Gestión de Datos
+                    <div>
+                        <h3 className="font-display font-bold text-lg text-slate-400">
+                            Carga de Documentos Estratégicos
                         </h3>
+                        <p className="text-slate-400 text-xs">
+                            Procesa reportes y PDFs (Próximamente)
+                        </p>
                     </div>
-
-                    <div className="shrink-0 w-fit">
-                        <span className="px-3 py-1.5 bg-blue-50 text-blue-600 border border-blue-100 rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center gap-2 shadow-sm">
-                            <Lock className="w-3 h-3" />
-                            Próximamente
-                        </span>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <button
-                        disabled
-                        className="flex items-center justify-center gap-3 px-6 py-4 bg-slate-100 border border-slate-200 rounded-2xl cursor-not-allowed"
-                    >
-                        <Download className="w-5 h-5 text-slate-400" />
-                        <span className="font-bold text-sm text-slate-400">
-                            Exportar Datos (JSON)
-                        </span>
-                    </button>
-
-                    <button
-                        disabled
-                        className="flex items-center justify-center gap-3 px-6 py-4 bg-red-50/50 border border-red-200 rounded-2xl cursor-not-allowed"
-                    >
-                        <Trash2 className="w-5 h-5 text-red-300" />
-                        <span className="font-bold text-sm text-red-300">
-                            Purgar Caché Local
-                        </span>
-                    </button>
                 </div>
             </div>
 
-            {/* Edit Username Modal */}
+            {/* Modals */}
             {isEditingUsername && (
                 <Modal
                     title="Editar Nombre de Usuario"
@@ -455,45 +258,28 @@ export default function Profile() {
                     }}
                 >
                     <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-bold text-slate-700 mb-2">
-                                Nuevo nombre de usuario
-                            </label>
-                            <input
-                                type="text"
-                                value={newUsername}
-                                onChange={(e) => setNewUsername(e.target.value)}
-                                className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition outline-none"
-                                placeholder="Ingresa tu nuevo nombre"
-                            />
-                        </div>
+                        <input
+                            type="text"
+                            value={newUsername}
+                            onChange={(e) => setNewUsername(e.target.value)}
+                            className="w-full px-4 py-3 rounded-xl border border-slate-300 outline-none"
+                            placeholder="Nuevo nombre"
+                        />
                         <div className="flex gap-3">
                             <button
                                 onClick={handleUpdateUsername}
                                 disabled={isUpdatingUsername}
-                                className="flex-1 py-3 px-6 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold"
                             >
-                                {isUpdatingUsername ? (
-                                    <>
-                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                        Actualizando...
-                                    </>
-                                ) : (
-                                    "Guardar Cambios"
-                                )}
-                            </button>
-                            <button
-                                onClick={() => setIsEditingUsername(false)}
-                                className="px-6 py-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition"
-                            >
-                                Cancelar
+                                {isUpdatingUsername
+                                    ? "Actualizando..."
+                                    : "Guardar"}
                             </button>
                         </div>
                     </div>
                 </Modal>
             )}
 
-            {/* Change Password Modal */}
             {isEditingPassword && (
                 <Modal
                     title="Cambiar Contraseña"
@@ -505,68 +291,34 @@ export default function Profile() {
                     }}
                 >
                     <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-bold text-slate-700 mb-2">
-                                Contraseña Actual
-                            </label>
-                            <input
-                                type="password"
-                                value={currentPassword}
-                                onChange={(e) =>
-                                    setCurrentPassword(e.target.value)
-                                }
-                                className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition outline-none"
-                                placeholder="••••••••"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-bold text-slate-700 mb-2">
-                                Nueva Contraseña
-                            </label>
-                            <input
-                                type="password"
-                                value={newPassword}
-                                onChange={(e) => setNewPassword(e.target.value)}
-                                className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition outline-none"
-                                placeholder="••••••••"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-bold text-slate-700 mb-2">
-                                Confirmar Nueva Contraseña
-                            </label>
-                            <input
-                                type="password"
-                                value={confirmPassword}
-                                onChange={(e) =>
-                                    setConfirmPassword(e.target.value)
-                                }
-                                className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition outline-none"
-                                placeholder="••••••••"
-                            />
-                        </div>
-                        <div className="flex gap-3">
-                            <button
-                                onClick={handleChangePassword}
-                                disabled={isUpdatingPassword}
-                                className="flex-1 py-3 px-6 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                            >
-                                {isUpdatingPassword ? (
-                                    <>
-                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                        Actualizando...
-                                    </>
-                                ) : (
-                                    "Cambiar Contraseña"
-                                )}
-                            </button>
-                            <button
-                                onClick={() => setIsEditingPassword(false)}
-                                className="px-6 py-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition"
-                            >
-                                Cancelar
-                            </button>
-                        </div>
+                        <input
+                            type="password"
+                            value={currentPassword}
+                            onChange={(e) => setCurrentPassword(e.target.value)}
+                            className="w-full px-4 py-3 rounded-xl border border-slate-300 outline-none"
+                            placeholder="Contraseña Actual"
+                        />
+                        <input
+                            type="password"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            className="w-full px-4 py-3 rounded-xl border border-slate-300 outline-none"
+                            placeholder="Nueva Contraseña"
+                        />
+                        <input
+                            type="password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            className="w-full px-4 py-3 rounded-xl border border-slate-300 outline-none"
+                            placeholder="Confirmar"
+                        />
+                        <button
+                            onClick={handleChangePassword}
+                            disabled={isUpdatingPassword}
+                            className="w-full py-3 bg-blue-600 text-white rounded-xl font-bold"
+                        >
+                            {isUpdatingPassword ? "Actualizando..." : "Cambiar"}
+                        </button>
                     </div>
                 </Modal>
             )}
@@ -574,39 +326,22 @@ export default function Profile() {
     );
 }
 
-// Info Field Component
-interface InfoFieldProps {
-    icon: React.ElementType;
-    label: string;
-    value: string;
-    editable?: boolean;
-    badge?: boolean;
-    onEdit?: () => void;
-}
-
-function InfoField({
-    icon: Icon,
-    label,
-    value,
-    editable,
-    badge,
-    onEdit,
-}: InfoFieldProps) {
+function InfoField({ icon: Icon, label, value, editable, badge, onEdit }: any) {
     return (
-        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 hover:border-blue-200 transition group">
+        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200">
             <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                    <Icon className="w-4 h-4 text-slate-400 group-hover:text-blue-600 transition" />
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">
+                    <Icon className="w-4 h-4 text-slate-400" />
+                    <span className="text-xs font-bold text-slate-500 uppercase">
                         {label}
                     </span>
                 </div>
                 {editable && (
                     <button
                         onClick={onEdit}
-                        className="p-1.5 hover:bg-white rounded-lg transition cursor-pointer"
+                        className="p-1 hover:bg-white rounded transition"
                     >
-                        <Edit2 className="w-3.5 h-3.5 text-slate-400 hover:text-blue-600" />
+                        <Edit2 className="w-3.5 h-3.5 text-slate-400" />
                     </button>
                 )}
             </div>
@@ -619,104 +354,23 @@ function InfoField({
     );
 }
 
-// Modal Component
-interface ModalProps {
-    title: string;
-    children: React.ReactNode;
-    onClose: () => void;
-}
-
-function Modal({ title, children, onClose }: ModalProps) {
+function Modal({ title, children, onClose }: any) {
     return (
-        <div className="fixed inset-0 bg-navy-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 xs:p-4 animate-fade-in">
-            <div className="bg-white rounded-2xl xs:rounded-3xl max-w-md w-full p-5 xs:p-6 shadow-2xl animate-scale-in">
-                <div className="flex items-center justify-between mb-5 xs:mb-6">
-                    <h3 className="font-display font-bold text-xl xs:text-2xl text-navy-900">
+        <div className="fixed inset-0 bg-navy-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative">
+                <div className="flex items-center justify-between mb-6">
+                    <h3 className="font-display font-bold text-2xl text-navy-900">
                         {title}
                     </h3>
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-slate-100 rounded-xl transition cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center"
+                        className="p-2 hover:bg-slate-100 rounded-xl transition"
                     >
                         <X className="w-5 h-5 text-slate-400" />
                     </button>
                 </div>
                 {children}
             </div>
-        </div>
-    );
-}
-
-// Integration Card Component
-interface IntegrationCardProps {
-    name: string;
-    icon: React.ReactNode;
-    color: string;
-    connected: boolean;
-    connectedText?: string;
-    loading?: boolean;
-    onAction: () => void;
-}
-
-function IntegrationCard({
-    name,
-    icon,
-    color,
-    connected,
-    connectedText,
-    loading,
-    onAction,
-}: IntegrationCardProps) {
-    return (
-        <div
-            className={clsx(
-                "p-5 rounded-2xl border transition-all",
-                connected
-                    ? `bg-${color}/5 border-${color}/20`
-                    : "bg-slate-50 border-slate-200 hover:border-slate-300",
-            )}
-        >
-            <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                    <div
-                        className={clsx(
-                            "w-10 h-10 rounded-xl flex items-center justify-center",
-                            connected
-                                ? `bg-white text-${color}`
-                                : "bg-white text-slate-400",
-                        )}
-                    >
-                        {icon}
-                    </div>
-                    <div>
-                        <h4 className="font-bold text-navy-900 text-sm">
-                            {name}
-                        </h4>
-                        <p className="text-xs text-slate-500">
-                            {connected
-                                ? connectedText || "Conectado"
-                                : "No conectado"}
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <button
-                onClick={onAction}
-                disabled={loading}
-                className={clsx(
-                    "w-full py-2 px-4 rounded-xl text-xs font-bold transition",
-                    connected
-                        ? "bg-red-50 text-red-600 hover:bg-red-100"
-                        : `bg-${color} text-white hover:opacity-90`,
-                    loading && "opacity-50 cursor-not-allowed",
-                )}
-            >
-                {loading
-                    ? "Verificando..."
-                    : connected
-                      ? "Desconectar"
-                      : "Conectar"}
-            </button>
         </div>
     );
 }

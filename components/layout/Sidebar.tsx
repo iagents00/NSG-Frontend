@@ -20,6 +20,14 @@ import clsx from "clsx";
 import BrandAtom from "@/components/ui/BrandAtom";
 import LocationIndicator from "./LocationIndicator";
 
+interface MenuItem {
+    id: string;
+    label: string;
+    subtitle: string;
+    icon: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    special?: boolean;
+}
+
 export default function Sidebar() {
     const { currentRole, setRole } = useAppStore();
     const { isSidebarOpen, toggleSidebar } = useUIStore();
@@ -40,9 +48,11 @@ export default function Sidebar() {
                     setUsername(data.user.username);
                 }
                 if (data?.user?.role) {
-                    setRole(data.user.role as any);
+                    setRole(data.user.role as RoleType);
                 }
-            } catch (error) {}
+            } catch (error) {
+                console.error("Error fetching user session in Sidebar:", error);
+            }
         };
         fetchUser();
     }, [setRole]);
@@ -75,8 +85,15 @@ export default function Sidebar() {
     };
 
     // Group menu items
-    const groupedMenu = config?.menu.reduce(
-        (acc: any, item: any) => {
+    const groupedMenu = (config?.menu as MenuItem[] | undefined)?.reduce(
+        (
+            acc: {
+                intelligence: MenuItem | null;
+                nsgModules: MenuItem[];
+                other: MenuItem[];
+            },
+            item: MenuItem,
+        ) => {
             if (item.id === "nsg_intelligence") {
                 acc.intelligence = item;
             } else if (
@@ -264,13 +281,13 @@ export default function Sidebar() {
                                     if (window.innerWidth < 1024)
                                         toggleSidebar();
                                 }}
-                                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all cursor-pointer group relative overflow-hidden bg-gradient-to-r from-blue-600/20 to-blue-500/10 border border-blue-500/30 text-blue-200 hover:text-white hover:border-blue-400/50 shadow-[0_0_20px_rgba(59,130,246,0.15)] hover:shadow-[0_0_30px_rgba(59,130,246,0.3)]"
+                                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all cursor-pointer group relative overflow-hidden bg-linear-to-r from-blue-600/20 to-blue-500/10 border border-blue-500/30 text-blue-200 hover:text-white hover:border-blue-400/50 shadow-[0_0_20px_rgba(59,130,246,0.15)] hover:shadow-[0_0_30px_rgba(59,130,246,0.3)]"
                             >
                                 <BrandAtom className="w-5 h-5 relative z-10" />
                                 <span className="truncate flex-1 relative z-10 font-semibold">
                                     {groupedMenu.intelligence.label}
                                 </span>
-                                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/0 via-blue-500/10 to-blue-600/0 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                <div className="absolute inset-0 bg-linear-to-r from-blue-600/0 via-blue-500/10 to-blue-600/0 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                             </Link>
                         </div>
                     )}
@@ -284,55 +301,62 @@ export default function Sidebar() {
                                 </p>
                             </div>
                             <div className="space-y-0.5">
-                                {groupedMenu.nsgModules.map((item: any) => {
-                                    const Icon = item.icon;
-                                    const targetPath = `/dashboard/${item.id}`;
-                                    const isActive = pathname === targetPath;
-                                    const comingSoonSections = [
-                                        "nsg_news",
-                                        "clinical_radar",
-                                        "patients",
-                                        "library",
-                                    ];
-                                    const isComingSoon =
-                                        comingSoonSections.includes(item.id);
+                                {groupedMenu.nsgModules.map(
+                                    (item: MenuItem) => {
+                                        const Icon = item.icon;
+                                        const targetPath = `/dashboard/${item.id}`;
+                                        const isActive =
+                                            pathname === targetPath;
+                                        const comingSoonSections = [
+                                            "nsg_news",
+                                            "clinical_radar",
+                                            "patients",
+                                            "library",
+                                        ];
+                                        const isComingSoon =
+                                            comingSoonSections.includes(
+                                                item.id,
+                                            );
 
-                                    return (
-                                        <Link
-                                            key={item.id}
-                                            href={targetPath}
-                                            onClick={() => {
-                                                if (window.innerWidth < 1024)
-                                                    toggleSidebar();
-                                            }}
-                                            className={clsx(
-                                                "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all cursor-pointer group relative",
-                                                "focus:outline-none active:scale-[0.98]",
-                                                isActive
-                                                    ? "text-white bg-white/10 border-l-4 border-blue-500 pl-3 shadow-[inset_0_0_10px_rgba(59,130,246,0.1)]"
-                                                    : "text-slate-400 hover:bg-white/5 hover:text-white hover:translate-x-1 border-l-4 border-transparent pl-3",
-                                            )}
-                                        >
-                                            <Icon
+                                        return (
+                                            <Link
+                                                key={item.id}
+                                                href={targetPath}
+                                                onClick={() => {
+                                                    if (
+                                                        window.innerWidth < 1024
+                                                    )
+                                                        toggleSidebar();
+                                                }}
                                                 className={clsx(
-                                                    "w-4.5 h-4.5 transition-colors",
+                                                    "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all cursor-pointer group relative",
+                                                    "focus:outline-none active:scale-[0.98]",
                                                     isActive
-                                                        ? "text-blue-400"
-                                                        : "text-slate-500 group-hover:text-blue-400",
+                                                        ? "text-white bg-white/10 border-l-4 border-blue-500 pl-3 shadow-[inset_0_0_10px_rgba(59,130,246,0.1)]"
+                                                        : "text-slate-400 hover:bg-white/5 hover:text-white hover:translate-x-1 border-l-4 border-transparent pl-3",
                                                 )}
-                                            />
-                                            <span className="truncate flex-1">
-                                                {item.label}
-                                            </span>
-                                            {isComingSoon && (
-                                                <span className="text-[0.55rem] font-black px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 uppercase tracking-wider flex items-center gap-1">
-                                                    <Lock className="w-2.5 h-2.5" />
-                                                    Próximamente
+                                            >
+                                                <Icon
+                                                    className={clsx(
+                                                        "w-4.5 h-4.5 transition-colors",
+                                                        isActive
+                                                            ? "text-blue-400"
+                                                            : "text-slate-500 group-hover:text-blue-400",
+                                                    )}
+                                                />
+                                                <span className="truncate flex-1">
+                                                    {item.label}
                                                 </span>
-                                            )}
-                                        </Link>
-                                    );
-                                })}
+                                                {isComingSoon && (
+                                                    <span className="text-[0.55rem] font-black px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 uppercase tracking-wider flex items-center gap-1">
+                                                        <Lock className="w-2.5 h-2.5" />
+                                                        Próximamente
+                                                    </span>
+                                                )}
+                                            </Link>
+                                        );
+                                    },
+                                )}
                             </div>
                         </div>
                     )}

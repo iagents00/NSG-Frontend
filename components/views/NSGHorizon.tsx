@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import api from "@/lib/api";
-import axios from "axios";
 import { useToast } from "@/components/ui/ToastProvider";
 import FathomTokenModal from "@/components/features/FathomTokenModal";
 import {
@@ -19,28 +18,21 @@ import {
     Music,
     UploadCloud,
     Headphones,
-    PlayCircle,
     Clock,
     DownloadCloud,
-    Sunrise,
     FolderOpen,
     Timer,
     FileText,
     Cpu,
-    PenTool,
-    ArrowUpRight,
-    CheckSquare,
-    ListTodo,
-    PlusCircle,
     Folder,
     ArrowLeft,
-    MoreHorizontal,
     Loader2,
     Layers,
     Calendar,
     Play,
     FileCheck,
     FileType,
+    ListTodo,
 } from "lucide-react";
 import clsx from "clsx";
 import ReactMarkdown from "react-markdown";
@@ -55,12 +47,6 @@ interface TranscriptItem {
     time: string;
     text: string;
     isUser?: boolean;
-}
-
-interface ActionStep {
-    id: number;
-    text: string;
-    subtext: string;
 }
 
 interface AIInfo {
@@ -95,6 +81,15 @@ interface MeetingFolder {
     transcripts?: TranscriptItem[];
     aiInfo?: AIInfo;
     source?: "fathom" | "manual"; // Distinguished source
+}
+
+interface ManualRecording {
+    id: string;
+    title: string;
+    fullContent?: string;
+    date: string;
+    type: string;
+    size: string;
 }
 
 export default function NSGHorizon() {
@@ -132,7 +127,9 @@ export default function NSGHorizon() {
         "text",
     );
     const [manualTextContent, setManualTextContent] = useState("");
-    const [manualRecordings, setManualRecordings] = useState<any[]>([]); // New state for audio files
+    const [manualRecordings, setManualRecordings] = useState<ManualRecording[]>(
+        [],
+    ); // New state for audio files
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Check initial connection from backend
@@ -164,9 +161,9 @@ export default function NSGHorizon() {
         };
 
         checkFathomConnection();
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const handleConnectFathom = (token: string) => {
+    const handleConnectFathom = () => {
         // Token is already saved in backend by the modal
         setFathomToken("***"); // Don't store actual token
         setIsConnected(true);
@@ -198,6 +195,7 @@ export default function NSGHorizon() {
                 showToast("Error desconectando Fathom", "error");
             }
         } catch (error) {
+            console.error("Error disconnecting Fathom:", error);
             showToast("Error desconectando Fathom", "error");
         }
     };
@@ -249,13 +247,14 @@ export default function NSGHorizon() {
                             date: `${day}-${month}-${year}`,
                             time: `${hours}:${minutes}`,
                         };
-                    } catch (e) {
+                    } catch (error) {
+                        console.error("Date formatting error:", error);
                         return { date: isoString, time: "" };
                     }
                 };
 
                 // Parse logic based on user structure: [0: { meetings: [...] }]
-                let meetingsArray: any[] = [];
+                let meetingsArray: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
 
                 // Check if root is array and has meetings in first element
                 if (
@@ -275,6 +274,7 @@ export default function NSGHorizon() {
 
                 const mappedFolders: MeetingFolder[] = meetingsArray.map(
                     (item: any, index: number) => {
+                        // eslint-disable-line @typescript-eslint/no-explicit-any
                         // Handle structure where item itself might be the meeting or it wraps meeting_data
                         const mData = item.meeting_data || item;
                         const tList = item.transcription_list || [];
@@ -298,18 +298,19 @@ export default function NSGHorizon() {
                             // Map Transcripts
                             transcripts: Array.isArray(tList)
                                 ? tList.map((t: any) => ({
-                                    speakerName:
-                                        t.speaker?.display_name ||
-                                        "Desconocido",
-                                    time: t.timestamp || "",
-                                    text: t.text || "",
-                                    // Robust check: Look at root OR inside speaker object
-                                    isUser: !!(
-                                        t.matched_calendar_invitee_email ||
-                                        t.speaker
-                                            ?.matched_calendar_invitee_email
-                                    ),
-                                }))
+                                      // eslint-disable-line @typescript-eslint/no-explicit-any
+                                      speakerName:
+                                          t.speaker?.display_name ||
+                                          "Desconocido",
+                                      time: t.timestamp || "",
+                                      text: t.text || "",
+                                      // Robust check: Look at root OR inside speaker object
+                                      isUser: !!(
+                                          t.matched_calendar_invitee_email ||
+                                          t.speaker
+                                              ?.matched_calendar_invitee_email
+                                      ),
+                                  }))
                                 : [],
 
                             // Map AI Info (Attempt to retrieve from backend)
@@ -320,6 +321,7 @@ export default function NSGHorizon() {
 
                 setFolders(mappedFolders);
             } catch (error) {
+                console.error("Error fetching horizon data:", error);
                 showToast("Error cargando datos de Horizon", "error");
             } finally {
                 setIsFathomLoading(false);
@@ -327,7 +329,7 @@ export default function NSGHorizon() {
         };
 
         fetchHorizonData();
-    }, [userId, isConnected]);
+    }, [userId, isConnected, showToast]);
 
     // Fetch Manual Transcriptions
     useEffect(() => {
@@ -340,6 +342,7 @@ export default function NSGHorizon() {
                 );
                 if (response.status === 200) {
                     const mapped = response.data.map((t: any) => ({
+                        // eslint-disable-line @typescript-eslint/no-explicit-any
                         id: t._id,
                         title:
                             t.content.length > 30
@@ -359,7 +362,7 @@ export default function NSGHorizon() {
         };
 
         fetchTranscriptions();
-    }, [userId, activeTab]);
+    }, [userId, activeTab]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleGenerateAnalysis = async () => {
         if (!selectedFolder || isAnalyzing) return;
@@ -425,6 +428,7 @@ export default function NSGHorizon() {
                 }
             }
         } catch (error) {
+            console.error("Error generating analysis:", error);
             showToast(
                 "Error al generar el análisis. Inténtalo de nuevo.",
                 "error",
@@ -476,11 +480,13 @@ export default function NSGHorizon() {
                         }
                     }
                 }
-            } catch (error) { }
+            } catch (error) {
+                console.error("Error checking existing analysis:", error);
+            }
         };
 
         checkExistingAnalysis();
-    }, [selectedFolder?.id, selectedFolder?.source]);
+    }, [selectedFolder?.id, selectedFolder?.source]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Scroll to top when folder changes
     useEffect(() => {
@@ -490,7 +496,7 @@ export default function NSGHorizon() {
                 scrollContainerRef.current.scrollTop = 0;
             }
         }
-    }, [selectedFolder?.id]);
+    }, [selectedFolder?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const toggleItem = async (id: number) => {
         if (!selectedFolder) return;
@@ -523,11 +529,6 @@ export default function NSGHorizon() {
 
     // --- VIEW: LIST (Fathom or Manual) ---
     if (!selectedFolder) {
-        // Calculate metrics
-        const totalSessions =
-            activeTab === "fathom" ? folders.length : manualRecordings.length;
-        const sessionsWithAnalysis =
-            activeTab === "fathom" ? folders.filter((f) => f.aiInfo).length : 0; // Manual doesn't show analysis count in list
         const lastSync = new Date().toLocaleTimeString("es-ES", {
             hour: "2-digit",
             minute: "2-digit",
@@ -536,11 +537,11 @@ export default function NSGHorizon() {
         return (
             <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 animate-fade-in-up pb-10 px-2 xs:px-4 sm:px-6">
                 {/* Dark Header Banner - Clarity Style */}
-                <div className="relative overflow-hidden bg-gradient-to-r from-navy-950 via-navy-900 to-navy-950 px-4 py-5 xs:px-5 sm:px-8 sm:py-6 rounded-2xl xs:rounded-3xl border border-navy-800/50 shadow-xl">
+                <div className="relative overflow-hidden bg-linear-to-r from-navy-950 via-navy-900 to-navy-950 px-4 py-5 xs:px-5 sm:px-8 sm:py-6 rounded-2xl xs:rounded-3xl border border-navy-800/50 shadow-xl">
                     <div className="relative z-10">
                         <h2 className="font-display font-bold text-2xl lg:text-3xl tracking-tight">
                             <span className="text-white">Diseño de </span>
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
+                            <span className="text-transparent bg-clip-text bg-linear-to-r from-cyan-400 to-blue-500">
                                 NSG Horizon
                             </span>
                         </h2>
@@ -731,7 +732,7 @@ export default function NSGHorizon() {
                                                 )}
 
                                                 <div className="flex justify-between items-start mb-3 xs:mb-4">
-                                                    <div className="w-12 h-12 xs:w-14 xs:h-14 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 text-blue-600 flex items-center justify-center group-hover:from-blue-600 group-hover:to-indigo-600 group-hover:text-white transition-all duration-300 shadow-md group-hover:shadow-lg group-hover:scale-110">
+                                                    <div className="w-12 h-12 xs:w-14 xs:h-14 rounded-2xl bg-linear-to-br from-blue-50 to-indigo-50 text-blue-600 flex items-center justify-center group-hover:from-blue-600 group-hover:to-indigo-600 group-hover:text-white transition-all duration-300 shadow-md group-hover:shadow-lg group-hover:scale-110">
                                                         <Headphones className="w-6 h-6 xs:w-7 xs:h-7" />
                                                     </div>
                                                 </div>
@@ -750,7 +751,7 @@ export default function NSGHorizon() {
                                                         <div className="flex items-center gap-2 mb-2">
                                                             <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                                                                 <div
-                                                                    className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full"
+                                                                    className="h-full bg-linear-to-r from-blue-500 to-indigo-600 rounded-full"
                                                                     style={{
                                                                         width: "75%",
                                                                     }}
@@ -775,7 +776,7 @@ export default function NSGHorizon() {
                                                 </div>
 
                                                 {/* Hover indicator */}
-                                                <div className="absolute bottom-0 left-0 h-1 w-0 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 group-hover:w-full transition-all duration-700 ease-in-out rounded-b-3xl"></div>
+                                                <div className="absolute bottom-0 left-0 h-1 w-0 bg-linear-to-r from-blue-500 via-blue-600 to-blue-700 group-hover:w-full transition-all duration-700 ease-in-out rounded-b-3xl"></div>
                                             </div>
                                         );
                                     })}
@@ -790,7 +791,7 @@ export default function NSGHorizon() {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
                                 <div className="flex items-start gap-3">
-                                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">
                                         1
                                     </div>
                                     <div>
@@ -806,7 +807,7 @@ export default function NSGHorizon() {
 
                             <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
                                 <div className="flex items-start gap-3">
-                                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">
                                         2
                                     </div>
                                     <div>
@@ -822,7 +823,7 @@ export default function NSGHorizon() {
 
                             <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
                                 <div className="flex items-start gap-3">
-                                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">
                                         3
                                     </div>
                                     <div>
@@ -966,7 +967,7 @@ export default function NSGHorizon() {
                                                 onChange={(e) =>
                                                     setSelectedFile(
                                                         e.target.files?.[0] ||
-                                                        null,
+                                                            null,
                                                     )
                                                 }
                                             />
@@ -1020,7 +1021,7 @@ export default function NSGHorizon() {
                                                                     formData.append(
                                                                         "userId",
                                                                         userId ||
-                                                                        "",
+                                                                            "",
                                                                     );
                                                                     formData.append(
                                                                         "fileName",
@@ -1034,10 +1035,10 @@ export default function NSGHorizon() {
                                                                             formData,
                                                                             {
                                                                                 headers:
-                                                                                {
-                                                                                    "Content-Type":
-                                                                                        "multipart/form-data",
-                                                                                },
+                                                                                    {
+                                                                                        "Content-Type":
+                                                                                            "multipart/form-data",
+                                                                                    },
                                                                             },
                                                                         );
 
@@ -1054,33 +1055,33 @@ export default function NSGHorizon() {
                                                                             (
                                                                                 prev,
                                                                             ) => [
-                                                                                    {
-                                                                                        id: savedDoc._id,
-                                                                                        title:
-                                                                                            savedDoc.content.substring(
-                                                                                                0,
-                                                                                                30,
-                                                                                            ) +
-                                                                                            "...",
-                                                                                        fullContent:
-                                                                                            savedDoc.content,
-                                                                                        date: new Date(
-                                                                                            savedDoc.createdAt,
-                                                                                        ).toLocaleDateString(),
-                                                                                        type: "audio",
-                                                                                        size:
-                                                                                            (
-                                                                                                savedDoc
-                                                                                                    .content
-                                                                                                    .length /
-                                                                                                1000
-                                                                                            ).toFixed(
-                                                                                                1,
-                                                                                            ) +
-                                                                                            "k chars",
-                                                                                    },
-                                                                                    ...prev,
-                                                                                ],
+                                                                                {
+                                                                                    id: savedDoc._id,
+                                                                                    title:
+                                                                                        savedDoc.content.substring(
+                                                                                            0,
+                                                                                            30,
+                                                                                        ) +
+                                                                                        "...",
+                                                                                    fullContent:
+                                                                                        savedDoc.content,
+                                                                                    date: new Date(
+                                                                                        savedDoc.createdAt,
+                                                                                    ).toLocaleDateString(),
+                                                                                    type: "audio",
+                                                                                    size:
+                                                                                        (
+                                                                                            savedDoc
+                                                                                                .content
+                                                                                                .length /
+                                                                                            1000
+                                                                                        ).toFixed(
+                                                                                            1,
+                                                                                        ) +
+                                                                                        "k chars",
+                                                                                },
+                                                                                ...prev,
+                                                                            ],
                                                                         );
 
                                                                         showToast(
@@ -1304,27 +1305,27 @@ export default function NSGHorizon() {
                                             onClick={() => {
                                                 // Map manual recording to MeetingFolder structure to reuse the Detail View
                                                 const manualFolder: MeetingFolder =
-                                                {
-                                                    id: rec.id,
-                                                    title: "Análisis Manual", // Or rec.title if it wasn't truncated
-                                                    description: rec.title, // Use the content snippet as description
-                                                    date: rec.date,
-                                                    timeStr: "N/A",
-                                                    shareUrl: "#",
-                                                    type: "Manual",
-                                                    insights: 0,
-                                                    source: "manual",
-                                                    transcripts: [
-                                                        {
-                                                            speakerName:
-                                                                "Texto Original",
-                                                            time: "",
-                                                            text:
-                                                                rec.fullContent ||
-                                                                rec.title,
-                                                        },
-                                                    ],
-                                                };
+                                                    {
+                                                        id: rec.id,
+                                                        title: "Análisis Manual", // Or rec.title if it wasn't truncated
+                                                        description: rec.title, // Use the content snippet as description
+                                                        date: rec.date,
+                                                        timeStr: "N/A",
+                                                        shareUrl: "#",
+                                                        type: "Manual",
+                                                        insights: 0,
+                                                        source: "manual",
+                                                        transcripts: [
+                                                            {
+                                                                speakerName:
+                                                                    "Texto Original",
+                                                                time: "",
+                                                                text:
+                                                                    rec.fullContent ||
+                                                                    rec.title,
+                                                            },
+                                                        ],
+                                                    };
                                                 setSelectedFolder(manualFolder);
                                             }}
                                             className="bg-white p-6 rounded-4xl border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group cursor-pointer"
@@ -1469,7 +1470,7 @@ export default function NSGHorizon() {
                         onClick={() => setShowTranscription(true)}
                         className="px-3 sm:px-6 py-2.5 sm:py-3 bg-slate-50 text-navy-900 text-xs sm:text-sm font-bold rounded-xl hover:bg-slate-100 transition border border-slate-200 flex items-center justify-center gap-2 cursor-pointer no-underline"
                     >
-                        <FileText className="w-5 h-5 sm:w-6 h-6" />{" "}
+                        <FileText className="w-5 h-5 sm:w-6" />{" "}
                         <span className="hidden md:inline">Ver</span> Transc.
                     </button>
                     <button
@@ -1535,7 +1536,7 @@ export default function NSGHorizon() {
                         }
                         className="flex-1 xs:flex-none px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-500 transition shadow-lg shadow-blue-200 flex items-center justify-center gap-2 cursor-pointer"
                     >
-                        <FileCheck className="w-3.5 h-3.5 sm:w-4 h-4" />{" "}
+                        <FileCheck className="w-4 h-4" />{" "}
                         <span className="hidden md:inline">Exportar</span> PDF
                     </button>
                 </div>
@@ -1597,7 +1598,7 @@ export default function NSGHorizon() {
 
                                     {selectedFolder.description &&
                                         selectedFolder.description.length >
-                                        200 && (
+                                            200 && (
                                             <button
                                                 onClick={() =>
                                                     setIsSummaryExpanded(
@@ -2022,10 +2023,11 @@ export default function NSGHorizon() {
                                             <div
                                                 className={`
                            group relative max-w-[85%] px-5 py-4 shadow-sm transition-all duration-300
-                           ${isMe
-                                                        ? "bg-white text-slate-900 rounded-2xl rounded-tr-none"
-                                                        : "bg-white text-slate-800 rounded-2xl rounded-tl-none border border-slate-200"
-                                                    }
+                           ${
+                               isMe
+                                   ? "bg-white text-slate-900 rounded-2xl rounded-tr-none"
+                                   : "bg-white text-slate-800 rounded-2xl rounded-tl-none border border-slate-200"
+                           }
                         `}
                                             >
                                                 {!isMe && (

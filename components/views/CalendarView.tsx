@@ -6,18 +6,14 @@ import {
     Plus,
     LogOut,
     RefreshCw,
-    Search,
     Calendar,
     Activity,
-    Filter,
-    MoreHorizontal,
-    Settings,
     ExternalLink,
 } from "lucide-react";
 import { useUIStore } from "@/store/useUIStore";
 import { useToast } from "@/components/ui/ToastProvider";
 import { motion, AnimatePresence } from "framer-motion";
-import AtomEffect from "@/components/ui/AtomEffect";
+import api from "@/lib/api";
 import clsx from "clsx";
 
 const MONTHS = [
@@ -57,48 +53,33 @@ export default function CalendarView() {
     const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
-    const jwtToken =
-        typeof window !== "undefined"
-            ? localStorage.getItem("nsg-token")
-            : null;
-
     // 1. Verificar conexión inicial
     useEffect(() => {
         const checkConnection = async () => {
-            if (!jwtToken) return;
             try {
-                const res = await fetch(
-                    "https://nsg-backend.onrender.com/google/calendar/events",
-                    {
-                        headers: { Authorization: jwtToken },
-                    },
-                );
-                if (res.ok) {
+                const res = await api.get("/google/calendar/events");
+                if (res.status === 200) {
                     setIsConnected(true);
-                    const data = await res.json();
-                    setEvents(data);
+                    setEvents(res.data);
                 }
-            } catch (error) {}
+            } catch (error) {
+                console.error("Error checking connection:", error);
+                // Not connected or error, ignore
+            }
         };
         checkConnection();
-    }, [jwtToken]);
+    }, []);
 
     const fetchEvents = async () => {
-        if (!jwtToken) return;
         setIsLoading(true);
         try {
-            const res = await fetch(
-                "https://nsg-backend.onrender.com/google/calendar/events",
-                {
-                    headers: { Authorization: jwtToken },
-                },
-            );
-            if (res.ok) {
-                const data = await res.json();
-                setEvents(data);
+            const res = await api.get("/google/calendar/events");
+            if (res.status === 200) {
+                setEvents(res.data);
                 showToast("Calendario actualizado", "success");
             }
         } catch (error) {
+            console.error("Error fetching events:", error);
             showToast("Error al obtener eventos", "error");
         } finally {
             setIsLoading(false);
@@ -109,19 +90,14 @@ export default function CalendarView() {
         if (isConnected) {
             // Desconectar
             try {
-                const res = await fetch(
-                    "https://nsg-backend.onrender.com/google/calendar",
-                    {
-                        method: "DELETE",
-                        headers: { Authorization: jwtToken || "" },
-                    },
-                );
-                if (res.ok) {
+                const res = await api.delete("/google/calendar");
+                if (res.status === 200) {
                     setIsConnected(false);
                     setEvents([]);
                     showToast("Google Calendar desconectado", "info");
                 }
             } catch (error) {
+                console.error("Error disconnecting:", error);
                 showToast("Error al desconectar", "error");
             }
             return;
@@ -129,17 +105,12 @@ export default function CalendarView() {
 
         // Conectar
         try {
-            const res = await fetch(
-                "https://nsg-backend.onrender.com/google/auth",
-                {
-                    headers: { Authorization: jwtToken || "" },
-                },
-            );
-            const data = await res.json();
-            if (data.url) {
-                window.open(data.url, "_blank");
+            const res = await api.get("/google/auth");
+            if (res.data?.url) {
+                window.open(res.data.url, "_blank");
             }
         } catch (error) {
+            console.error("Error starting authentication:", error);
             showToast("Error al iniciar autenticación", "error");
         }
     };
@@ -200,7 +171,7 @@ export default function CalendarView() {
     return (
         <div className="h-full flex flex-col px-1 xs:px-2 sm:px-0 gap-4 sm:gap-6">
             {/* 1. HEADER SECTION */}
-            <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4 sm:gap-6 shrink-0 bg-white/40 backdrop-blur-md p-4 sm:p-6 rounded-[2rem] sm:rounded-[2.5rem] border border-white/60 shadow-sm relative overflow-hidden">
+            <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4 sm:gap-6 shrink-0 bg-white/40 backdrop-blur-md p-4 sm:p-6 rounded-4xl sm:rounded-[2.5rem] border border-white/60 shadow-sm relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50/50 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
 
                 <div className="flex items-center gap-4 relative z-10">

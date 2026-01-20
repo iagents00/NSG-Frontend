@@ -192,7 +192,7 @@ export default function Settings() {
                     setTelegramId(data.user.telegram_id);
                 }
             } catch (error) {
-                // Silent fail
+                console.error("Error fetching session:", error);
             }
         };
         fetchUser();
@@ -205,7 +205,8 @@ export default function Settings() {
                 if (res.status === 200) {
                     setIsCalendarConnected(true);
                 }
-            } catch (e) {
+            } catch (error) {
+                console.error("Calendar check failed:", error);
                 setIsCalendarConnected(false);
             } finally {
                 setIsCheckingCalendar(false);
@@ -221,7 +222,8 @@ export default function Settings() {
                 if (res.status === 200 && res.data?.connected) {
                     setIsFathomConnected(true);
                 }
-            } catch (e) {
+            } catch (error) {
+                console.error("Fathom check failed:", error);
                 setIsFathomConnected(false);
             } finally {
                 setIsCheckingFathom(false);
@@ -232,29 +234,21 @@ export default function Settings() {
 
     const handleConnectCalendar = async () => {
         if (isCalendarConnected) {
-            // Confirmation dialog
-            if (
-                !confirm(
-                    "¿Estás seguro de que deseas desvincular Google Calendar? Perderás el acceso a tus eventos sincronizados.",
-                )
-            ) {
-                return;
-            }
-
+            if (!confirm("¿Desvincular Google Calendar?")) return;
             try {
                 await api.delete("/google/calendar");
                 setIsCalendarConnected(false);
                 showToast("Google Calendar desconectado", "info");
-            } catch (e) {
+            } catch (error) {
+                console.error(error);
                 showToast("Error al desconectar", "error");
             }
         } else {
             try {
                 const res = await api.get("/google/auth");
-                if (res.data?.url) {
-                    window.open(res.data.url, "_blank");
-                }
-            } catch (e) {
+                if (res.data?.url) window.open(res.data.url, "_blank");
+            } catch (error) {
+                console.error(error);
                 showToast("Error al conectar", "error");
             }
         }
@@ -262,20 +256,13 @@ export default function Settings() {
 
     const handleConnectFathom = async () => {
         if (isFathomConnected) {
-            // Confirmation dialog
-            if (
-                !confirm(
-                    "¿Estás seguro de que deseas desvincular Fathom Analytics? Se eliminarán todos los datos sincronizados.",
-                )
-            ) {
-                return;
-            }
-
+            if (!confirm("¿Desvincular Fathom Analytics?")) return;
             try {
                 await api.delete("/fathom/token");
                 setIsFathomConnected(false);
                 showToast("Fathom Analytics desconectado", "info");
-            } catch (e) {
+            } catch (error) {
+                console.error(error);
                 showToast("Error al desconectar Fathom", "error");
             }
         } else {
@@ -291,10 +278,7 @@ export default function Settings() {
                 ...prev,
                 darkMode: newTheme === "dark",
             }));
-            showToast(
-                `Tema cambiado a ${newTheme === "dark" ? "Oscuro" : "Claro"}`,
-                "success",
-            );
+            showToast(`Tema cambiado`, "success");
         } else {
             setPreferences((prev) => ({
                 ...prev,
@@ -304,7 +288,6 @@ export default function Settings() {
         }
     };
 
-    // Filter integrations and preferences by role
     const availableIntegrations = Object.values(INTEGRATIONS_CONFIG).filter(
         (int) => int.roles.includes(currentRole || "patient"),
     );
@@ -313,7 +296,6 @@ export default function Settings() {
         (pref) => pref.roles.includes(currentRole || "patient"),
     );
 
-    // Helper to check connection status
     const getIntegrationStatus = (integrationId: string) => {
         switch (integrationId) {
             case "telegram":
@@ -346,14 +328,12 @@ export default function Settings() {
     const handleIntegrationAction = (integrationId: string) => {
         switch (integrationId) {
             case "telegram":
-                if (!telegramId) {
+                if (!telegramId)
                     window.open(
                         `https://t.me/nsg_preguntasyrespuestas_bot?start=${userId}`,
                         "_blank",
                     );
-                } else {
-                    showToast("Telegram ya conectado", "info");
-                }
+                else showToast("Telegram ya conectado", "info");
                 break;
             case "calendar":
                 handleConnectCalendar();
@@ -368,25 +348,22 @@ export default function Settings() {
 
     return (
         <div className="w-full max-w-[1600px] mx-auto space-y-6 py-6 px-2 xs:px-4 sm:px-6 lg:px-8">
-            {/* Dark Header Banner - Clarity Style */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-navy-950 via-navy-900 to-navy-950 px-5 py-5 sm:px-8 sm:py-6 rounded-3xl border border-navy-800/50 shadow-xl">
+            <div className="relative overflow-hidden bg-linear-to-r from-navy-950 via-navy-900 to-navy-950 px-5 py-5 sm:px-8 sm:py-6 rounded-3xl border border-navy-800/50 shadow-xl">
                 <div className="w-full relative z-20">
-                    <h2 className="font-display font-bold text-2xl lg:text-3xl tracking-tight">
-                        <span className="text-white">Configuración del </span>
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
+                    <h2 className="font-display font-bold text-2xl lg:text-3xl tracking-tight text-white">
+                        Configuración del{" "}
+                        <span className="text-transparent bg-clip-text bg-linear-to-r from-cyan-400 to-blue-500">
                             Sistema NSG
                         </span>
-                        <span className="text-white">.</span>
+                        .
                     </h2>
                     <p className="text-slate-300 text-sm mt-2 max-w-3xl leading-relaxed">
                         Personaliza tu experiencia neuronal y gestiona
-                        integraciones de protocolo. Sistema de configuración
-                        avanzada ejecutándose.
+                        integraciones de protocolo.
                     </p>
                 </div>
             </div>
 
-            {/* Integrations Section */}
             <div className="bg-white p-5 xs:p-6 sm:p-8 rounded-4xl shadow-sm border border-slate-200">
                 <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
@@ -425,7 +402,6 @@ export default function Settings() {
                 </div>
             </div>
 
-            {/* System Preferences Card */}
             <div className="bg-white p-5 xs:p-6 sm:p-8 rounded-4xl shadow-sm border border-slate-200">
                 <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 bg-violet-50 rounded-xl flex items-center justify-center">
@@ -459,8 +435,7 @@ export default function Settings() {
                 </div>
             </div>
 
-            {/* System Info */}
-            <div className="bg-gradient-to-br from-slate-50 to-slate-100 p-6 rounded-3xl border border-slate-200">
+            <div className="bg-linear-to-br from-slate-50 to-slate-100 p-6 rounded-3xl border border-slate-200">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div>
                         <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">
@@ -484,7 +459,6 @@ export default function Settings() {
     );
 }
 
-// Toggle Item Component
 interface ToggleItemProps {
     icon: React.ElementType;
     title: string;
@@ -504,7 +478,7 @@ function ToggleItem({
     soon,
     onClick,
 }: ToggleItemProps) {
-    const styles = {
+    const styles: Record<string, { container: string; iconBox: string }> = {
         blue: {
             container: "hover:border-blue-300",
             iconBox:
@@ -537,12 +511,12 @@ function ToggleItem({
         },
     };
 
-    const currentStyle = styles[color];
+    const currentStyle = styles[color] || styles.blue;
 
     return (
         <div
             className={clsx(
-                "relative flex items-center justify-between p-4 xs:p-5 bg-white rounded-2xl border border-slate-200 transition-all group",
+                "relative flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-200 transition-all group",
                 soon
                     ? "cursor-not-allowed opacity-60"
                     : "cursor-pointer hover:shadow-md",
@@ -550,19 +524,10 @@ function ToggleItem({
             )}
             onClick={soon ? undefined : onClick}
         >
-            {soon && (
-                <div className="absolute top-2 right-2 sm:top-3 sm:right-3">
-                    <span className="px-2 py-1 bg-blue-50 text-blue-600 border border-blue-100 rounded-lg text-[0.6rem] font-black uppercase tracking-wider flex items-center gap-1">
-                        <Lock className="w-2.5 h-2.5" />
-                        Próximamente
-                    </span>
-                </div>
-            )}
-
             <div className="flex items-center gap-4 flex-1">
                 <div
                     className={clsx(
-                        "p-3 rounded-xl transition-all duration-300",
+                        "p-3 rounded-xl transition-all",
                         currentStyle.iconBox,
                     )}
                 >
@@ -577,9 +542,7 @@ function ToggleItem({
                     </p>
                 </div>
             </div>
-
-            {/* Switch Toggle */}
-            {!soon && (
+            {!soon ? (
                 <div
                     className={clsx(
                         "relative w-12 h-6 rounded-full transition-colors shrink-0 ml-3",
@@ -588,23 +551,18 @@ function ToggleItem({
                 >
                     <div
                         className={clsx(
-                            "absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform",
+                            "absolute top-1 w-4 h-4 bg-white rounded-full transition-transform",
                             active ? "right-1" : "left-1",
                         )}
                     />
                 </div>
-            )}
-
-            {soon && (
-                <div className="shrink-0 ml-3">
-                    <Lock className="w-5 h-5 text-slate-400" />
-                </div>
+            ) : (
+                <Lock className="w-5 h-5 text-slate-400 ml-3" />
             )}
         </div>
     );
 }
 
-// Integration Card Component
 interface IntegrationCardProps {
     name: string;
     description: string;
@@ -631,7 +589,7 @@ function IntegrationCard({
     return (
         <div
             className={clsx(
-                "relative p-4 xs:p-5 rounded-2xl border transition-all group",
+                "relative p-4 rounded-2xl border transition-all group",
                 soon
                     ? "opacity-60 cursor-not-allowed"
                     : "cursor-pointer hover:shadow-md",
@@ -640,20 +598,11 @@ function IntegrationCard({
                     : "bg-slate-50 border-slate-200 hover:border-slate-300",
             )}
         >
-            {soon && (
-                <div className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10">
-                    <span className="px-2 py-1 bg-blue-50 text-blue-600 border border-blue-100 rounded-lg text-[0.6rem] font-black uppercase tracking-wider flex items-center gap-1">
-                        <Lock className="w-2.5 h-2.5" />
-                        Próximamente
-                    </span>
-                </div>
-            )}
-
             <div className="flex items-start gap-4 mb-4">
                 <div
                     className={clsx(
-                        "w-12 h-12 rounded-xl flex items-center justify-center transition-all",
-                        connected ? `bg-white shadow-md` : "bg-white",
+                        "w-12 h-12 rounded-xl flex items-center justify-center bg-white",
+                        connected && "shadow-md",
                     )}
                 >
                     <div
@@ -664,18 +613,17 @@ function IntegrationCard({
                         {icon}
                     </div>
                 </div>
-                <div className="flex-1 min-w-0">
+                <div className="flex-1">
                     <h4 className="font-bold text-navy-900 text-sm mb-1">
                         {name}
                     </h4>
-                    <p className="text-[0.7rem] text-slate-500 leading-relaxed">
+                    <p className="text-[0.7rem] text-slate-500">
                         {description}
                     </p>
                 </div>
             </div>
-
             <div className="flex items-center justify-between text-xs mb-3">
-                <span className="text-slate-500 font-medium">Estado:</span>
+                <span className="text-slate-500">Estado:</span>
                 <span
                     className={clsx(
                         "font-bold",
@@ -686,21 +634,20 @@ function IntegrationCard({
                         (connected ? "Conectado" : "No conectado")}
                 </span>
             </div>
-
             <button
                 onClick={soon ? undefined : onAction}
                 disabled={loading || soon}
                 className={clsx(
-                    "w-full py-2.5 px-4 rounded-xl text-xs font-bold transition-all",
-                    soon && "cursor-not-allowed",
-                    connected
-                        ? "bg-red-50 text-red-600 hover:bg-red-100"
-                        : `bg-${color} text-white hover:opacity-90 shadow-sm hover:shadow-md`,
-                    loading && "opacity-50 cursor-not-allowed",
+                    "w-full py-2 px-4 rounded-xl text-xs font-bold transition",
+                    soon
+                        ? "bg-slate-100 text-slate-400"
+                        : connected
+                          ? "bg-red-50 text-red-600 hover:bg-red-100"
+                          : `bg-${color} text-white hover:opacity-90`,
                 )}
             >
                 {loading
-                    ? "Verificando..."
+                    ? "..."
                     : soon
                       ? "Próximamente"
                       : connected

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Loader2, X, Mic, Send, Bot } from "lucide-react";
+import { X, Send, Bot } from "lucide-react";
 import clsx from "clsx";
 import { useToast } from "@/components/ui/ToastProvider";
 import { authService } from "@/lib/auth";
@@ -19,9 +19,8 @@ export default function JarvisAssistant() {
     // --- LOGIC STATES ---
     const [input, setInput] = useState("");
     const [lastResponse, setLastResponse] = useState<string | null>(null);
-    const [isListening, setIsListening] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
-    const [isMuted, setIsMuted] = useState(false);
+    const [isMuted] = useState(false);
     const [status, setStatus] = useState<
         "IDLE" | "LISTENING" | "THINKING" | "SPEAKING"
     >("IDLE");
@@ -31,7 +30,7 @@ export default function JarvisAssistant() {
     const { showToast } = useToast();
 
     const inputRef = useRef<HTMLInputElement>(null);
-    const recognitionRef = useRef<any>(null);
+    const recognitionRef = useRef<any>(null); // Type 'any' for window.SpeechRecognition
     const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
 
     // --- VISUAL STATES ---
@@ -46,7 +45,9 @@ export default function JarvisAssistant() {
                 if (data?.user?.username) {
                     setUsername(data.user.username);
                 }
-            } catch (error) {}
+            } catch (error) {
+                console.error("Error fetching user session in Jarvis:", error);
+            }
         };
         fetchUser();
     }, []);
@@ -166,8 +167,6 @@ export default function JarvisAssistant() {
 
             if (!response.ok) throw new Error(`API Error: ${response.status}`);
 
-
-
             const data = await response.json();
             const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
@@ -189,14 +188,17 @@ export default function JarvisAssistant() {
             } else {
                 throw new Error("Empty Response");
             }
-        } catch (e: any) {
-            console.error(e);
+        } catch (error: any) {
+            console.error(error);
             let errorMessage = "Protocol Failure. Connection terminated.";
 
-            if (e.message.includes("429")) {
+            if (error.message?.includes("429")) {
                 errorMessage =
                     "System Overload. Neural capacity exceeded. Please retry in a moment.";
-            } else if (e.message.includes("503") || e.message.includes("500")) {
+            } else if (
+                error.message?.includes("503") ||
+                error.message?.includes("500")
+            ) {
                 errorMessage = "Server unreachable. Retrying downlink...";
             }
 
@@ -231,7 +233,6 @@ export default function JarvisAssistant() {
 
             recognition.onstart = () => {
                 setStatus("LISTENING");
-                setIsListening(true);
                 setInput("");
             };
 
@@ -258,7 +259,6 @@ export default function JarvisAssistant() {
                 if (e.error === "no-speech") return;
                 if (e.error !== "aborted") {
                     setStatus("IDLE");
-                    setIsListening(false);
                 }
             };
 
@@ -266,17 +266,15 @@ export default function JarvisAssistant() {
                 const msg = inputRef.current?.value || "";
                 if (msg.trim().length > 1) {
                     handleAction(msg);
-                    setIsListening(false);
                 } else {
                     setStatus("IDLE");
-                    setIsListening(false);
                 }
             };
 
             try {
                 recognition.start();
             } catch {
-                 // ignore
+                // ignore
             }
         } else {
             showToast("Speech Module Unavailable", "error");
@@ -286,10 +284,10 @@ export default function JarvisAssistant() {
     // --- MOBILE AUDIO FIX ---
     const primeAudio = () => {
         // Unlock iOS/Mobile audio contexts
-        if (typeof window !== 'undefined') {
+        if (typeof window !== "undefined") {
             window.speechSynthesis.resume(); // Fix for Chrome/Safari pausing
             // Silent utterance to unlock the queue
-            const utterance = new SpeechSynthesisUtterance('');
+            const utterance = new SpeechSynthesisUtterance("");
             utterance.volume = 0;
             window.speechSynthesis.speak(utterance);
         }
@@ -534,14 +532,14 @@ export default function JarvisAssistant() {
                         ) : (
                             <circle
                                 cx="50"
-                                    cy="50"
-                                    r="10"
-                                    fill="url(#glassSphere)"
-                                    stroke="rgba(255,255,255,0.2)"
-                                    strokeWidth="0.5"
-                                    className={`transition-all duration-300 ease-out origin-center ${isHovered ? "scale-110" : "scale-100"}`}
-                                    style={{ transformBox: "fill-box" }}
-                                />
+                                cy="50"
+                                r="10"
+                                fill="url(#glassSphere)"
+                                stroke="rgba(255,255,255,0.2)"
+                                strokeWidth="0.5"
+                                className={`transition-all duration-300 ease-out origin-center ${isHovered ? "scale-110" : "scale-100"}`}
+                                style={{ transformBox: "fill-box" }}
+                            />
                         )}
                     </svg>
                 </div>
