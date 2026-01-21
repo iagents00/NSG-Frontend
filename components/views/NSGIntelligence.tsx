@@ -68,16 +68,16 @@ export default function NSGIntelligence() {
                         </div>
 
                         {/* Desktop Access Level Badge */}
-                        <div className="hidden md:flex items-center gap-3 px-4 py-2.5 xs:px-6 xs:py-3 bg-emerald-50 rounded-xl xs:rounded-2xl border border-emerald-200 self-start md:self-auto shadow-sm">
-                            <div className="flex flex-col items-end">
-                                <p className="text-[9px] uppercase tracking-widest text-emerald-600 font-bold mb-1">
+                        <div className="hidden md:flex items-center gap-2.5 px-5 py-2.5 bg-linear-to-r from-emerald-50 to-teal-50 rounded-2xl border border-emerald-200/80 shadow-sm hover:shadow-md transition-all duration-300">
+                            <div className="flex flex-col">
+                                <p className="text-[9px] uppercase tracking-[0.15em] text-emerald-600/80 font-bold mb-0.5">
                                     Access Level
                                 </p>
-                                <span className="text-xs xs:text-sm font-bold text-emerald-700">
+                                <span className="text-sm font-bold text-emerald-700 tracking-tight">
                                     {roleData.roleDesc}
                                 </span>
                             </div>
-                            <div className="w-2.5 h-2.5 xs:w-3 xs:h-3 rounded-full bg-emerald-500 shadow-lg shadow-emerald-200 animate-pulse" />
+                            <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)] animate-pulse ml-1" />
                         </div>
                     </div>
                 </div>

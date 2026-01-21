@@ -5,75 +5,95 @@ import { authService } from "@/lib/auth";
 import { usePathname, useRouter } from "next/navigation";
 import { useAppStore } from "@/store/useAppStore";
 
-export default function TokenVerifier({ children }: { children: React.ReactNode; }) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const [isAuthorized, setIsAuthorized] = useState(false);
-  const { setUserLocation } = useAppStore();
+export default function TokenVerifier({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
+    const router = useRouter();
+    const pathname = usePathname();
+    const [isAuthorized, setIsAuthorized] = useState(false);
+    const { setUserLocation, setUserProfile, setUserId } = useAppStore();
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      // 1. Check if we are on a public path
-      const publicPaths = [
-        '/',
-        '/auth/login',
-        '/auth/register',
-        '/auth/forgot-password',
-        '/privacy',
-        '/politica-de-privacidad',
-        '/condiciones-del-servicio'
-      ];
-      const isPublicPath = publicPaths.some(path => pathname.startsWith(path));
-      const token = localStorage.getItem('nsg-token');
+    useEffect(() => {
+        const checkAuth = async () => {
+            const publicPaths = [
+                "/",
+                "/auth/login",
+                "/auth/register",
+                "/auth/forgot-password",
+                "/privacy",
+                "/politica-de-privacidad",
+                "/condiciones-del-servicio",
+            ];
 
-      // 2. Logic to determine authorization
-      if (isPublicPath) {
-        // Always allow public paths
-        setIsAuthorized(true);
-      } else if (token) {
-        // If we have a token (and are on a private path), authorize temporarily
-        // The background verification will handle validity
-        setIsAuthorized(true);
-      } else {
-        // Private path AND no token -> Redirect and Block
-        setIsAuthorized(false);
-        router.replace('/auth/login');
-        return; // Stop execution
-      }
+            const isPublicPath = publicPaths.some((path) =>
+                path === "/" ? pathname === "/" : pathname.startsWith(path),
+            );
 
-      // 3. Background Verification (only if we have a token)
-      if (token) {
-        try {
-          const response = await authService.verifySession();
-          // Save user location to store if available
-          if (response?.user?.location) {
-            setUserLocation(response.user.location);
-          }
-        } catch (error) {
-          // If verification fails (401), existing logic in authService removes token
-          // Then we need to re-evaluate or redirect
-          if (!localStorage.getItem('nsg-token')) {
-            // Token was removed
-            if (!isPublicPath) {
-              setIsAuthorized(false);
-              router.replace('/auth/login');
+            let token =
+                typeof window !== "undefined"
+                    ? localStorage.getItem("nsg-token")
+                    : null;
+
+            // Handle edge cases where token might be a string "null" or "undefined"
+            if (token === "null" || token === "undefined") {
+                token = null;
+                if (typeof window !== "undefined")
+                    localStorage.removeItem("nsg-token");
             }
-          }
-        }
-      }
-    };
 
-    checkAuth();
+            if (isPublicPath) {
+                setIsAuthorized(true);
+            } else if (token) {
+                setIsAuthorized(true);
+            } else {
+                setIsAuthorized(false);
+                router.replace("/auth/login");
+                return;
+            }
 
-    // Constant verification loop
-    const intervalId = setInterval(checkAuth, 10000);
-    return () => clearInterval(intervalId);
-  }, [pathname, router]);
+            if (token) {
+                try {
+                    const response = await authService.verifySession();
+                    if (response?.user) {
+                        setUserProfile(response.user);
+                        if (response.user.id) {
+                            setUserId(response.user.id);
+                        }
+                        if (response.user.location) {
+                            setUserLocation(response.user.location);
+                        }
+                    }
+                } catch (error) {
+                    console.error(
+                        "[TokenVerifier] Error verifying session:",
+                        error,
+                    );
+                    if (
+                        typeof window !== "undefined" &&
+                        !localStorage.getItem("nsg-token")
+                    ) {
+                        if (!isPublicPath) {
+                            setIsAuthorized(false);
+                            router.replace("/auth/login");
+                        }
+                    }
+                }
+            }
+        };
 
-  // If not authorized, render NOTHING (null) effectively blocking the page
-  if (!isAuthorized) {
-    return null;
-  }
+        checkAuth();
 
-  return <>{children}</>;
+        // Check every 30 seconds instead of 10 to reduce server load
+        const intervalId = setInterval(checkAuth, 30000);
+        return () => clearInterval(intervalId);
+    }, [pathname, router, setUserLocation, setUserProfile, setUserId]);
+
+    // If not authorized, render NOTHING (null) effectively blocking the page
+    if (!isAuthorized) {
+        return null;
+    }
+
+    return <>{children}</>;
 }

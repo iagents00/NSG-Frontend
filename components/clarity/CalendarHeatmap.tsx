@@ -16,7 +16,10 @@ interface CalendarHeatmapProps {
     isLoading?: boolean;
 }
 
-export default function CalendarHeatmap({ data, isLoading = false }: CalendarHeatmapProps) {
+export default function CalendarHeatmap({
+    data,
+    isLoading = false,
+}: CalendarHeatmapProps) {
     const [currentMonth, setCurrentMonth] = useState(new Date());
 
     const { weeks, monthName, emptyStart } = useMemo(() => {
@@ -26,7 +29,10 @@ export default function CalendarHeatmap({ data, isLoading = false }: CalendarHea
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
 
-        const monthName = firstDay.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+        const monthName = firstDay.toLocaleDateString("es-ES", {
+            month: "long",
+            year: "numeric",
+        });
 
         // Get day of week (0 = Sunday, 1 = Monday, etc.)
         const startDayOfWeek = firstDay.getDay();
@@ -59,8 +65,8 @@ export default function CalendarHeatmap({ data, isLoading = false }: CalendarHea
     const getIntensity = (date: Date | null): number => {
         if (!date) return 0;
 
-        const dateStr = date.toISOString().split('T')[0];
-        const dayData = data.find(d => d.date === dateStr);
+        const dateStr = date.toISOString().split("T")[0];
+        const dayData = data.find((d) => d.date === dateStr);
 
         return dayData?.count || 0;
     };
@@ -74,17 +80,27 @@ export default function CalendarHeatmap({ data, isLoading = false }: CalendarHea
 
     const getDayData = (date: Date | null) => {
         if (!date) return null;
-        const dateStr = date.toISOString().split('T')[0];
-        return data.find(d => d.date === dateStr);
+        const dateStr = date.toISOString().split("T")[0];
+        return data.find((d) => d.date === dateStr);
     };
 
     const goToPreviousMonth = () => {
-        setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
+        setCurrentMonth(
+            new Date(
+                currentMonth.getFullYear(),
+                currentMonth.getMonth() - 1,
+                1,
+            ),
+        );
     };
 
     const goToNextMonth = () => {
         const today = new Date();
-        const nextMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
+        const nextMonth = new Date(
+            currentMonth.getFullYear(),
+            currentMonth.getMonth() + 1,
+            1,
+        );
 
         // Don't allow going beyond current month
         if (nextMonth <= today) {
@@ -94,7 +110,11 @@ export default function CalendarHeatmap({ data, isLoading = false }: CalendarHea
 
     const isCurrentMonthOrFuture = () => {
         const today = new Date();
-        const nextMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
+        const nextMonth = new Date(
+            currentMonth.getFullYear(),
+            currentMonth.getMonth() + 1,
+            1,
+        );
         return nextMonth > today;
     };
 
@@ -103,7 +123,7 @@ export default function CalendarHeatmap({ data, isLoading = false }: CalendarHea
     }
 
     return (
-        <div className="bg-white p-6 sm:p-8 rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-white p-6 sm:p-8 rounded-4xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
                 <h4 className="font-display font-bold text-lg sm:text-xl text-navy-950 capitalize">
@@ -125,7 +145,7 @@ export default function CalendarHeatmap({ data, isLoading = false }: CalendarHea
                             "p-2 rounded-lg transition-colors",
                             isCurrentMonthOrFuture()
                                 ? "text-slate-300 cursor-not-allowed"
-                                : "hover:bg-slate-100 text-slate-600 hover:text-navy-950"
+                                : "hover:bg-slate-100 text-slate-600 hover:text-navy-950",
                         )}
                         aria-label="Mes siguiente"
                     >
@@ -136,8 +156,11 @@ export default function CalendarHeatmap({ data, isLoading = false }: CalendarHea
 
             {/* Day Headers */}
             <div className="grid grid-cols-7 gap-2 mb-2">
-                {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((day, i) => (
-                    <div key={i} className="text-center text-[10px] font-bold uppercase tracking-wider text-slate-400 pb-2">
+                {["L", "M", "X", "J", "V", "S", "D"].map((day, i) => (
+                    <div
+                        key={i}
+                        className="text-center text-[10px] font-bold uppercase tracking-wider text-slate-400 pb-2"
+                    >
                         {day}
                     </div>
                 ))}
@@ -150,23 +173,36 @@ export default function CalendarHeatmap({ data, isLoading = false }: CalendarHea
                         {week.map((date, dayIndex) => {
                             const intensity = getIntensity(date);
                             const dayData = getDayData(date);
-                            const isToday = date && date.toDateString() === new Date().toDateString();
+                            const isToday =
+                                date &&
+                                date.toDateString() ===
+                                    new Date().toDateString();
 
                             return (
                                 <div key={dayIndex} className="relative group">
                                     <div
                                         className={clsx(
                                             "aspect-square rounded-lg border-2 transition-all duration-300 flex items-center justify-center relative overflow-hidden",
-                                            date ? getIntensityColor(intensity) : "bg-transparent border-transparent",
-                                            date && "hover:scale-110 hover:shadow-md cursor-pointer",
-                                            isToday && "ring-2 ring-blue-500 ring-offset-2"
+                                            date
+                                                ? getIntensityColor(intensity)
+                                                : "bg-transparent border-transparent",
+                                            date &&
+                                                "hover:scale-110 hover:shadow-md cursor-pointer",
+                                            isToday &&
+                                                "ring-2 ring-blue-500 ring-offset-2",
                                         )}
                                     >
                                         {date && (
-                                            <span className={clsx(
-                                                "text-xs font-bold transition-colors",
-                                                intensity === 0 ? "text-slate-400" : intensity < 3 ? "text-slate-700" : "text-white"
-                                            )}>
+                                            <span
+                                                className={clsx(
+                                                    "text-xs font-bold transition-colors",
+                                                    intensity === 0
+                                                        ? "text-slate-400"
+                                                        : intensity < 3
+                                                          ? "text-slate-700"
+                                                          : "text-white",
+                                                )}
+                                            >
                                                 {date.getDate()}
                                             </span>
                                         )}
@@ -177,26 +213,42 @@ export default function CalendarHeatmap({ data, isLoading = false }: CalendarHea
                                         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
                                             <div className="bg-navy-950 text-white p-3 rounded-xl shadow-2xl whitespace-nowrap text-xs">
                                                 <p className="font-bold mb-2">
-                                                    {date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+                                                    {date.toLocaleDateString(
+                                                        "es-ES",
+                                                        {
+                                                            weekday: "long",
+                                                            day: "numeric",
+                                                            month: "long",
+                                                        },
+                                                    )}
                                                 </p>
                                                 <div className="space-y-1">
                                                     <p className="text-blue-200">
-                                                        {dayData.count} {dayData.count === 1 ? 'protocolo' : 'protocolos'} completados
+                                                        {dayData.count}{" "}
+                                                        {dayData.count === 1
+                                                            ? "objetivo completado"
+                                                            : "objetivos completados"}
                                                     </p>
                                                     <div className="flex flex-wrap gap-1 mt-2">
-                                                        {dayData.protocols.includes('morning_clarity') && (
+                                                        {dayData.protocols.includes(
+                                                            "morning_clarity",
+                                                        ) && (
                                                             <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 rounded text-[10px] font-bold">
-                                                                Morning
+                                                                Mañana
                                                             </span>
                                                         )}
-                                                        {dayData.protocols.includes('power_check') && (
+                                                        {dayData.protocols.includes(
+                                                            "power_check",
+                                                        ) && (
                                                             <span className="px-2 py-0.5 bg-blue-500/20 text-blue-300 rounded text-[10px] font-bold">
-                                                                Power
+                                                                Mediodía
                                                             </span>
                                                         )}
-                                                        {dayData.protocols.includes('next_day_planning') && (
+                                                        {dayData.protocols.includes(
+                                                            "next_day_planning",
+                                                        ) && (
                                                             <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-300 rounded text-[10px] font-bold">
-                                                                Next Day
+                                                                Noche
                                                             </span>
                                                         )}
                                                     </div>
@@ -218,25 +270,31 @@ export default function CalendarHeatmap({ data, isLoading = false }: CalendarHea
             {/* Legend */}
             <div className="flex items-center justify-between mt-6 pt-6 border-t border-slate-100">
                 <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Menos</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        Menos
+                    </span>
                     <div className="flex items-center gap-1">
                         {[0, 1, 2, 3].map((level) => (
                             <div
                                 key={level}
                                 className={clsx(
                                     "w-5 h-5 rounded border-2",
-                                    getIntensityColor(level)
+                                    getIntensityColor(level),
                                 )}
                             />
                         ))}
                     </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Más</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        Más
+                    </span>
                 </div>
 
                 <div className="text-right">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Días perfectos</p>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        Días al 100%
+                    </p>
                     <p className="font-bold text-lg text-blue-600">
-                        {data.filter(d => d.count === 3).length}
+                        {data.filter((d) => d.count === 3).length}
                     </p>
                 </div>
             </div>

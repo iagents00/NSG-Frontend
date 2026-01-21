@@ -20,7 +20,9 @@ import { SkeletonTable } from "@/components/ui/Skeleton";
 
 interface User {
     _id: string;
-    username: string;
+    firstName?: string;
+    lastName?: string;
+    username: string | null;
     email: string;
     role: string;
     createdAt: string;
@@ -120,12 +122,25 @@ export default function UserManagement() {
         }
     };
 
-    const filteredUsers = users.filter(
-        (user) =>
-            user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.role.toLowerCase().includes(searchTerm.toLowerCase()),
-    );
+    const getDisplayName = (user: User) => {
+        if (user.firstName || user.lastName) {
+            return `${user.firstName || ""} ${user.lastName || ""}`.trim();
+        }
+        return `user-nsg${user._id.substring(0, 6)}`;
+    };
+
+    const filteredUsers = users.filter((user) => {
+        const displayName = getDisplayName(user).toLowerCase();
+        const email = user.email.toLowerCase();
+        const role = user.role.toLowerCase();
+        const search = searchTerm.toLowerCase();
+
+        return (
+            displayName.includes(search) ||
+            email.includes(search) ||
+            role.includes(search)
+        );
+    });
 
     // Pagination logic
     const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
@@ -290,13 +305,28 @@ export default function UserManagement() {
                                                 <td className="px-1 xs:px-2 py-2 sm:py-4">
                                                     <div className="flex items-center gap-2 xs:gap-3">
                                                         <div className="w-8 h-8 sm:w-10 sm:h-10 bg-linear-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-[10px] sm:text-sm shrink-0">
-                                                            {user.username
-                                                                .substring(0, 2)
-                                                                .toUpperCase()}
+                                                            {user.firstName
+                                                                ? user.firstName
+                                                                      .substring(
+                                                                          0,
+                                                                          1,
+                                                                      )
+                                                                      .toUpperCase()
+                                                                : "U"}
+                                                            {user.lastName
+                                                                ? user.lastName
+                                                                      .substring(
+                                                                          0,
+                                                                          1,
+                                                                      )
+                                                                      .toUpperCase()
+                                                                : "N"}
                                                         </div>
                                                         <div className="min-w-0">
                                                             <p className="font-bold text-navy-900 text-xs sm:text-sm md:text-base truncate">
-                                                                {user.username}
+                                                                {getDisplayName(
+                                                                    user,
+                                                                )}
                                                             </p>
                                                         </div>
                                                     </div>

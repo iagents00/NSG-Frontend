@@ -1,35 +1,24 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from "next/navigation";
+import React, { useState, Suspense } from "react";
+import { useRouter } from "next/navigation";
 import { useAppStore } from "@/store/useAppStore";
-import { CONTEXT, RoleType } from "@/data/context";
+import { RoleType } from "@/data/context";
 import BrandAtom from "@/components/ui/BrandAtom";
-import clsx from "clsx";
 import Link from "next/link";
-import { Lock, ChevronLeft } from "lucide-react";
-import { authService } from '@/lib/auth';
-import { translateAuthError } from '@/lib/error-translator';
+import { Lock } from "lucide-react";
+import { authService } from "@/lib/auth";
+import { translateAuthError } from "@/lib/error-translator";
 
 function LoginContent() {
     const router = useRouter();
-    const searchParams = useSearchParams();
     const setRole = useAppStore((state) => state.setRole);
     const setUserId = useAppStore((state) => state.setUserId);
 
-    const [selectedRole, setSelectedRole] = useState<RoleType>('manager');
     const [isAnimating, setIsAnimating] = useState(false);
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-        const roleParam = searchParams.get('role') as RoleType | null;
-        if (roleParam && CONTEXT[roleParam]) {
-            setSelectedRole(roleParam);
-        }
-    }, [searchParams]);
-
 
     const getLocation = async (): Promise<any> => {
         return new Promise((resolve) => {
@@ -38,16 +27,24 @@ function LoginContent() {
                 return;
             }
 
+            // Set a timeout of 5 seconds to avoid waiting forever
+            const timeoutId = setTimeout(() => {
+                console.warn("Geolocation request timed out");
+                resolve(undefined);
+            }, 5000);
+
             navigator.geolocation.getCurrentPosition(
                 async (position) => {
+                    clearTimeout(timeoutId);
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
-                    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                    const timezone =
+                        Intl.DateTimeFormat().resolvedOptions().timeZone;
 
                     // Reverse geocoding to get city and country
                     try {
                         const response = await fetch(
-                            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10`
+                            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10`,
                         );
                         const data = await response.json();
 
@@ -55,22 +52,28 @@ function LoginContent() {
                             latitude: lat,
                             longitude: lng,
                             timezone,
-                            city: data.address?.city || data.address?.town || data.address?.village || data.address?.state,
-                            country: data.address?.country
+                            city:
+                                data.address?.city ||
+                                data.address?.town ||
+                                data.address?.village ||
+                                data.address?.state,
+                            country: data.address?.country,
                         });
                     } catch (error) {
                         console.error("Error getting location name", error);
                         resolve({
                             latitude: lat,
                             longitude: lng,
-                            timezone
+                            timezone,
                         });
                     }
                 },
                 (error) => {
+                    clearTimeout(timeoutId);
                     console.error("Error getting location", error);
                     resolve(undefined);
-                }
+                },
+                { timeout: 5000 }, // Geolocation option timeout as well
             );
         });
     };
@@ -91,11 +94,11 @@ function LoginContent() {
             const data = await authService.login({
                 email: email.toLowerCase(),
                 password,
-                location
+                location,
             });
 
             if (data.token) {
-                localStorage.setItem('nsg-token', data.token);
+                localStorage.setItem("nsg-token", data.token);
             }
 
             // Save real user ID from backend response
@@ -103,20 +106,23 @@ function LoginContent() {
                 setUserId((data.user as any).id);
             }
 
+            // Save user role from backend
             if ((data.user as any)?.role) {
                 setRole((data.user as any).role as RoleType);
-            } else {
-                setRole(selectedRole);
             }
+
             router.push("/dashboard");
         } catch (err: unknown) {
             const error = err as any;
-            setError(translateAuthError(error.response?.data?.message || error.message) || "Credenciales inválidas. Intenta nuevamente.");
+            setError(
+                translateAuthError(
+                    error.response?.data?.message || error.message,
+                ) || "Credenciales inválidas. Intenta nuevamente.",
+            );
         } finally {
             setIsAnimating(false);
         }
     };
-
 
     return (
         <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 relative overflow-hidden">
@@ -131,7 +137,10 @@ function LoginContent() {
                 <div className="bg-white/80 backdrop-blur-xl border border-white/40 rounded-[28px] shadow-xl shadow-slate-200/50 p-8 md:p-10 overflow-hidden relative">
                     {/* Header Section */}
                     <div className="flex flex-col items-center text-center mb-6">
-                        <BrandAtom className="w-12 h-12 mb-2" variant="colored" />
+                        <BrandAtom
+                            className="w-12 h-12 mb-2"
+                            variant="colored"
+                        />
 
                         <div className="space-y-1">
                             <h1 className="font-display font-medium text-slate-900 text-2xl tracking-tight">
@@ -161,9 +170,13 @@ function LoginContent() {
                         >
                             <div className="space-y-4">
                                 <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase tracking-wider">Usuario / Email</label>
+                                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase tracking-wider">
+                                        Usuario / Email
+                                    </label>
                                     <div className="relative group">
-                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors flex items-center justify-center font-bold text-[10px]">@</div>
+                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors flex items-center justify-center font-bold text-[10px]">
+                                            @
+                                        </div>
                                         <input
                                             type="text"
                                             value={email}
@@ -178,7 +191,9 @@ function LoginContent() {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase tracking-wider">Contraseña</label>
+                                    <label className="text-xs font-bold text-slate-500 ml-1 uppercase tracking-wider">
+                                        Contraseña
+                                    </label>
                                     <div className="relative group">
                                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
                                         <input
@@ -197,7 +212,9 @@ function LoginContent() {
                                             href="/auth/forgot-password"
                                             onClick={(e) => {
                                                 e.preventDefault();
-                                                router.push('/auth/forgot-password');
+                                                router.push(
+                                                    "/auth/forgot-password",
+                                                );
                                             }}
                                             className="text-[10px] font-bold text-slate-400 hover:text-blue-600 transition-colors uppercase tracking-widest cursor-pointer"
                                         >
@@ -219,9 +236,11 @@ function LoginContent() {
 
                             {/* Register Link */}
                             <div className="mt-8 pt-6 border-t border-slate-100 flex justify-center text-sm">
-                                <span className="text-slate-500 mr-1">¿No tienes cuenta?</span>
+                                <span className="text-slate-500 mr-1">
+                                    ¿No tienes cuenta?
+                                </span>
                                 <Link
-                                    href={`/auth/register?role=${selectedRole || 'manager'}`}
+                                    href="/auth/register"
                                     className="text-blue-600 font-semibold hover:text-blue-700 transition-colors cursor-pointer"
                                 >
                                     Registrarse
@@ -233,9 +252,15 @@ function LoginContent() {
                     {/* Footer */}
                     <div className="mt-8 text-center space-y-2">
                         <div className="flex justify-center gap-6 text-xs text-slate-400 font-medium">
-                            <span className="hover:text-slate-600 cursor-pointer transition-colors">Ayuda</span>
-                            <span className="hover:text-slate-600 cursor-pointer transition-colors">Privacidad</span>
-                            <span className="hover:text-slate-600 cursor-pointer transition-colors">Términos</span>
+                            <span className="hover:text-slate-600 cursor-pointer transition-colors">
+                                Ayuda
+                            </span>
+                            <span className="hover:text-slate-600 cursor-pointer transition-colors">
+                                Privacidad
+                            </span>
+                            <span className="hover:text-slate-600 cursor-pointer transition-colors">
+                                Términos
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -246,7 +271,13 @@ function LoginContent() {
 
 export default function LoginPage() {
     return (
-        <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-400">Cargando...</div>}>
+        <Suspense
+            fallback={
+                <div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-400">
+                    Cargando...
+                </div>
+            }
+        >
             <LoginContent />
         </Suspense>
     );

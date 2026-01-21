@@ -586,10 +586,26 @@ function IntegrationCard({
     soon,
     onAction,
 }: IntegrationCardProps) {
+    // Get proper button background color
+    const getButtonBg = () => {
+        if (soon) return "bg-slate-100 text-slate-400";
+        if (connected) return "bg-red-50 text-red-600 hover:bg-red-100";
+
+        // Explicit color classes for Tailwind
+        const colorMap: Record<string, string> = {
+            "[#0088cc]": "bg-blue-600 text-white hover:bg-blue-700",
+            "blue-600": "bg-blue-600 text-white hover:bg-blue-700",
+            "purple-600": "bg-purple-600 text-white hover:bg-purple-700",
+            "pink-600": "bg-pink-600 text-white hover:bg-pink-700",
+        };
+
+        return colorMap[color] || "bg-blue-600 text-white hover:bg-blue-700";
+    };
+
     return (
         <div
             className={clsx(
-                "relative p-4 rounded-2xl border transition-all group",
+                "relative p-3 rounded-xl border transition-all group",
                 soon
                     ? "opacity-60 cursor-not-allowed"
                     : "cursor-pointer hover:shadow-md",
@@ -598,10 +614,10 @@ function IntegrationCard({
                     : "bg-slate-50 border-slate-200 hover:border-slate-300",
             )}
         >
-            <div className="flex items-start gap-4 mb-4">
+            <div className="flex items-start gap-3 mb-3">
                 <div
                     className={clsx(
-                        "w-12 h-12 rounded-xl flex items-center justify-center bg-white",
+                        "w-10 h-10 rounded-lg flex items-center justify-center bg-white shrink-0",
                         connected && "shadow-md",
                     )}
                 >
@@ -613,20 +629,20 @@ function IntegrationCard({
                         {icon}
                     </div>
                 </div>
-                <div className="flex-1">
-                    <h4 className="font-bold text-navy-900 text-sm mb-1">
+                <div className="flex-1 min-w-0">
+                    <h4 className="font-bold text-navy-900 text-sm mb-0.5 truncate">
                         {name}
                     </h4>
-                    <p className="text-[0.7rem] text-slate-500">
+                    <p className="text-[0.65rem] text-slate-500 leading-tight line-clamp-1">
                         {description}
                     </p>
                 </div>
             </div>
-            <div className="flex items-center justify-between text-xs mb-3">
-                <span className="text-slate-500">Estado:</span>
+            <div className="flex items-center justify-between text-[0.65rem] mb-2.5">
+                <span className="text-slate-500 font-medium">Estado:</span>
                 <span
                     className={clsx(
-                        "font-bold",
+                        "font-bold text-[0.65rem]",
                         connected ? "text-emerald-600" : "text-slate-400",
                     )}
                 >
@@ -638,12 +654,8 @@ function IntegrationCard({
                 onClick={soon ? undefined : onAction}
                 disabled={loading || soon}
                 className={clsx(
-                    "w-full py-2 px-4 rounded-xl text-xs font-bold transition",
-                    soon
-                        ? "bg-slate-100 text-slate-400"
-                        : connected
-                          ? "bg-red-50 text-red-600 hover:bg-red-100"
-                          : `bg-${color} text-white hover:opacity-90`,
+                    "w-full py-2 px-3 rounded-lg text-[0.7rem] font-bold transition",
+                    getButtonBg(),
                 )}
             >
                 {loading

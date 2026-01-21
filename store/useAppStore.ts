@@ -24,6 +24,15 @@ interface AppState {
     city?: string;
     country?: string;
   } | null;
+  userProfile: {
+    id: string;
+    email: string;
+    username?: string;
+    firstName?: string;
+    lastName?: string;
+    role: Role;
+    telegram_id?: number | null;
+  } | null;
 
   setRole: (role: Role) => void;
   setTheme: (theme: 'light' | 'dark' | 'neon' | 'system') => void;
@@ -32,8 +41,8 @@ interface AppState {
   addMessage: (role: Role, message: Message) => void;
   setMessages: (role: Role, messages: Message[]) => void;
   setUserId: (id: string) => void;
-  setUserLocation: (location: { latitude: number; longitude: number; timezone: string; } | null) => void;
-
+  setUserLocation: (location: AppState['userLocation']) => void;
+  setUserProfile: (profile: AppState['userProfile']) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -51,8 +60,9 @@ export const useAppStore = create<AppState>()(
         patient: [],
         admin: [],
       },
-      userId: '', // Dynamic ID populated via setUserId
+      userId: '',
       userLocation: null,
+      userProfile: null,
 
       setRole: (role) => set({ currentRole: role }),
       setTheme: (theme) => set({ theme }),
@@ -72,7 +82,7 @@ export const useAppStore = create<AppState>()(
       })),
       setUserId: (id) => set({ userId: id }),
       setUserLocation: (location) => set({ userLocation: location }),
-
+      setUserProfile: (profile) => set({ userProfile: profile }),
     }),
     {
       name: 'nsg-storage',
@@ -81,7 +91,8 @@ export const useAppStore = create<AppState>()(
         theme: state.theme,
         conversations: state.conversations,
         userId: state.userId,
-        userLocation: state.userLocation
+        userLocation: state.userLocation,
+        userProfile: state.userProfile
       }),
     }
   )
