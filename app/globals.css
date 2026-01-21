@@ -48,7 +48,7 @@
     --animate-fluid-cycle-2: fluidCycle2 14s ease-in-out infinite;
     --animate-fluid-cycle-3: fluidCycle3 14s ease-in-out infinite;
 
-    /* Jarvis Animations */
+    /* Neural Engine Animations */
     --animate-gradient-xy: gradient-xy 3s ease infinite;
     --animate-wave: wave 1s ease-in-out infinite;
 }
@@ -617,7 +617,7 @@ body {
     }
 }
 
-/* Jarvis Animations */
+/* NSG Intelligence Animations */
 @keyframes gradient-xy {
     0%,
     100% {

@@ -15,7 +15,7 @@ Responde ÚNICAMENTE con texto directo y elegante. Debes guiar al usuario a la a
 ESTÁ PROHIBIDO usar emojis, líneas de separación, markdown complejo o mencionar componentes de UI.
 Sé extremadamente conciso. Tono 'Apple Pro': minimalista pero poderoso.`;
 
-export default function JarvisAssistant() {
+export default function NSGAssistant() {
     // --- LOGIC STATES ---
     const [input, setInput] = useState("");
     const [lastResponse, setLastResponse] = useState<string | null>(null);
@@ -26,7 +26,7 @@ export default function JarvisAssistant() {
     >("IDLE");
 
     const [showNotification, setShowNotification] = useState(false);
-    const [username, setUsername] = useState<string>("Ejecutivo");
+    const [displayName, setDisplayName] = useState<string>("Ejecutivo");
     const { showToast } = useToast();
 
     const inputRef = useRef<HTMLInputElement>(null);
@@ -42,11 +42,22 @@ export default function JarvisAssistant() {
         const fetchUser = async () => {
             try {
                 const data = await authService.verifySession();
-                if (data?.user?.username) {
-                    setUsername(data.user.username);
+                if (data?.user) {
+                    if (data.user.firstName || data.user.lastName) {
+                        setDisplayName(
+                            `${data.user.firstName || ""} ${data.user.lastName || ""}`.trim(),
+                        );
+                    } else if (data.user.id) {
+                        setDisplayName(
+                            `user-nsg${data.user.id.substring(0, 6)}`,
+                        );
+                    }
                 }
             } catch (error) {
-                console.error("Error fetching user session in Jarvis:", error);
+                console.error(
+                    "Error fetching user session in Assistant:",
+                    error,
+                );
             }
         };
         fetchUser();
@@ -139,7 +150,7 @@ export default function JarvisAssistant() {
                         systemInstruction: {
                             parts: [
                                 {
-                                    text: `${BASE_SYSTEM_PROMPT} Te diriges al ejecutivo "${username}". IMPERATIVO: MENCIONA SIEMPRE el nombre "${username}" en tu respuesta de forma natural. RESPONDE SIEMPRE EN CASTELLANO (ESPAÑOL DE ESPAÑA). Tu voz es 'Puck'.`,
+                                    text: `${BASE_SYSTEM_PROMPT} Te diriges al ejecutivo "${displayName}". IMPERATIVO: MENCIONA SIEMPRE el nombre "${displayName}" en tu respuesta de forma natural. RESPONDE SIEMPRE EN CASTELLANO (ESPAÑOL DE ESPAÑA). Tu voz es 'Puck'.`,
                                 },
                             ],
                         },
@@ -336,9 +347,6 @@ export default function JarvisAssistant() {
                 </div>
             </div>
 
-            {/* ==============================================
-          PRO BRAND ATOM (Centered Top)
-         ============================================== */}
             {/* ==============================================
           PRO BRAND ATOM (Centered Top)
          ============================================== */}

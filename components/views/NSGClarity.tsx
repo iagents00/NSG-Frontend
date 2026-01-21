@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
     Target,
     ArrowRight,
@@ -18,7 +18,6 @@ import clsx from "clsx";
 import { useToast } from "@/components/ui/ToastProvider";
 import confetti from "canvas-confetti";
 import { useAppStore } from "@/store/useAppStore";
-import { authService } from "@/lib/auth";
 import api from "@/lib/api";
 
 // Import new metrics components
@@ -151,6 +150,7 @@ interface TimelineItemProps {
     desc: string;
     locked: boolean;
     isChecked: boolean;
+    disabled?: boolean;
     onToggle: (id: string) => void;
 }
 
@@ -162,6 +162,7 @@ function TimelineItem({
     desc,
     locked,
     isChecked,
+    disabled = false,
     onToggle,
 }: TimelineItemProps) {
     const styles: Record<string, ActionStyle> = {
@@ -215,10 +216,12 @@ function TimelineItem({
 
     return (
         <div
-            onClick={() => !locked && onToggle(id)}
+            onClick={() => !locked && !disabled && onToggle(id)}
             className={clsx(
-                "flex gap-3 xs:gap-4 sm:gap-6 relative group cursor-pointer transition-all duration-500 select-none",
-                locked && "opacity-40 pointer-events-none",
+                "flex gap-3 xs:gap-4 sm:gap-6 relative group transition-all duration-500 select-none",
+                locked || disabled
+                    ? "opacity-40 cursor-not-allowed"
+                    : "cursor-pointer",
             )}
         >
             <div className="flex flex-col items-center shrink-0 w-10 xs:w-12">
@@ -250,10 +253,10 @@ function TimelineItem({
             </div>
             <div
                 className={clsx(
-                    "flex-1 p-4 xs:p-5 rounded-3xl xs:rounded-4xl border transition-all duration-500 ease-out relative overflow-hidden",
+                    "flex-1 p-5 rounded-3xl border transition-all duration-500 ease-out relative overflow-hidden",
                     isChecked
-                        ? `${style.active.bg} ${style.active.border} shadow-xl shadow-slate-200/50 translate-x-1`
-                        : "bg-white border-slate-200 hover:border-slate-300 hover:shadow-2xl hover:shadow-slate-200/40",
+                        ? `${style.active.bg} ${style.active.border} shadow-sm`
+                        : "bg-white border-slate-200 hover:border-slate-300 hover:shadow-md",
                 )}
             >
                 {isChecked && (
@@ -268,7 +271,7 @@ function TimelineItem({
                     <div className="space-y-0.5">
                         <h4
                             className={clsx(
-                                "font-display font-bold text-base xs:text-lg lg:text-xl tracking-tight transition-all duration-700",
+                                "font-display font-bold text-lg tracking-tight transition-all duration-700",
                                 isChecked ? style.active.text : "text-navy-950",
                             )}
                         >
@@ -276,7 +279,7 @@ function TimelineItem({
                         </h4>
                         <div
                             className={clsx(
-                                "text-[8px] xs:text-[9px] font-bold uppercase tracking-[0.15em] xs:tracking-[0.2em]",
+                                "text-[10px] font-bold uppercase tracking-widest",
                                 isChecked
                                     ? style.active.accent
                                     : "text-slate-400",
@@ -311,10 +314,8 @@ function TimelineItem({
                 </div>
                 <p
                     className={clsx(
-                        "text-xs xs:text-sm leading-relaxed transition-all duration-500 relative z-10",
-                        isChecked
-                            ? "text-slate-600/80 font-medium"
-                            : "text-slate-500 font-medium",
+                        "text-sm font-medium leading-relaxed transition-all duration-500 relative z-10",
+                        isChecked ? "text-slate-500/70" : "text-slate-500/90",
                     )}
                 >
                     {desc}
@@ -367,7 +368,7 @@ function StrategyCard({ strategy }: { strategy: Strategy }) {
     };
 
     return (
-        <div className="bg-white p-6 xs:p-8 rounded-[2.5rem] lg:rounded-[3rem] border border-slate-200 shadow-2xl shadow-slate-200/60 transition-all duration-500 group overflow-hidden relative flex flex-col h-full">
+        <div className="transition-all duration-500 group overflow-hidden relative flex flex-col h-full">
             {/* Meta Title */}
             <div className="mb-8 relative z-10 pt-1 pr-12">
                 <h4 className="font-display font-bold text-sm lg:text-base tracking-tight text-navy-950 mb-1.5 leading-tight transition-all duration-500 group-hover:text-blue-700">
@@ -417,24 +418,31 @@ function StrategyCard({ strategy }: { strategy: Strategy }) {
                             <div
                                 key={i}
                                 className={clsx(
-                                    "p-5 rounded-3xl border transition-all duration-500 hover:shadow-xl hover:shadow-slate-200/50 hover:scale-[1.02] flex flex-col gap-3 group/action",
-                                    style.bg,
-                                    style.border,
+                                    "p-5 rounded-3xl border border-slate-200 bg-white transition-all duration-500 flex flex-col gap-3 group/action hover:shadow-md hover:border-slate-300 relative overflow-hidden animate-fade-in",
                                 )}
+                                style={{ animationDelay: `${i * 100}ms` }}
                             >
-                                <div className="flex justify-between items-start">
-                                    <div className="space-y-0.5">
-                                        <div
-                                            className={clsx(
-                                                "text-[8px] font-black uppercase tracking-[0.2em]",
-                                                style.accent,
-                                            )}
-                                        >
-                                            {label}
+                                <div className="flex justify-between items-start relative z-10">
+                                    <div className="space-y-1">
+                                        <div className="flex items-center gap-2">
+                                            <div
+                                                className={clsx(
+                                                    "w-1.5 h-1.5 rounded-full",
+                                                    style.numBg,
+                                                )}
+                                            ></div>
+                                            <div
+                                                className={clsx(
+                                                    "text-[10px] font-bold uppercase tracking-widest",
+                                                    style.accent,
+                                                )}
+                                            >
+                                                {label}
+                                            </div>
                                         </div>
                                         <h5
                                             className={clsx(
-                                                "font-display font-bold text-base transition-colors",
+                                                "font-display font-bold text-lg tracking-tight transition-colors",
                                                 style.text,
                                             )}
                                         >
@@ -443,14 +451,14 @@ function StrategyCard({ strategy }: { strategy: Strategy }) {
                                     </div>
                                     <div
                                         className={clsx(
-                                            "w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-lg shadow-blue-900/5 transition-all duration-500 group-hover/action:scale-110 font-bold text-white text-xs",
+                                            "w-7 h-7 rounded-full flex items-center justify-center shrink-0 font-bold text-white text-[10px]",
                                             style.numBg,
                                         )}
                                     >
                                         {i + 1}
                                     </div>
                                 </div>
-                                <p className="text-[12px] font-medium text-slate-500 leading-relaxed pr-2">
+                                <p className="text-sm font-medium text-slate-500/90 leading-relaxed pr-2 relative z-10 transition-colors group-hover/action:text-slate-600">
                                     {description}
                                 </p>
                             </div>
@@ -462,14 +470,12 @@ function StrategyCard({ strategy }: { strategy: Strategy }) {
     );
 }
 
-import { useCallback } from "react";
-
 // --- MAIN COMPONENT ---
 export default function NSGClarity() {
     const { showToast } = useToast();
-    const { userId } = useAppStore();
+    const { userId, userProfile } = useAppStore();
+    const telegramId = userProfile?.telegram_id || null;
     const [isConnected, setIsConnected] = useState(false);
-    const [telegramId, setTelegramId] = useState<number | null>(null);
     const [telegramData, setTelegramData] = useState<{
         username?: string;
     } | null>(null);
@@ -491,30 +497,30 @@ export default function NSGClarity() {
         {
             id: "1",
             time: "Morning",
-            title: "Morning Clarity",
+            title: "Enfoque Mañanero",
             status: "Pendiente",
             color: "emerald" as const,
-            desc: "Establecimiento de la intención estratégica. Sincronización con la Hoja de Alineación y blindaje de prioridades para una ejecución de alto impacto.",
+            desc: "Define tus 3 tareas más importantes y bloquea distracciones para un inicio productivo.",
             locked: false,
             isChecked: false,
         },
         {
             id: "2",
             time: "Noon",
-            title: "Power Check",
+            title: "Sincronización de Mediodía",
             status: "Pendiente",
             color: "blue" as const,
-            desc: "Sincronización táctica y control de flujo. Evaluación de hitos alcanzados y recalibración de energía para asegurar un cierre de jornada resolutivo.",
+            desc: "Revisa lo que has avanzado hoy, ajusta tus prioridades y recarga energía para el resto de la jornada.",
             locked: false,
             isChecked: false,
         },
         {
             id: "3",
             time: "Night",
-            title: "Next Day Planning",
+            title: "Diseño del Mañana",
             status: "Pendiente",
             color: "indigo" as const,
-            desc: "Arquitectura del éxito anticipado. Auditoría de resultados daily, optimización de la Hoja de Alineación y diseño proactivo de la jornada de mañana.",
+            desc: "Cierra el día revisando tus logros y deja lista la ruta detallada para empezar con éxito mañana.",
             locked: false,
             isChecked: false,
         },
@@ -729,27 +735,25 @@ export default function NSGClarity() {
     }, [userId, setTasks]);
 
     useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const data = await authService.verifySession();
-                if (data?.user) {
-                    if (data.user.telegram_id)
-                        setTelegramId(data.user.telegram_id);
-                    if (data.user.id) {
-                        useAppStore.getState().setUserId(data.user.id);
-                        fetchStrategies();
-                        fetchTodayCompletions(); // Load today's completions
-                        fetchAllMetrics(); // Load metrics data
-                    }
-                }
-            } catch (error) {
-                console.error("Error fetching user session:", error);
+        if (userId) {
+            fetchStrategies();
+            fetchTodayCompletions();
+            fetchAllMetrics();
+        }
+    }, [userId, fetchStrategies, fetchTodayCompletions, fetchAllMetrics]);
+
+    // Handle window focus to refresh data
+    useEffect(() => {
+        const handleFocus = () => {
+            if (userId) {
+                fetchStrategies();
+                fetchTodayCompletions();
+                fetchAllMetrics();
             }
         };
-        fetchUser();
-        window.addEventListener("focus", fetchUser);
-        return () => window.removeEventListener("focus", fetchUser);
-    }, [fetchAllMetrics, fetchStrategies, fetchTodayCompletions]);
+        window.addEventListener("focus", handleFocus);
+        return () => window.removeEventListener("focus", handleFocus);
+    }, [userId, fetchStrategies, fetchTodayCompletions, fetchAllMetrics]);
 
     useEffect(() => {
         if (telegramId) syncObjectives();
@@ -906,23 +910,23 @@ export default function NSGClarity() {
     };
 
     return (
-        <div className="max-w-7xl mx-auto px-2 xs:px-4 sm:px-6 lg:px-8 h-full flex flex-col animate-fade-in-up pb-12 md:pb-16">
+        <div className="max-w-7xl mx-auto px-2 xs:px-4 sm:px-6 lg:px-8 min-h-full flex flex-col animate-fade-in-up pb-12 md:pb-16">
             {/* 1. HERO BANNER */}
             <div
                 onClick={() => syncObjectives(true)}
-                className="relative overflow-hidden bg-linear-to-r from-navy-950 via-navy-900 to-navy-950 px-5 py-6 sm:px-8 sm:py-6 rounded-3xl border border-navy-800/50 shadow-xl cursor-pointer group transition-all duration-700 hover:shadow-2xl mb-5 shrink-0"
+                className="relative overflow-hidden bg-linear-to-br from-navy-950 via-slate-900 to-navy-950 px-5 py-6 sm:px-8 sm:py-8 rounded-4xl border border-white/5 shadow-2xl cursor-pointer group transition-all duration-700 hover:shadow-blue-500/10 mb-6 shrink-0"
                 title="Clic para sincronizar objetivos"
             >
                 <div className="relative z-10">
                     <h2 className="font-display font-bold text-2xl lg:text-3xl tracking-tight mb-2">
                         <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-emerald-400">
-                            Claridad y Eficiencia con IA
+                            Tu Centro de Productividad IA
                         </span>
                     </h2>
                     <p className="text-slate-300 text-sm max-w-3xl leading-relaxed">
-                        Sincronización neuronal activa diseñada para la
-                        precisión máxima y el alto rendimiento continuo.
-                        Protocolo de alineación estratégica ejecutándose.
+                        Optimiza tu flujo de trabajo diario con estrategias
+                        personalizadas y seguimiento de tus objetivos en tiempo
+                        real.
                     </p>
                 </div>
             </div>
@@ -1104,9 +1108,9 @@ export default function NSGClarity() {
 
             {activeTab === "execution" ? (
                 /* 4. MAIN GRID (Daily Progress & Actions) */
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 xs:gap-8 mb-6 animate-fade-in-up">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 xs:gap-12 mb-6 animate-fade-in-up md:px-4">
                     {/* Left Column: Daily Progress */}
-                    <div className="lg:col-span-7 flex flex-col gap-6 p-5 xs:p-6 sm:p-8 bg-slate-50/40 backdrop-blur-sm rounded-[2.5rem] lg:rounded-[3.5rem] border border-slate-200/50 shadow-sm relative overflow-hidden group/left">
+                    <div className="lg:col-span-6 flex flex-col gap-6 p-6 xs:p-8 bg-slate-50/40 backdrop-blur-sm rounded-[2.5rem] border border-slate-200/50 shadow-sm relative overflow-hidden group/left transition-all duration-500">
                         <div className="absolute -top-24 -left-24 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl opacity-0 group-hover/left:opacity-100 transition-opacity duration-1000"></div>
 
                         <div className="flex items-center justify-between px-2 relative z-10">
@@ -1143,14 +1147,15 @@ export default function NSGClarity() {
                                             {Math.round(progress)}%
                                         </span>
                                     </div>
-                                    <div className="h-3 bg-slate-100 rounded-full overflow-hidden shadow-inner relative border border-slate-200/50 backdrop-blur-sm">
+                                    <div className="h-2 bg-slate-100/80 rounded-full overflow-hidden relative border border-slate-200/40 backdrop-blur-sm">
                                         <div
                                             className={clsx(
                                                 "h-full transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] relative overflow-hidden",
                                                 progress === 100
-                                                    ? "bg-emerald-500"
-                                                    : "bg-blue-600",
+                                                    ? "bg-linear-to-r from-emerald-400 to-emerald-600 shadow-[0_0_10px_rgba(16,185,129,0.3)]"
+                                                    : "bg-linear-to-r from-blue-500 to-indigo-600 shadow-[0_0_10px_rgba(59,130,246,0.2)]",
                                             )}
+                                            style={{ width: `${progress}%` }}
                                         />
                                     </div>
                                 </div>
@@ -1179,6 +1184,7 @@ export default function NSGClarity() {
                                         desc={t.desc}
                                         locked={t.locked}
                                         isChecked={t.isChecked}
+                                        disabled={!telegramId}
                                         onToggle={handleTaskToggle}
                                     />
                                 ))}
@@ -1187,61 +1193,100 @@ export default function NSGClarity() {
                     </div>
 
                     {/* Right Column: Action Protocols */}
-                    <div className="lg:col-span-5 flex flex-col gap-6 p-5 xs:p-6 sm:p-8 bg-blue-50/30 backdrop-blur-sm rounded-[2.5rem] lg:rounded-[3.5rem] border border-blue-100/50 shadow-sm relative overflow-hidden group/right">
+                    <div
+                        className={clsx(
+                            "lg:col-span-6 flex flex-col gap-6 p-6 xs:p-8 bg-slate-50/40 backdrop-blur-sm rounded-[2.5rem] border border-slate-200/50 shadow-sm relative overflow-hidden group/right transition-all duration-500",
+                        )}
+                    >
                         <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl opacity-0 group-hover/right:opacity-100 transition-opacity duration-1000"></div>
 
                         <div className="flex items-center justify-between px-2 relative z-10">
-                            <h4 className="font-bold text-navy-950 text-xl flex items-center gap-3">
-                                <div className="p-2.5 bg-blue-600 rounded-2xl text-white shadow-lg shadow-blue-600/20 group-hover/right:scale-110 transition-transform duration-500">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-linear-to-tr from-blue-600 to-indigo-600 rounded-2xl text-white shadow-lg shadow-blue-600/20 group-hover/right:scale-110 transition-transform duration-500">
                                     <Target className="w-5 h-5 transition-transform group-hover/right:rotate-12" />
                                 </div>
-                                Protocolo de Acción
-                                <button
-                                    onClick={() => fetchStrategies()}
-                                    className="p-1.5 rounded-lg hover:bg-white hover:text-blue-600 transition active:scale-95 disabled:opacity-50 ml-1 cursor-pointer"
-                                    title="Actualizar protocolos"
-                                    disabled={isLoadingStrategies}
-                                >
-                                    <RefreshCw
-                                        className={clsx(
-                                            "w-3.5 h-3.5 text-slate-400 group-hover:text-blue-500",
-                                            isLoadingStrategies &&
-                                                "animate-spin",
-                                        )}
-                                    />
-                                </button>
-                            </h4>
+                                <div>
+                                    <h4 className="font-bold text-navy-950 text-xl tracking-tight">
+                                        Protocolo de Acción
+                                    </h4>
+                                    <div className="flex items-center gap-2 mt-0.5">
+                                        <div className="px-1.5 py-0.5 bg-blue-100 text-blue-600 rounded text-[8px] font-black uppercase tracking-wider">
+                                            Semanal
+                                        </div>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                            Estrategia de Enfoque
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => fetchStrategies()}
+                                className="p-2.5 rounded-xl bg-white border border-slate-100 text-slate-400 hover:text-blue-600 hover:border-blue-100 hover:shadow-sm transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                                title={
+                                    !telegramId
+                                        ? "Telegram Requerido"
+                                        : "Actualizar protocolos"
+                                }
+                                disabled={isLoadingStrategies || !telegramId}
+                            >
+                                <RefreshCw
+                                    className={clsx(
+                                        "w-4 h-4",
+                                        isLoadingStrategies && "animate-spin",
+                                    )}
+                                />
+                            </button>
                         </div>
 
                         <div className="flex-1 flex flex-col space-y-6 relative z-10">
                             <div className="flex-1 flex flex-col space-y-6 pr-1 custom-scroll min-h-0">
                                 {strategies.length > 0 ? (
-                                    strategies.map((strategy) => (
-                                        <StrategyCard
-                                            key={strategy._id}
-                                            strategy={strategy}
-                                        />
-                                    ))
+                                    <div
+                                        className={clsx(
+                                            "space-y-6",
+                                            !telegramId &&
+                                                "pointer-events-none opacity-50",
+                                        )}
+                                    >
+                                        {strategies.map((strategy) => (
+                                            <StrategyCard
+                                                key={strategy._id}
+                                                strategy={strategy}
+                                            />
+                                        ))}
+                                    </div>
                                 ) : (
-                                    <div className="bg-white/60 backdrop-blur-sm p-10 rounded-[2.5rem] border border-dashed border-slate-200 text-center shadow-sm">
-                                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner ring-1 ring-slate-100">
-                                            <Target className="w-8 h-8 text-slate-300" />
-                                        </div>
-                                        <h5 className="text-navy-900 font-bold mb-2">
-                                            Sin estrategias activas
-                                        </h5>
-                                        <p className="text-slate-400 font-medium text-[13px] mb-8 max-w-[250px] mx-auto leading-relaxed">
-                                            Analiza una noticia o reunión para
-                                            generar protocolos de acción
-                                            inmediata.
-                                        </p>
-                                        <button
-                                            onClick={() => fetchStrategies()}
-                                            className="w-full py-4 bg-blue-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition shadow-lg shadow-blue-200 flex items-center justify-center gap-2 cursor-pointer border-none"
-                                        >
-                                            <RefreshCw className="w-3.5 h-3.5" />
-                                            Actualizar Sistema
-                                        </button>
+                                    <div className="flex-1 flex flex-col items-center justify-center p-8 xs:p-12 bg-slate-50/50 rounded-[2.5rem] border border-dashed border-slate-200 text-center relative overflow-hidden">
+                                        <div className="absolute inset-0 bg-linear-to-b from-transparent to-white/50 pointer-events-none"></div>
+
+                                        {!telegramId ? (
+                                            <div className="flex-1 flex flex-col items-center justify-center py-12 animate-fade-in">
+                                                <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center mb-4 transition-colors group-hover/right:bg-slate-200/50">
+                                                    <Lock className="w-5 h-5 text-slate-400" />
+                                                </div>
+                                                <h5 className="text-slate-400 font-bold text-xs uppercase tracking-[0.2em] mb-1">
+                                                    Acceso Restringido
+                                                </h5>
+                                                <p className="text-slate-400/70 text-[10px] font-medium">
+                                                    Vincular Telegram para
+                                                    activar protocolos
+                                                </p>
+                                            </div>
+                                        ) : (
+                                            <div className="flex-1 flex flex-col items-center justify-center py-12 animate-fade-in">
+                                                <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center mb-4">
+                                                    <Target className="w-5 h-5 text-slate-400" />
+                                                </div>
+                                                <h5 className="text-slate-400 font-bold text-xs uppercase tracking-[0.2em] mb-1">
+                                                    Sin estrategias activas
+                                                </h5>
+                                                <p className="text-slate-400/70 text-[10px] font-medium max-w-[220px] mx-auto">
+                                                    Analiza noticias o reuniones
+                                                    para generar protocolos
+                                                    móviles
+                                                </p>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -1250,7 +1295,7 @@ export default function NSGClarity() {
                 </div>
             ) : (
                 /* 5. METRICS SECTION (Analysis Tab) */
-                <div className="space-y-4 xs:space-y-6 mb-6 xs:mb-8 animate-fade-in">
+                <div className="space-y-4 xs:space-y-6 mb-8 xs:mb-12 animate-fade-in pb-4">
                     <div className="bg-white/50 backdrop-blur-sm p-5 sm:p-6 rounded-[2.5rem] border border-slate-200/60 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div className="flex items-center gap-3">
                             <div className="w-12 h-12 bg-linear-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
@@ -1258,11 +1303,11 @@ export default function NSGClarity() {
                             </div>
                             <div>
                                 <h3 className="font-display font-bold text-xl text-navy-950">
-                                    Insights Operativos
+                                    Análisis de Rendimiento
                                 </h3>
                                 <p className="text-xs text-slate-500 font-medium">
-                                    Auditoría de rendimiento basada en la
-                                    ejecución de protocolos IA
+                                    Estadísticas detalladas sobre tu constancia
+                                    y ejecución de objetivos.
                                 </p>
                             </div>
                         </div>

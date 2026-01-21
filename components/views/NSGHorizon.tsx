@@ -535,9 +535,9 @@ export default function NSGHorizon() {
         });
 
         return (
-            <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 animate-fade-in-up pb-10 px-2 xs:px-4 sm:px-6">
+            <div className="max-w-7xl mx-auto px-2 xs:px-4 sm:px-6 lg:px-8 h-full flex flex-col animate-fade-in-up pb-12 md:pb-16">
                 {/* Dark Header Banner - Clarity Style */}
-                <div className="relative overflow-hidden bg-linear-to-r from-navy-950 via-navy-900 to-navy-950 px-4 py-5 xs:px-5 sm:px-8 sm:py-6 rounded-2xl xs:rounded-3xl border border-navy-800/50 shadow-xl">
+                <div className="relative overflow-hidden bg-linear-to-r from-navy-950 via-navy-900 to-navy-950 px-4 py-5 xs:px-5 sm:px-8 sm:py-6 rounded-2xl xs:rounded-3xl border border-navy-800/50 shadow-xl mb-5 shrink-0">
                     <div className="relative z-10">
                         <h2 className="font-display font-bold text-2xl lg:text-3xl tracking-tight">
                             <span className="text-white">Diseño de </span>
@@ -554,13 +554,13 @@ export default function NSGHorizon() {
                 </div>
 
                 {/* TAB NAVIGATION - Clarity Style */}
-                <div className="flex p-1 bg-slate-50 rounded-xl w-full max-w-md shadow-inner border border-slate-100">
+                <div className="flex p-1.5 bg-slate-100/50 backdrop-blur-md rounded-2xl w-full sm:w-fit mb-6 border border-slate-200/50 self-center">
                     <button
                         onClick={() => setActiveTab("fathom")}
                         className={clsx(
-                            "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all duration-300",
+                            "flex-1 flex items-center justify-center gap-2.5 px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 sm:flex-none whitespace-nowrap",
                             activeTab === "fathom"
-                                ? "bg-white text-blue-600 shadow-sm scale-105"
+                                ? "bg-white text-blue-600 shadow-sm ring-1 ring-slate-200"
                                 : "text-slate-400 hover:text-gray-700 hover:bg-white/50",
                         )}
                     >
@@ -570,9 +570,9 @@ export default function NSGHorizon() {
                     <button
                         onClick={() => setActiveTab("manual")}
                         className={clsx(
-                            "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all duration-300",
+                            "flex-1 flex items-center justify-center gap-2.5 px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 sm:flex-none whitespace-nowrap",
                             activeTab === "manual"
-                                ? "bg-white text-blue-600 shadow-sm scale-105"
+                                ? "bg-white text-blue-600 shadow-sm ring-1 ring-slate-200"
                                 : "text-slate-400 hover:text-gray-700 hover:bg-white/50",
                         )}
                     >

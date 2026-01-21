@@ -34,7 +34,9 @@ export default function Sidebar() {
     const pathname = usePathname();
     const router = useRouter();
 
-    const [username, setUsername] = useState<string | null>(null);
+    const [firstName, setFirstName] = useState<string | null>(null);
+    const [lastName, setLastName] = useState<string | null>(null);
+    const [userId, setUserId] = useState<string | null>(null);
     const [showUserMenu, setShowUserMenu] = useState(false);
 
     const roleKey = (currentRole as RoleType) || "patient";
@@ -44,11 +46,13 @@ export default function Sidebar() {
         const fetchUser = async () => {
             try {
                 const data = await authService.verifySession();
-                if (data?.user?.username) {
-                    setUsername(data.user.username);
-                }
-                if (data?.user?.role) {
-                    setRole(data.user.role as RoleType);
+                if (data?.user) {
+                    setFirstName(data.user.firstName);
+                    setLastName(data.user.lastName);
+                    setUserId(data.user.id);
+                    if (data.user.role) {
+                        setRole(data.user.role as RoleType);
+                    }
                 }
             } catch (error) {
                 console.error("Error fetching user session in Sidebar:", error);
@@ -57,19 +61,24 @@ export default function Sidebar() {
         fetchUser();
     }, [setRole]);
 
-    // Generate avatar from username
-    const getAvatarInitials = (name: string | null) => {
-        if (!name) return "US";
-        const parts = name.split(" ");
-        if (parts.length >= 2) {
-            return (parts[0][0] + parts[1][0]).toUpperCase();
+    const getDisplayName = () => {
+        if (firstName || lastName) {
+            return `${firstName || ""} ${lastName || ""}`.trim();
         }
-        return name.substring(0, 2).toUpperCase();
+        return `user-nsg${userId?.substring(0, 6) || ""}`;
     };
 
-    // Get avatar color based on username
-    const getAvatarColor = (name: string | null) => {
-        if (!name) return "bg-blue-600";
+    // Generate avatar initials
+    const getAvatarInitials = () => {
+        if (firstName && lastName) {
+            return (firstName[0] + lastName[0]).toUpperCase();
+        }
+        if (firstName) return firstName.substring(0, 2).toUpperCase();
+        return "UN"; // User NSG
+    };
+
+    // Get avatar color based on ID
+    const getAvatarColor = () => {
         const colors = [
             "bg-blue-600",
             "bg-teal-600",
@@ -78,7 +87,8 @@ export default function Sidebar() {
             "bg-orange-600",
             "bg-cyan-600",
         ];
-        const hash = name
+        const seed = userId || "guest";
+        const hash = seed
             .split("")
             .reduce((acc, char) => acc + char.charCodeAt(0), 0);
         return colors[hash % colors.length];
@@ -134,7 +144,10 @@ export default function Sidebar() {
                 <div className="h-16 xs:h-20 flex items-center px-4 xs:px-6 border-b border-navy-900 justify-between bg-navy-950/50 backdrop-blur-md sticky top-0 z-10 shrink-0">
                     <div className="flex items-center gap-2 xs:gap-3">
                         <div className="w-6 h-6 xs:w-8 xs:h-8 relative shrink-0">
-                            <BrandAtom variant="colored" className="w-full h-full" />
+                            <BrandAtom
+                                variant="colored"
+                                className="w-full h-full"
+                            />
                         </div>
                         <div className="flex flex-col">
                             <span className="font-display font-bold text-white text-base xs:text-lg tracking-tight leading-none">
@@ -143,8 +156,8 @@ export default function Sidebar() {
                                     Intelligence
                                 </span>
                             </span>
-                            <span className="text-[9px] font-bold text-blue-400/60 tracking-widest uppercase mt-1">
-                                v1.0.0-BETA
+                            <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest block">
+                                {config?.roleDesc || "User"}
                             </span>
                         </div>
                     </div>
@@ -167,14 +180,14 @@ export default function Sidebar() {
                         <div
                             className={clsx(
                                 "w-9 h-9 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg border border-white/10 group-hover:scale-105 transition-transform",
-                                getAvatarColor(username),
+                                getAvatarColor(),
                             )}
                         >
-                            {getAvatarInitials(username)}
+                            {getAvatarInitials()}
                         </div>
                         <div className="overflow-hidden flex-1">
                             <p className="text-xs font-bold text-white truncate leading-none mb-1">
-                                {username || "Usuario"}
+                                {getDisplayName()}
                             </p>
                             <p className="text-[0.6rem] font-bold text-slate-500 uppercase tracking-widest truncate">
                                 {config?.roleDesc || "GUEST"}

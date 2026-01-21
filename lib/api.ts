@@ -83,32 +83,26 @@ api.interceptors.response.use(
             const message = error.response.data?.message || error.message;
 
             if (isDevelopment) {
-                console.error("[ERROR] API Error:", {
-                    status,
-                    message,
-                    url: error.config?.url,
-                    data: error.response.data,
-                });
+                console.error(`[API Error] ${status} ${message} - URL: ${error.config?.url}`);
             }
 
             // Handle specific error cases
             switch (status) {
                 case 401:
-                    // Unauthorized - Only redirect for authentication endpoints
-                    // Don't redirect for 401 on data endpoints (may be expected for new users)
-                    const url = error.config?.url || '';
-                    const isAuthEndpoint = url.includes('/auth/') || url.includes('/verify-token');
-
-                    if (typeof window !== "undefined" && isAuthEndpoint) {
-                        localStorage.removeItem("nsg-token");
-                        // Only redirect if not already on login page
-                        if (!window.location.pathname.includes("/auth/login")) {
-                            console.log("[AUTH] Session expired, redirecting to login");
+                    // Unauthorized - means session is invalid or expired
+                    if (typeof window !== "undefined") {
+                        const token = localStorage.getItem("nsg-token");
+                        if (token) {
+                            console.log("[AUTH] Session invalid (401), clearing token and redirecting");
+                            localStorage.removeItem("nsg-token");
+                        }
+                        
+                        // Only redirect if not already on public/login page
+                        if (!window.location.pathname.includes("/auth/login") && 
+                            !window.location.pathname.includes("/auth/register") &&
+                            window.location.pathname !== "/") {
                             window.location.href = "/auth/login";
                         }
-                    } else if (!isAuthEndpoint) {
-                        // For non-auth endpoints, log but don't redirect
-                        console.log("[INFO] 401 on data endpoint - user may not have access to this resource");
                     }
                     break;
                 case 403:

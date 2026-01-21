@@ -1,7 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Brain, Target, TrendingUp, Users, Zap, Shield } from "lucide-react";
+import {
+    ChevronLeft,
+    ChevronRight,
+    Brain,
+    Target,
+    TrendingUp,
+    Users,
+    Zap,
+    Shield,
+} from "lucide-react";
 import clsx from "clsx";
 import BrandAtom from "@/components/ui/BrandAtom";
 
@@ -12,7 +21,8 @@ const slides = [
         icon: Brain,
         title: "NSG Intelligence",
         subtitle: "Neural Strategic Gateway",
-        description: "Plataforma de inteligencia artificial avanzada diseñada para transformar datos en decisiones estratégicas con precisión neuronal.",
+        description:
+            "Plataforma de inteligencia artificial avanzada diseñada para transformar datos en decisiones estratégicas con precisión neuronal.",
         gradient: "from-blue-400 to-cyan-400",
     },
     {
@@ -20,7 +30,8 @@ const slides = [
         icon: Target,
         title: "Clarity Protocol",
         subtitle: "Ejecución Diaria de Alto Rendimiento",
-        description: "Sistema de protocolos estructurados que optimiza tu flujo de trabajo diario mediante alineación estratégica y seguimiento inteligente.",
+        description:
+            "Sistema de protocolos estructurados que optimiza tu flujo de trabajo diario mediante alineación estratégica y seguimiento inteligente.",
         gradient: "from-emerald-400 to-teal-400",
     },
     {
@@ -28,7 +39,8 @@ const slides = [
         icon: TrendingUp,
         title: "Horizon Planning",
         subtitle: "Arquitectura del Futuro",
-        description: "Análisis profundo de reuniones y sesiones convertido en insights accionables mediante IA, creando hojas de ruta de implementación precisas.",
+        description:
+            "Análisis profundo de reuniones y sesiones convertido en insights accionables mediante IA, creando hojas de ruta de implementación precisas.",
         gradient: "from-blue-500 to-cyan-500",
     },
     {
@@ -36,7 +48,8 @@ const slides = [
         icon: Users,
         title: "Ecosystem Integration",
         subtitle: "Sincronización Total",
-        description: "Integración perfecta con Telegram, Google Calendar, Fathom Analytics y más, centralizando tu ecosistema digital en un solo lugar.",
+        description:
+            "Integración perfecta con Telegram, Google Calendar, Fathom Analytics y más, centralizando tu ecosistema digital en un solo lugar.",
         gradient: "from-cyan-400 to-teal-400",
     },
     {
@@ -44,7 +57,8 @@ const slides = [
         icon: Zap,
         title: "Real-Time Analytics",
         subtitle: "Métricas de Alto Impacto",
-        description: "Dashboard ejecutivo con visualizaciones premium que revelan patrones, tendencias y oportunidades de optimización continua.",
+        description:
+            "Dashboard ejecutivo con visualizaciones premium que revelan patrones, tendencias y oportunidades de optimización continua.",
         gradient: "from-amber-400 to-orange-400",
     },
     {
@@ -52,7 +66,8 @@ const slides = [
         icon: Shield,
         title: "Enterprise Security",
         subtitle: "Protección de Nivel Corporativo",
-        description: "Arquitectura segura con autenticación robusta, encriptación end-to-end y cumplimiento de estándares internacionales de privacidad.",
+        description:
+            "Arquitectura segura con autenticación robusta, encriptación end-to-end y cumplimiento de estándares internacionales de privacidad.",
         gradient: "from-slate-400 to-slate-300",
     },
 ];
@@ -91,45 +106,53 @@ export default function ProjectSlider() {
     const Icon = current.icon;
 
     return (
-        <div className="relative w-full overflow-hidden bg-gradient-to-r from-navy-950 via-navy-900 to-navy-950 px-5 py-5 sm:px-8 sm:py-6 rounded-3xl border border-navy-800/50 shadow-xl group/slider transition-all duration-700 hover:shadow-2xl select-none antialiased">
+        <div className="relative w-full min-h-[220px] sm:min-h-[280px] overflow-hidden bg-linear-to-r from-navy-950 via-navy-900 to-navy-950 px-5 py-5 sm:px-8 sm:py-10 rounded-3xl border border-navy-800/50 shadow-xl group/slider transition-all duration-700 hover:shadow-2xl select-none antialiased">
             {/* Content Container */}
-            <div className="relative h-full flex flex-col items-center justify-center z-10">
-                {/* Icon */}
-                <div className="mb-4 relative">
-                    <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center bg-white/5 backdrop-blur-sm border border-white/10 shadow-lg transition-all duration-700 group-hover/slider:scale-110">
-                        <Icon className="w-7 h-7 sm:w-8 sm:h-8 text-white/80" strokeWidth={1.5} />
+            <div className="relative h-full flex flex-col items-center justify-between z-10">
+                <div className="flex-1 flex flex-col items-center justify-center w-full">
+                    {/* Icon */}
+                    <div className="mb-4 relative">
+                        <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center bg-white/5 backdrop-blur-sm border border-white/10 shadow-lg transition-all duration-700 group-hover/slider:scale-110">
+                            <Icon
+                                className="w-7 h-7 sm:w-8 sm:h-8 text-white/80"
+                                strokeWidth={1.5}
+                            />
+                        </div>
                     </div>
-                </div>
 
-                {/* Text Content */}
-                <div className="text-center max-w-3xl space-y-2">
-                    <div className="space-y-1.5">
-                        <h2 className={clsx(
-                            "font-display font-bold text-2xl sm:text-3xl lg:text-3xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r transition-all duration-700",
-                            current.gradient
-                        )}>
-                            {current.title}
-                        </h2>
-                        <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] text-slate-400">
-                            {current.subtitle}
+                    {/* Text Content */}
+                    <div className="text-center max-w-3xl space-y-2">
+                        <div className="space-y-1.5">
+                            <h2
+                                className={clsx(
+                                    "font-display font-bold text-2xl sm:text-3xl lg:text-3xl tracking-tight text-transparent bg-clip-text bg-linear-to-r transition-all duration-700",
+                                    current.gradient,
+                                )}
+                            >
+                                {current.title}
+                            </h2>
+                            <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] text-slate-400">
+                                {current.subtitle}
+                            </p>
+                        </div>
+                        <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal max-w-2xl mx-auto px-4">
+                            {current.description}
                         </p>
                     </div>
-                    <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal max-w-2xl mx-auto">
-                        {current.description}
-                    </p>
                 </div>
 
                 {/* Progress Indicator */}
-                <div className="flex items-center gap-2 mt-5">
+                <div className="flex items-center gap-2 mt-6 sm:mt-8 mb-2">
                     {slides.map((_, index) => (
                         <button
                             key={index}
                             onClick={() => goToSlide(index)}
                             className={clsx(
-                                "h-1.5 rounded-full transition-all duration-500 hover:scale-110",
+                                "h-1 sm:h-1.5 rounded-full transition-all duration-500 hover:scale-110",
                                 index === currentSlide
-                                    ? "w-8 bg-gradient-to-r " + current.gradient
-                                    : "w-1.5 bg-slate-600 hover:bg-slate-500"
+                                    ? "w-6 sm:w-10 bg-linear-to-r " +
+                                          current.gradient
+                                    : "w-1.5 bg-slate-700 hover:bg-slate-600",
                             )}
                             aria-label={`Go to slide ${index + 1}`}
                         />
@@ -156,14 +179,15 @@ export default function ProjectSlider() {
             {/* Slide Counter */}
             <div className="absolute top-4 right-4 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-sm">
                 <span className="text-[10px] font-bold text-slate-300 tracking-wider">
-                    {String(currentSlide + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}
+                    {String(currentSlide + 1).padStart(2, "0")} /{" "}
+                    {String(slides.length).padStart(2, "0")}
                 </span>
             </div>
 
-            {/* Brand Badge */}
-            <div className="absolute bottom-4 left-4 flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-sm">
+            {/* Brand Badge - Moved to Top-Left for symmetry */}
+            <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10 shadow-sm group-hover/slider:border-white/20 transition-all">
                 <BrandAtom className="w-3 h-3" variant="colored" />
-                <span className="text-[9px] font-bold uppercase tracking-widest text-slate-300">
+                <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 group-hover:text-slate-300 transition-colors">
                     NSG Platform
                 </span>
             </div>
