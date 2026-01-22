@@ -31,7 +31,7 @@ export default function NSGAssistant() {
 
     const inputRef = useRef<HTMLInputElement>(null);
     const recognitionRef = useRef<any>(null); // Type 'any' for window.SpeechRecognition
-    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
+
 
     // --- VISUAL STATES ---
     const isActive = status !== "IDLE";
@@ -140,41 +140,38 @@ export default function NSGAssistant() {
         setInput("");
 
         try {
-            const response = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
-                {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: userQuery }] }],
-                        systemInstruction: {
-                            parts: [
-                                {
-                                    text: `${BASE_SYSTEM_PROMPT} Te diriges al ejecutivo "${displayName}". IMPERATIVO: MENCIONA SIEMPRE el nombre "${displayName}" en tu respuesta de forma natural. RESPONDE SIEMPRE EN CASTELLANO (ESPAÑOL DE ESPAÑA). Tu voz es 'Puck'.`,
-                                },
-                            ],
-                        },
-                        safetySettings: [
+            const response = await fetch("/api/gemini", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: userQuery }] }],
+                    systemInstruction: {
+                        parts: [
                             {
-                                category: "HARM_CATEGORY_HARASSMENT",
-                                threshold: "BLOCK_NONE",
-                            },
-                            {
-                                category: "HARM_CATEGORY_HATE_SPEECH",
-                                threshold: "BLOCK_NONE",
-                            },
-                            {
-                                category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                                threshold: "BLOCK_NONE",
-                            },
-                            {
-                                category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-                                threshold: "BLOCK_NONE",
+                                text: `${BASE_SYSTEM_PROMPT} Te diriges al ejecutivo "${displayName}". IMPERATIVO: MENCIONA SIEMPRE el nombre "${displayName}" en tu respuesta de forma natural. RESPONDE SIEMPRE EN CASTELLANO (ESPAÑOL DE ESPAÑA). Tu voz es 'Puck'.`,
                             },
                         ],
-                    }),
-                },
-            );
+                    },
+                    safetySettings: [
+                        {
+                            category: "HARM_CATEGORY_HARASSMENT",
+                            threshold: "BLOCK_NONE",
+                        },
+                        {
+                            category: "HARM_CATEGORY_HATE_SPEECH",
+                            threshold: "BLOCK_NONE",
+                        },
+                        {
+                            category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                            threshold: "BLOCK_NONE",
+                        },
+                        {
+                            category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+                            threshold: "BLOCK_NONE",
+                        },
+                    ],
+                }),
+            });
 
             if (!response.ok) throw new Error(`API Error: ${response.status}`);
 
