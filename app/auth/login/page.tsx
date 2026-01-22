@@ -84,6 +84,29 @@ function LoginContent() {
             return;
         }
 
+        // Strict Email Validation
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(email)) {
+            setError("Por favor ingresa una dirección de correo válida.");
+            return;
+        }
+
+        // Typo Check for Common Domains
+        const domain = email.split('@')[1];
+        const domainTypos: { [key: string]: string } = {
+            'gmil.com': 'gmail.com',
+            'gnail.com': 'gmail.com',
+            'gmai.com': 'gmail.com',
+            'hotmil.com': 'hotmail.com',
+            'outlok.com': 'outlook.com',
+            'yhoo.com': 'yahoo.com'
+        };
+
+        if (domainTypos[domain]) {
+            setError(`¿Quisiste decir @${domainTypos[domain]}? Verifica tu correo.`);
+            return;
+        }
+
         setIsAnimating(true);
         setError(null);
 
