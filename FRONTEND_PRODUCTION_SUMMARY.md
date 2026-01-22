@@ -35,7 +35,7 @@
 
 ```env
 GOOGLE_GENERATIVE_AI_API_KEY=your_key
-NEXT_PUBLIC_API_URL=https://nsg-backend.onrender.com
+NEXT_PUBLIC_API_URL=https://nsg-backend.vercel.app
 NEXT_PUBLIC_APP_ENV=production
 ```
 
@@ -163,7 +163,7 @@ Stage 3: runner    → Production runtime (smallest)
 
 ```bash
 docker build -t nsg-frontend \
-  --build-arg NEXT_PUBLIC_API_URL=https://nsg-backend.onrender.com \
+  --build-arg NEXT_PUBLIC_API_URL=https://nsg-backend.vercel.app \
   .
 ```
 
@@ -314,7 +314,7 @@ touch .env.local  # or create manually
 
 # 2. Add content (see ENV_CONFIGURATION.md)
 GOOGLE_GENERATIVE_AI_API_KEY=your_key_here
-NEXT_PUBLIC_API_URL=https://nsg-backend.onrender.com
+NEXT_PUBLIC_API_URL=https://nsg-backend.vercel.app
 NEXT_PUBLIC_APP_ENV=production
 
 # 3. NEVER commit this file to git
@@ -365,7 +365,7 @@ npm start
 
 ```typescript
 // Hardcoded URL
-baseURL: "https://nsg-backend.onrender.com";
+baseURL: "https://nsg-backend.vercel.app";
 
 // No error handling
 // No logging

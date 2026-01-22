@@ -102,7 +102,7 @@ The build will create a `.next/standalone` folder ready for deployment.
 
 ```
 GOOGLE_GENERATIVE_AI_API_KEY=your_key
-NEXT_PUBLIC_API_URL=https://nsg-backend.onrender.com
+NEXT_PUBLIC_API_URL=https://nsg-backend.vercel.app
 NEXT_PUBLIC_APP_ENV=production
 ```
 
@@ -138,7 +138,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Set environment variables for build
-ENV NEXT_PUBLIC_API_URL=https://nsg-backend.onrender.com
+ENV NEXT_PUBLIC_API_URL=https://nsg-backend.vercel.app
 ENV NEXT_PUBLIC_APP_ENV=production
 
 RUN npm run build
@@ -174,7 +174,7 @@ docker build -t nsg-frontend .
 # Run container
 docker run -p 3000:3000 \
   -e GOOGLE_GENERATIVE_AI_API_KEY=your_key \
-  -e NEXT_PUBLIC_API_URL=https://nsg-backend.onrender.com \
+  -e NEXT_PUBLIC_API_URL=https://nsg-backend.vercel.app \
   nsg-frontend
 ```
 
