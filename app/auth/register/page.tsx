@@ -91,15 +91,18 @@ function RegisterContent() {
             return;
         }
 
+        // Normalize before validation
+        const normalizedEmailCheck = formData.email.toLowerCase().trim();
+
         // Strict Email Validation
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        if (!emailRegex.test(formData.email)) {
+        if (!emailRegex.test(normalizedEmailCheck)) {
             setError("Por favor ingresa una dirección de correo válida.");
             return;
         }
 
         // Typo Check for Common Domains
-        const domain = formData.email.split('@')[1];
+        const domain = normalizedEmailCheck.split('@')[1];
         const domainTypos: { [key: string]: string } = {
             'gmil.com': 'gmail.com',
             'gnail.com': 'gmail.com',
@@ -109,7 +112,7 @@ function RegisterContent() {
             'yhoo.com': 'yahoo.com'
         };
 
-        if (domainTypos[domain]) {
+        if (domain && domainTypos[domain]) {
             setError(`¿Quisiste decir @${domainTypos[domain]}? Verifica tu correo.`);
             return;
         }
@@ -120,7 +123,7 @@ function RegisterContent() {
         const location = await getLocation();
 
         const registrationData = {
-            email: formData.email.toLowerCase(),
+            email: normalizedEmailCheck,
             password: formData.password,
             // SECURITY: role removed - backend assigns "user" by default
             location,

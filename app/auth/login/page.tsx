@@ -84,15 +84,18 @@ function LoginContent() {
             return;
         }
 
+        // Normalize for validation
+        const normalizedEmailCheck = email.toLowerCase().trim();
+
         // Strict Email Validation
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        if (!emailRegex.test(email)) {
+        if (!emailRegex.test(normalizedEmailCheck)) {
             setError("Por favor ingresa una dirección de correo válida.");
             return;
         }
 
         // Typo Check for Common Domains
-        const domain = email.split('@')[1];
+        const domain = normalizedEmailCheck.split('@')[1];
         const domainTypos: { [key: string]: string } = {
             'gmil.com': 'gmail.com',
             'gnail.com': 'gmail.com',
@@ -102,7 +105,7 @@ function LoginContent() {
             'yhoo.com': 'yahoo.com'
         };
 
-        if (domainTypos[domain]) {
+        if (domain && domainTypos[domain]) {
             setError(`¿Quisiste decir @${domainTypos[domain]}? Verifica tu correo.`);
             return;
         }
@@ -114,8 +117,11 @@ function LoginContent() {
             // Get location (don't fail if denied/error)
             const location = await getLocation();
 
+            // Normalize email
+            const normalizedEmail = email.toLowerCase().trim();
+
             const data = await authService.login({
-                email: email.toLowerCase(),
+                email: normalizedEmail,
                 password,
                 location,
             });
