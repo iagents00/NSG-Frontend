@@ -74,14 +74,18 @@ export default function Strategy() {
 
 ### **Usuario con rol `admin`**
 
-1. ✅ Ve "P&L Financiero" y "M&A Pipeline" en el menú lateral
-2. ✅ Puede acceder a ambas vistas sin restricciones
-3. ✅ Contenido completo visible
+1. ✅ Ve **todas las secciones** en el menú lateral (P&L Financiero, M&A Pipeline, NSG News, Clinical Radar, Patients, Library, etc.)
+2. ✅ Puede acceder a **todas las vistas sin restricciones**
+3. ✅ **NO ve badges de "Próximamente"** en ninguna sección
+4. ✅ Contenido completo visible (o interfaz funcional en secciones en desarrollo)
+5. ✅ Es el único rol con acceso total sin limitaciones
 
 ### **Usuario con otro rol** (manager, consultant, psychologist, patient)
 
-1. ❌ NO ve "P&L Financiero" ni "M&A Pipeline" en el menú
-2. ❌ Si intenta acceder directamente a la URL:
+1. ❌ NO ve "P&L Financiero" ni "M&A Pipeline" en el menú (solo admin)
+2. 🔒 Ve badges de **"Próximamente"** en: NSG News, Clinical Radar, Patients, Library
+3. 🔒 Al acceder a secciones con "Próximamente", se muestra pantalla de **ComingSoon**
+4. ❌ Si intenta acceder directamente a la URL de P&L o M&A:
     - Se muestra pantalla de "Acceso Restringido"
     - Mensaje: "No tienes permisos para acceder a esta sección"
     - Indica su rol actual
@@ -135,9 +139,17 @@ export type Role =
 | **M&A Pipeline**   | ✅    | ❌      | ❌         | ❌           | ❌      |
 | NSG Intelligence   | ✅    | ✅      | ✅         | ✅           | ✅      |
 | NSG Clarity        | ✅    | ✅      | ✅         | ✅           | ✅      |
-| NSG News           | ✅    | ✅      | ✅         | ✅           | ✅      |
+| **NSG News**       | ✅    | 🔒      | 🔒         | 🔒           | 🔒      |
 | NSG Horizon        | ✅    | ✅      | ✅         | ✅           | ❌      |
+| **Clinical Radar** | ✅    | 🔒      | 🔒         | 🔒           | 🔒      |
+| **Patients**       | ✅    | 🔒      | 🔒         | 🔒           | 🔒      |
+| **Library**        | ✅    | 🔒      | 🔒         | 🔒           | 🔒      |
 | Calendario         | ✅    | ✅      | ✅         | ✅           | ✅      |
+
+**Leyenda:**
+- ✅ = Acceso completo
+- 🔒 = Próximamente (muestra pantalla ComingSoon)
+- ❌ = No disponible para este rol
 
 ---
 
@@ -203,11 +215,20 @@ Aunque el frontend está protegido, para **seguridad completa** se recomienda:
 
 -   ✅ `components/RoleGuard.tsx`
 
-### Modificados:
+### Modificados (Control de Acceso Admin):
 
 -   ✅ `data/context.ts` - Menu del rol manager
 -   ✅ `components/views/Metrics.tsx` - Protección agregada
 -   ✅ `components/views/Strategy.tsx` - Protección agregada
+
+### Modificados (Admin sin "Próximamente"):
+
+-   ✅ `components/layout/Sidebar.tsx` - Lógica para ocultar badges de "Próximamente" a admin
+-   ✅ `components/views/NSGIntelligence.tsx` - Lógica para ocultar badges de "Próximamente" a admin
+-   ✅ `components/views/NSGNews.tsx` - Interfaz funcional para admin, ComingSoon para otros
+-   ✅ `components/views/ClinicalRadar.tsx` - Interfaz funcional para admin, ComingSoon para otros
+-   ✅ `components/views/Patients.tsx` - Interfaz funcional para admin, ComingSoon para otros
+-   ✅ `components/views/Library.tsx` - Interfaz funcional para admin, ComingSoon para otros
 
 ---
 
@@ -216,14 +237,18 @@ Aunque el frontend está protegido, para **seguridad completa** se recomienda:
 ### Probar como admin:
 
 1. Cambiar rol a `admin` en la UI
-2. Verificar que "P&L Financiero" y "M&A Pipeline" aparecen en menú
-3. Acceder a ambas vistas → ✅ Debe funcionar
+2. Verificar que **todas las secciones** aparecen en menú (P&L, M&A, NSG News, Clinical Radar, Patients, Library)
+3. Verificar que **NO aparecen badges de "Próximamente"** en ninguna sección
+4. Acceder a NSG News, Clinical Radar, Patients, Library → ✅ Debe mostrar interfaz funcional
+5. Acceder a P&L Financiero y M&A Pipeline → ✅ Debe funcionar sin restricciones
 
-### Probar como manager:
+### Probar como manager/otros roles:
 
-1. Cambiar rol a `manager` en la UI
-2. Verificar que NO aparecen en menú
-3. Intentar acceder vía URL directa → ❌ Debe mostrar "Acceso Restringido"
+1. Cambiar rol a `manager` (o consultant, psychologist, patient) en la UI
+2. Verificar que NO aparecen "P&L Financiero" ni "M&A Pipeline" en menú
+3. Verificar que **SÍ aparecen badges de "Próximamente"** en: NSG News, Clinical Radar, Patients, Library
+4. Acceder a secciones con "Próximamente" → 🔒 Debe mostrar pantalla ComingSoon
+5. Intentar acceder vía URL directa a P&L o M&A → ❌ Debe mostrar "Acceso Restringido"
 
 ---
 

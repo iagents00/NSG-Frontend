@@ -267,7 +267,9 @@ export default function Sidebar() {
                                             "patients",
                                             "library",
                                         ];
+                                        // Admin puede acceder a todas las secciones
                                         const isComingSoon =
+                                            currentRole !== "admin" &&
                                             comingSoonSections.includes(
                                                 item.id,
                                             );
@@ -334,7 +336,9 @@ export default function Sidebar() {
                                         "patients",
                                         "library",
                                     ];
+                                    // Admin puede acceder a todas las secciones
                                     const isComingSoon =
+                                        currentRole !== "admin" &&
                                         comingSoonSections.includes(item.id);
 
                                     return (

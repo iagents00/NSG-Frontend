@@ -331,7 +331,7 @@ function TimelineItem({
     );
 }
 
-function StrategyCard({ strategy }: { strategy: Strategy }) {
+function StrategyCard({ strategy }: { strategy: Strategy; }) {
     const parseAction = (text: string, index: number) => {
         const keywords = [
             { kw: "Quick Win", label: "Ejecución Inmediata", color: "emerald" },
@@ -497,7 +497,7 @@ export default function NSGClarity() {
         {
             id: "1",
             time: "Morning",
-            title: "Enfoque Mañanero",
+            title: "Morning Clarity",
             status: "Pendiente",
             color: "emerald" as const,
             desc: "Define tus 3 tareas más importantes y bloquea distracciones para un inicio productivo.",
@@ -507,7 +507,7 @@ export default function NSGClarity() {
         {
             id: "2",
             time: "Noon",
-            title: "Sincronización de Mediodía",
+            title: "Power Check",
             status: "Pendiente",
             color: "blue" as const,
             desc: "Revisa lo que has avanzado hoy, ajusta tus prioridades y recarga energía para el resto de la jornada.",
@@ -517,7 +517,7 @@ export default function NSGClarity() {
         {
             id: "3",
             time: "Night",
-            title: "Diseño del Mañana",
+            title: "Next-Day Design",
             status: "Pendiente",
             color: "indigo" as const,
             desc: "Cierra el día revisando tus logros y deja lista la ruta detallada para empezar con éxito mañana.",
@@ -664,7 +664,7 @@ export default function NSGClarity() {
 
                     // Fill in completions
                     completions.forEach(
-                        (c: { date: string; protocol: string }) => {
+                        (c: { date: string; protocol: string; }) => {
                             if (chartMap[c.date]) {
                                 const protocolKey = c.protocol as
                                     | "morning_clarity"
@@ -819,7 +819,7 @@ export default function NSGClarity() {
         if (!task || !userId) return;
 
         // Map task ID to protocol name
-        const protocolMap: { [key: string]: string } = {
+        const protocolMap: { [key: string]: string; } = {
             "1": "morning_clarity",
             "2": "power_check",
             "3": "next_day_planning",
@@ -1247,7 +1247,7 @@ export default function NSGClarity() {
                                         className={clsx(
                                             "space-y-6",
                                             !telegramId &&
-                                                "pointer-events-none opacity-50",
+                                            "pointer-events-none opacity-50",
                                         )}
                                     >
                                         {strategies.map((strategy) => (
