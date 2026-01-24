@@ -1,4 +1,4 @@
-import { Cpu, Newspaper, Target, Sunrise, Briefcase, Calendar, BarChart2, Settings, Hexagon, Users, BookOpen, PieChart, Trello, FileSpreadsheet, HeartPulse, Crown, User, Shield } from "lucide-react";
+import { Cpu, Newspaper, Target, Sunrise, Briefcase, Calendar, BarChart2, Settings, Hexagon, Users, BookOpen, PieChart, Trello, FileSpreadsheet, HeartPulse, Crown, User, Shield, GraduationCap } from "lucide-react";
 
 export const CONTEXT = {
     admin: {
@@ -7,6 +7,7 @@ export const CONTEXT = {
         roleDesc: "System Admin",
         menu: [
             { id: 'nsg_intelligence', label: 'NSG Intelligence', subtitle: 'Sistema Central de Inteligencia', icon: Cpu, special: true },
+            { id: 'nsg_education', label: 'NSG Education', subtitle: 'Estrategia y Aprendizaje', icon: GraduationCap },
             { id: 'nsg_clarity', label: 'NSG Clarity', subtitle: 'Claridad en tus Objetivos', icon: Target },
             { id: 'nsg_horizon', label: 'NSG Horizon', subtitle: 'Planificación y Proyección', icon: Sunrise },
             { id: 'nsg_news', label: 'NSG News', subtitle: 'Actualidad y Análisis Global', icon: Newspaper },
@@ -33,6 +34,7 @@ export const CONTEXT = {
         roleDesc: "Senior Consultant",
         menu: [
             { id: 'nsg_intelligence', label: 'NSG Intelligence', subtitle: 'Sistema Central de Inteligencia', icon: Cpu, special: true },
+            { id: 'nsg_education', label: 'NSG Education', subtitle: 'Estrategia y Aprendizaje', icon: GraduationCap },
             { id: 'nsg_clarity', label: 'NSG Clarity', subtitle: 'Claridad en tus Objetivos', icon: Target },
             { id: 'nsg_horizon', label: 'NSG Horizon', subtitle: 'Planificación y Proyección', icon: Sunrise },
             { id: 'nsg_news', label: 'NSG News', subtitle: 'Actualidad y Análisis Global', icon: Newspaper },
@@ -49,6 +51,7 @@ export const CONTEXT = {
         roleDesc: "Clinical Lead",
         menu: [
             { id: 'nsg_intelligence', label: 'NSG Intelligence', subtitle: 'Sistema Central de Inteligencia', icon: Cpu, special: true },
+            { id: 'nsg_education', label: 'NSG Education', subtitle: 'Estrategia y Aprendizaje', icon: GraduationCap },
             { id: 'nsg_clarity', label: 'NSG Clarity', subtitle: 'Claridad en tus Objetivos', icon: Target },
             { id: 'nsg_horizon', label: 'NSG Horizon', subtitle: 'Planificación y Proyección', icon: Sunrise },
             { id: 'nsg_news', label: 'NSG News', subtitle: 'Actualidad y Análisis Global', icon: Newspaper },
@@ -67,6 +70,7 @@ export const CONTEXT = {
         roleDesc: "CEO",
         menu: [
             { id: 'nsg_intelligence', label: 'NSG Intelligence', subtitle: 'Sistema Central de Inteligencia', icon: Cpu, special: true },
+            { id: 'nsg_education', label: 'NSG Education', subtitle: 'Estrategia y Aprendizaje', icon: GraduationCap },
             { id: 'nsg_clarity', label: 'NSG Clarity', subtitle: 'Claridad en tus Objetivos', icon: Target },
             { id: 'nsg_horizon', label: 'NSG Horizon', subtitle: 'Planificación y Proyección', icon: Sunrise },
             { id: 'nsg_news', label: 'NSG News', subtitle: 'Actualidad y Análisis Global', icon: Newspaper },
@@ -84,6 +88,7 @@ export const CONTEXT = {
         roleDesc: "User",
         menu: [
             { id: 'nsg_intelligence', label: 'NSG Intelligence', subtitle: 'Sistema Central de Inteligencia', icon: Cpu, special: true },
+            { id: 'nsg_education', label: 'NSG Education', subtitle: 'Estrategia y Aprendizaje', icon: GraduationCap },
             { id: 'nsg_clarity', label: 'NSG Clarity', subtitle: 'Claridad en tus Objetivos', icon: Target },
             { id: 'nsg_horizon', label: 'NSG Horizon', subtitle: 'Planificación y Proyección', icon: Sunrise },
             { id: 'calendar', label: 'Agenda', subtitle: 'Citas y Recordatorios', icon: Calendar },
@@ -97,6 +102,7 @@ export const CONTEXT = {
         roleDesc: "Patient",
         menu: [
             { id: 'nsg_intelligence', label: 'NSG Intelligence', subtitle: 'Sistema Central de Inteligencia', icon: Cpu, special: true },
+            { id: 'nsg_education', label: 'NSG Education', subtitle: 'Estrategia y Aprendizaje', icon: GraduationCap },
             { id: 'nsg_clarity', label: 'NSG Clarity', subtitle: 'Claridad en tus Objetivos', icon: Target },
             { id: 'nsg_horizon', label: 'NSG Horizon', subtitle: 'Planificación y Proyección', icon: Sunrise },
             { id: 'nsg_news', label: 'NSG News', subtitle: 'Actualidad y Análisis Global', icon: Newspaper },

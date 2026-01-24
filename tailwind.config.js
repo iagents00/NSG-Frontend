@@ -56,6 +56,10 @@ module.exports = {
             spacing: {
                 4.5: "1.125rem",
             },
+            borderRadius: {
+                "4xl": "2rem",
+                "5xl": "2.5rem",
+            },
             colors: {
                 navy: {
                     950: "#020617",

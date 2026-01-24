@@ -107,7 +107,7 @@ export default function Sidebar() {
             if (item.id === "nsg_intelligence") {
                 acc.intelligence = item;
             } else if (
-                ["nsg_clarity", "nsg_horizon", "nsg_news"].includes(item.id)
+                ["nsg_clarity", "nsg_horizon", "nsg_news", "nsg_education"].includes(item.id)
             ) {
                 acc.nsgModules.push(item);
             } else {

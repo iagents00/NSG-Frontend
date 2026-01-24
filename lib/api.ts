@@ -82,7 +82,7 @@ api.interceptors.response.use(
             const status = error.response.status;
             const message = error.response.data?.message || error.message;
 
-            if (isDevelopment) {
+            if (isDevelopment && status !== 404) {
                 console.error(`[API Error] ${status} ${message} - URL: ${error.config?.url}`);
             }
 
