@@ -27,11 +27,11 @@ function LoginContent() {
                 return;
             }
 
-            // Set a timeout of 5 seconds to avoid waiting forever
+            // Set a fallback timeout to avoid blocking the UI
             const timeoutId = setTimeout(() => {
-                console.warn("Geolocation request timed out");
+                console.log("Proceeding without location (UX fallback)");
                 resolve(undefined);
-            }, 5000);
+            }, 12000); // 12 seconds manual fallback
 
             navigator.geolocation.getCurrentPosition(
                 async (position) => {
@@ -41,7 +41,6 @@ function LoginContent() {
                     const timezone =
                         Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-                    // Reverse geocoding to get city and country
                     try {
                         const response = await fetch(
                             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10`,
@@ -70,10 +69,25 @@ function LoginContent() {
                 },
                 (error) => {
                     clearTimeout(timeoutId);
-                    console.error("Error getting location", error);
+                    // Don't log as error if it's just a timeout or denied
+                    if (error.code === 3) {
+                        // TIMEOUT
+                        console.log(
+                            "Geolocation timed out after user approval or system delay",
+                        );
+                    } else if (error.code === 1) {
+                        // PERMISSION_DENIED
+                        console.log("Location access denied by user");
+                    } else {
+                        console.warn("Location info:", error.message);
+                    }
                     resolve(undefined);
                 },
-                { timeout: 5000 }, // Geolocation option timeout as well
+                {
+                    enableHighAccuracy: false,
+                    timeout: 15000, // 15 seconds browser timeout
+                    maximumAge: 600000, // 10 minutes cache
+                },
             );
         });
     };
@@ -95,40 +109,42 @@ function LoginContent() {
         }
 
         // Typo Check for Common Domains
-        const domain = normalizedEmailCheck.split('@')[1];
+        const domain = normalizedEmailCheck.split("@")[1];
         const domainTypos: { [key: string]: string } = {
             // Gmail
-            'gmil.com': 'gmail.com',
-            'gnail.com': 'gmail.com',
-            'gmai.com': 'gmail.com',
-            'gamill.com': 'gmail.com', // Requested specific
-            'gmal.com': 'gmail.com',
-            'gmaill.com': 'gmail.com',
-            'gail.com': 'gmail.com',
-            'gmial.com': 'gmail.com',
-            
+            "gmil.com": "gmail.com",
+            "gnail.com": "gmail.com",
+            "gmai.com": "gmail.com",
+            "gamill.com": "gmail.com", // Requested specific
+            "gmal.com": "gmail.com",
+            "gmaill.com": "gmail.com",
+            "gail.com": "gmail.com",
+            "gmial.com": "gmail.com",
+
             // Hotmail
-            'hotmil.com': 'hotmail.com',
-            'hotmal.com': 'hotmail.com',
-            'hotmai.com': 'hotmail.com',
-            'hotmaill.com': 'hotmail.com',
-            
+            "hotmil.com": "hotmail.com",
+            "hotmal.com": "hotmail.com",
+            "hotmai.com": "hotmail.com",
+            "hotmaill.com": "hotmail.com",
+
             // Outlook
-            'outlok.com': 'outlook.com',
-            'outook.com': 'outlook.com',
-            'outllok.com': 'outlook.com',
-            
+            "outlok.com": "outlook.com",
+            "outook.com": "outlook.com",
+            "outllok.com": "outlook.com",
+
             // Yahoo
-            'yhoo.com': 'yahoo.com',
-            'yahooo.com': 'yahoo.com',
-            
+            "yhoo.com": "yahoo.com",
+            "yahooo.com": "yahoo.com",
+
             // iCloud
-            'iclud.com': 'icloud.com',
-            'icoud.com': 'icloud.com'
+            "iclud.com": "icloud.com",
+            "icoud.com": "icloud.com",
         };
 
         if (domain && domainTypos[domain]) {
-            setError(`¿Quisiste decir @${domainTypos[domain]}? Verifica tu correo.`);
+            setError(
+                `¿Quisiste decir @${domainTypos[domain]}? Verifica tu correo.`,
+            );
             return;
         }
 
