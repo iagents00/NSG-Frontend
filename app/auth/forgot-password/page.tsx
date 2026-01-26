@@ -4,15 +4,9 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import BrandAtom from "@/components/ui/BrandAtom";
 import clsx from "clsx";
-import {
-    Lock,
-    Mail,
-    ChevronLeft,
-    ShieldCheck,
-    Send,
-    MessageCircle,
-} from "lucide-react";
+import { Lock, Mail, ChevronLeft, ShieldCheck, Send } from "lucide-react";
 import api from "@/lib/api";
+import { AxiosError } from "axios";
 import { useToast } from "@/components/ui/ToastProvider";
 import confetti from "canvas-confetti";
 
@@ -24,35 +18,8 @@ export default function ForgotPasswordPage() {
     const [email, setEmail] = useState("");
     const [code, setCode] = useState("");
     const [newPassword, setNewPassword] = useState("");
-    const [method, setMethod] = useState<"telegram" | "email">("telegram"); // Método de envío
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [hasTelegramLinked, setHasTelegramLinked] = useState<boolean | null>(
-        null,
-    );
-
-    // Check if email has telegram linked
-    React.useEffect(() => {
-        const checkTelegram = async () => {
-            if (email.includes("@") && email.includes(".")) {
-                try {
-                    const res = await api.get(
-                        `/auth/check-telegram/${email.toLowerCase().trim()}`,
-                    );
-                    setHasTelegramLinked(res.data.hasTelegram);
-                    if (!res.data.hasTelegram && method === "telegram") {
-                        setMethod("email");
-                    }
-                } catch (err) {
-                    setHasTelegramLinked(null);
-                }
-            } else {
-                setHasTelegramLinked(null);
-            }
-        };
-        const timer = setTimeout(checkTelegram, 500);
-        return () => clearTimeout(timer);
-    }, [email, method]);
 
     const handleSendCode = async () => {
         if (!email) {
@@ -60,32 +27,20 @@ export default function ForgotPasswordPage() {
             return;
         }
 
-        if (method === "telegram" && hasTelegramLinked === false) {
-            setError("Este usuario no tiene una cuenta de Telegram vinculada.");
-            return;
-        }
-
         setIsLoading(true);
         setError(null);
         try {
-            const endpoint =
-                method === "telegram"
-                    ? "/auth/forgot-password-telegram"
-                    : "/auth/forgot-password-email";
+            await api.post("/auth/forgot-password-email", {
+                email: email.toLowerCase(),
+            });
 
-            await api.post(endpoint, { email: email.toLowerCase() });
-
-            const successMessage =
-                method === "telegram"
-                    ? "Código enviado a Telegram"
-                    : "Código enviado a tu correo";
-
-            showToast(successMessage, "success");
+            showToast("Código enviado a tu correo", "success");
             setStep(2);
-        } catch (err: any) {
-            console.error("Error en handleSendCode:", err);
+        } catch (err: unknown) {
+            const errorObj = err as AxiosError<{ message: string }>;
+            console.error("Error en handleSendCode:", errorObj);
             const errorMessage =
-                err.response?.data?.message ||
+                errorObj.response?.data?.message ||
                 "Error al enviar el código. Verifica tu email y conexión.";
             setError(errorMessage);
             showToast(errorMessage, "error");
@@ -114,10 +69,12 @@ export default function ForgotPasswordPage() {
             setStep(3);
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
             showToast("Contraseña actualizada exitosamente", "success");
-        } catch (err: any) {
-            console.error("Error en handleResetPassword:", err);
+        } catch (err: unknown) {
+            const errorObj = err as AxiosError<{ message: string }>;
+            console.error("Error en handleResetPassword:", errorObj);
             const errorMessage =
-                err.response?.data?.message || "Código inválido o expirado.";
+                errorObj.response?.data?.message ||
+                "Código inválido o expirado.";
             setError(errorMessage);
             showToast(errorMessage, "error");
         } finally {
@@ -160,8 +117,8 @@ export default function ForgotPasswordPage() {
                                     Recuperar Acceso
                                 </h2>
                                 <p className="text-slate-500 text-sm">
-                                    Ingresa tu email y elige cómo recibir el
-                                    código de seguridad.
+                                    Ingresa tu email para recibir un código de
+                                    seguridad.
                                 </p>
                             </div>
 
@@ -184,72 +141,16 @@ export default function ForgotPasswordPage() {
                                             onChange={(e) =>
                                                 setEmail(e.target.value)
                                             }
+                                            autoComplete="email"
                                             className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl py-3.5 pl-12 pr-4 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
                                             placeholder="ejemplo@nsg.com"
                                         />
-                                    </div>
-                                    {hasTelegramLinked === false &&
-                                        email.includes("@") && (
-                                            <p className="text-[10px] text-amber-600 font-bold mt-1 ml-1 flex items-center gap-1.5">
-                                                ⚠️ Este email no tiene Telegram
-                                                vinculado.
-                                            </p>
-                                        )}
-                                </div>
-
-                                {/* Método de envío */}
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                                        Método de Envío
-                                    </label>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <button
-                                            onClick={() =>
-                                                setMethod("telegram")
-                                            }
-                                            disabled={
-                                                hasTelegramLinked === false
-                                            }
-                                            className={clsx(
-                                                "flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 transition-all font-semibold text-sm",
-                                                method === "telegram"
-                                                    ? "border-blue-500 bg-blue-50 text-blue-700"
-                                                    : "border-slate-200 bg-white text-slate-600 hover:border-slate-300",
-                                                hasTelegramLinked === false &&
-                                                    "opacity-40 grayscale cursor-not-allowed border-slate-100 bg-slate-50",
-                                            )}
-                                            title={
-                                                hasTelegramLinked === false
-                                                    ? "Telegram no vinculado"
-                                                    : ""
-                                            }
-                                        >
-                                            <MessageCircle className="w-4 h-4" />
-                                            Telegram
-                                        </button>
-                                        <button
-                                            onClick={() => setMethod("email")}
-                                            className={clsx(
-                                                "flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 transition-all font-semibold text-sm",
-                                                method === "email"
-                                                    ? "border-blue-500 bg-blue-50 text-blue-700"
-                                                    : "border-slate-200 bg-white text-slate-600 hover:border-slate-300",
-                                            )}
-                                        >
-                                            <Mail className="w-4 h-4" />
-                                            Email
-                                        </button>
                                     </div>
                                 </div>
 
                                 <button
                                     onClick={handleSendCode}
-                                    disabled={
-                                        isLoading ||
-                                        !email ||
-                                        (method === "telegram" &&
-                                            hasTelegramLinked === false)
-                                    }
+                                    disabled={isLoading || !email}
                                     className="w-full bg-navy-900 text-white font-bold py-4 rounded-2xl shadow-xl shadow-navy-900/10 hover:bg-blue-600 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed group"
                                 >
                                     {isLoading ? (
@@ -276,8 +177,8 @@ export default function ForgotPasswordPage() {
                                     Protocolo de Verificación
                                 </h2>
                                 <p className="text-slate-500 text-sm">
-                                    Hemos enviado un código a tu Telegram
-                                    vinculado.
+                                    Hemos enviado un código a tu correo
+                                    electrónico.
                                 </p>
                             </div>
 
@@ -299,6 +200,7 @@ export default function ForgotPasswordPage() {
                                             setCode(e.target.value)
                                         }
                                         maxLength={6}
+                                        autoComplete="one-time-code"
                                         className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl py-4 text-center text-2xl font-black tracking-[0.5em] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-navy-950"
                                         placeholder="000000"
                                     />
@@ -316,6 +218,7 @@ export default function ForgotPasswordPage() {
                                             onChange={(e) =>
                                                 setNewPassword(e.target.value)
                                             }
+                                            autoComplete="new-password"
                                             className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl py-3.5 pl-12 pr-4 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
                                             placeholder="••••••••"
                                         />
@@ -338,8 +241,7 @@ export default function ForgotPasswordPage() {
                                     onClick={() => setStep(1)}
                                     className="w-full text-slate-400 text-xs font-bold uppercase tracking-widest hover:text-slate-600 transition-colors"
                                 >
-                                    {" "}
-                                    Solicitar nuevo código{" "}
+                                    Solicitar nuevo código
                                 </button>
                             </div>
                         </div>
