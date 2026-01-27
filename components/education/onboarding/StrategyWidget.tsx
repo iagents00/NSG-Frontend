@@ -7,6 +7,7 @@ import clsx from "clsx";
 import BrandAtom from "@/components/ui/BrandAtom";
 import ContextHUD from "./ContextHUD";
 import { useAppStore, StrategyPreferences } from "@/store/useAppStore";
+import { educationService } from "@/lib/education";
 
 interface StrategyWidgetProps {
     isOpen: boolean;
@@ -255,9 +256,10 @@ export default function StrategyWidget({
         }, 800);
     };
 
-    const handleConfirm = () => {
+    const handleConfirm = async () => {
         // SAVE STRATEGY
         setStrategyPreferences(answers as StrategyPreferences);
+        await educationService.savePreferences(answers as StrategyPreferences);
 
         // Trigger completion
         const successMsg: Message = {

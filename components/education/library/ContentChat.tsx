@@ -1,34 +1,16 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ArrowLeft, ArrowRight, FileText, CheckCircle2, TrendingUp, Activity, Download, ChevronRight, Sparkles, X, ChevronLeft } from "lucide-react";
+import { ArrowLeft, ArrowRight, FileText, CheckCircle2, TrendingUp, Activity, Download, ChevronRight, X, ChevronLeft } from "lucide-react";
 import clsx from "clsx";
 import BrandAtom from "@/components/ui/BrandAtom";
-import { EducationContent } from "@/types/education";
+import { EducationContent, Message, AnalysisDocument } from "@/types/education";
 import { useAppStore } from "@/store/useAppStore";
+import { educationService } from "@/lib/education";
 
 interface ContentChatProps {
     item: EducationContent;
     onBack: () => void;
-}
-
-interface Message {
-    id: string;
-    role: 'system' | 'user';
-    content: string;
-    type?: 'text' | 'options' | 'report';
-    options?: string[];
-    reportData?: AnalysisDocument;
-}
-
-interface AnalysisDocument {
-    id: string;
-    title: string;
-    summary: string; // Abstract
-    example: string;
-    steps: string[];
-    kpi: string;
-    date: string;
 }
 
 export default function ContentChat({ item, onBack }: ContentChatProps) {
@@ -56,7 +38,7 @@ export default function ContentChat({ item, onBack }: ContentChatProps) {
         scrollToBottom();
     }, [messages, isTyping]);
 
-    const handleSend = (text: string) => {
+    const handleSend = async (text: string) => {
         if (!text.trim()) return;
 
         // User Message
@@ -65,59 +47,22 @@ export default function ContentChat({ item, onBack }: ContentChatProps) {
         setInput("");
         setIsTyping(true);
 
-        // Simulation of AI processing
-        setTimeout(() => {
+        try {
+            const responseMsg = await educationService.contentChat(item.id, text, messages, strategyPreferences);
+            
             setIsTyping(false);
-            
-            // Logic for demo flow
-            const msgCount = messages.length;
-            
-            let systemResponse: Message;
+            setMessages(prev => [...prev, responseMsg]);
 
-            if (msgCount < 3) {
-                 // Second question
-                 systemResponse = {
-                     id: (Date.now() + 1).toString(),
-                     role: 'system',
-                     content: "¿Entendido. Y qué nivel de experiencia tienes con este tema específico?",
-                     type: 'options',
-                     options: ["Principiante", "Intermedio", "Avanzado"]
-                 };
-            } else {
-                 // Generate Report & Upload Document
-                 const pref = strategyPreferences;
-                 const steps = pref?.learningStyle?.includes("Verlo") 
-                    ? ["Visualizar el diagrama de flujo (Anexo)", "Identificar cuellos de botella", "Ejecutar prueba piloto"]
-                    : ["Auditar tareas repetitivas (Mañana)", "Crear primer SOP en video (Miercoles)", "Delegar gestión de correo (Viernes)"];
-                 
-                 const summary = pref 
-                    ? `Optimizado para estilo "${pref.learningStyle}" con profundidad "${pref.depth}".`
-                    : "Estructura operativa para liberar tiempo.";
-
-                 const newDoc: AnalysisDocument = {
-                     id: Date.now().toString(),
-                     title: `Estrategia: ${item.title}`,
-                     summary: summary,
-                     example: "Caso de uso: Automatización de onboardings de clientes nuevos reduciendo 4 horas a 15 minutos.",
-                     steps: steps,
-                     kpi: "Horas recuperadas: 5h/semana",
-                     date: "Justo ahora"
-                 };
-
-                 // Add to documents list (Sidebar)
-                 setDocuments(prev => [newDoc, ...prev]);
-
-                 systemResponse = {
-                     id: (Date.now() + 1).toString(),
-                     role: 'system',
-                     content: "Perfecto. He analizado tu contexto y el contenido. He subido el Reporte de Aplicación Práctica a tu barra lateral.",
-                     type: 'report',
-                     reportData: newDoc
-                 };
+            if (responseMsg.type === 'report' && responseMsg.reportData) {
+                 setDocuments(prev => [responseMsg.reportData!, ...prev]);
+                 if (documents.length === 0) {
+                     setSelectedDoc(responseMsg.reportData!);
+                 }
             }
-
-            setMessages(prev => [...prev, systemResponse]);
-        }, 1500);
+        } catch (error) {
+             console.error("Chat Error", error);
+             setIsTyping(false);
+        }
     };
 
     return (

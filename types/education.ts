@@ -4,9 +4,10 @@ export interface Message {
   id: string;
   role: EducationRole;
   content: string;
-  type?: 'text' | 'options' | 'input';
+  type?: 'text' | 'options' | 'input' | 'report';
   options?: string[];
-  timestamp: Date;
+  reportData?: AnalysisDocument;
+  timestamp?: Date;
 }
 
 export interface UserContext {
@@ -37,6 +38,16 @@ export interface EducationContent {
   thumbnailUrl?: string;
   summary?: string;
   createdAt: string;
+}
+
+export interface AnalysisDocument {
+    id: string;
+    title: string;
+    summary: string; // Abstract
+    example: string; // "Por ejemplo..."
+    steps: string[]; // checklist
+    kpi: string; // "Metrica clave"
+    date: string;
 }
 
 export interface ActionPlan {
