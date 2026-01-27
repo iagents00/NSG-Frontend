@@ -7,7 +7,7 @@ export default function DiagnosticForm() {
     const [step, setStep] = useState(1);
 
     return (
-        <div className="w-full max-w-2xl mx-auto py-12">
+        <div className="w-full max-w-2xl mx-auto py-6 md:py-12">
             {/* Progress Header */}
             <div className="flex items-center justify-between mb-8">
                 <div>
@@ -20,7 +20,7 @@ export default function DiagnosticForm() {
             </div>
 
             {/* Question Card */}
-            <div className="bg-white rounded-4xl p-8 shadow-2xl shadow-blue-900/5 border border-slate-100 relative overflow-hidden">
+            <div className="bg-white rounded-3xl md:rounded-4xl p-6 md:p-8 shadow-2xl shadow-blue-900/5 border border-slate-100 relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1 bg-slate-100">
                     <div className="h-full bg-blue-600 transition-all duration-500" style={{ width: `${step * 10}%` }}></div>
                 </div>

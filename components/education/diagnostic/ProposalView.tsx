@@ -7,15 +7,15 @@ export default function ProposalView() {
     return (
         <div className="flex flex-col h-full overflow-hidden">
             {/* Header */}
-            <div className="flex items-center justify-between mb-8 px-6">
-                 <h2 className="text-2xl font-display font-bold text-navy-900">Tu Propuesta Estratégica</h2>
+            <div className="flex items-center justify-between mb-4 md:mb-8 px-4 md:px-6">
+                 <h2 className="text-xl md:text-2xl font-display font-bold text-navy-900">Tu Propuesta Estratégica</h2>
                  <button className="flex items-center gap-2 text-sm font-bold text-navy-900 bg-white border border-slate-200 px-4 py-2 rounded-xl hover:bg-slate-50 transition-colors">
                     <Download className="w-4 h-4" /> Exportar PDF
                  </button>
             </div>
 
             {/* 3-Column Layout */}
-            <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 px-6 pb-8 overflow-y-auto">
+            <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 px-4 md:px-6 pb-8 overflow-y-auto">
                 {/* Column 1: Procesos */}
                 <ColumnCard 
                     title="Análisis de Procesos" 

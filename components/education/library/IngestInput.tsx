@@ -26,15 +26,15 @@ export default function IngestInput() {
                     onBlur={() => setIsFocused(false)}
                     onChange={(e) => setUrl(e.target.value)}
                     placeholder="Pega un enlace de YouTube, TikTok o Instagram..."
-                    className="w-full bg-transparent px-4 py-5 text-lg font-medium text-navy-900 placeholder:text-slate-400 focus:outline-none"
+                    className="flex-1 w-full min-w-0 bg-transparent px-4 py-5 text-lg font-medium text-navy-900 placeholder:text-slate-400 focus:outline-none"
                 />
                 
                 {/* Right Actions */}
                 <div className="pr-2 flex items-center gap-2">
                      <div className="h-8 w-px bg-slate-200 mx-2"></div>
-                     <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:border-blue-200 text-slate-600 hover:text-blue-600 rounded-xl transition-all shadow-sm hover:shadow-md font-bold text-xs uppercase tracking-wider group/btn">
+                     <button className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-white border border-slate-200 hover:border-blue-200 text-slate-600 hover:text-blue-600 rounded-xl transition-all shadow-sm hover:shadow-md font-bold text-xs uppercase tracking-wider group/btn">
                         <UploadCloud className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
-                        Subir
+                        <span className="hidden sm:inline">Subir</span>
                      </button>
                 </div>
             </div>

@@ -11,22 +11,39 @@ import clsx from "clsx";
 
 type EducationView = 'onboarding' | 'library' | 'plans' | 'diagnostic';
 
-export default function NSGEducationPage() {
-    const [currentView, setCurrentView] = useState<EducationView>('onboarding');
+import StrategyWidget from "@/components/education/onboarding/StrategyWidget";
 
-    // Navigation for Demo Purposes
+export default function NSGEducationPage() {
+    const [currentView, setCurrentView] = useState<EducationView>('library'); // Changed default to library
+    
+    // Strategy Widget State
+    const [isStrategyOpen, setIsStrategyOpen] = useState(false);
+    const [isStrategyMinimized, setIsStrategyMinimized] = useState(false);
+    const [isStrategyCompleted, setIsStrategyCompleted] = useState(false);
+
+    // Initial load: Open strategy if not completed (simulated)
+    useState(() => {
+        // Here we would check DB if onboarding is done
+        setIsStrategyOpen(true);
+    });
+
+    // Navigation for Demo Purposes (Removed 'Estrategia' from main views, moved to button action)
     const NAV_ITEMS: { id: EducationView; label: string; icon: any }[] = [
-        { id: 'onboarding', label: 'Estrategia', icon: GraduationCap },
         { id: 'library', label: 'Biblioteca', icon: BookOpen },
         { id: 'plans', label: 'Mis Planes', icon: Layers },
         { id: 'diagnostic', label: 'Diagnóstico IA', icon: Zap },
     ];
 
+    const handleOpenStrategy = () => {
+        setIsStrategyOpen(true);
+        setIsStrategyMinimized(false);
+    };
+
     return (
-        <div className="h-full flex flex-col p-6 gap-6">
+        <div className="h-full flex flex-col p-4 md:p-6 gap-4 md:gap-6 relative">
             {/* Top Navigation Bar */}
-            <div className="flex items-center justify-between bg-white rounded-2xl p-2 px-4 shadow-sm border border-slate-100 shrink-0">
-                 <div className="flex items-center gap-1">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between bg-white rounded-2xl p-2 px-4 shadow-sm border border-slate-100 shrink-0 gap-2 sm:gap-0">
+                 <div className="flex items-center gap-1 overflow-x-auto no-scrollbar pb-1 sm:pb-0 -mx-2 px-2 sm:mx-0 sm:px-0">
                      {NAV_ITEMS.map((item) => (
                          <button
                             key={item.id}
@@ -42,6 +59,20 @@ export default function NSGEducationPage() {
                              {item.label}
                          </button>
                      ))}
+                     
+                     {/* Strategy Trigger Button */}
+                     <button
+                        onClick={handleOpenStrategy}
+                        className={clsx(
+                            "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ml-2",
+                            isStrategyOpen && !isStrategyMinimized
+                                ? "bg-amber-100 text-amber-700"
+                                : "text-slate-500 hover:bg-slate-50 hover:text-navy-900"
+                        )}
+                     >
+                         <GraduationCap className="w-4 h-4" />
+                         Estrategia
+                     </button>
                  </div>
                  
                  <div className="text-xs font-bold text-slate-400 uppercase tracking-widest hidden sm:block">
@@ -51,23 +82,33 @@ export default function NSGEducationPage() {
 
             {/* Main Content Area */}
             <div className="flex-1 overflow-hidden transition-all duration-500">
-                {currentView === 'onboarding' && <OnboardingLayout />}
                 {currentView === 'library' && (
                     <div className="h-full bg-slate-50/50 rounded-4xl border border-white/50 shadow-inner overflow-hidden">
                         <ContentLibrary />
                     </div>
                 )}
+                {/* Defaulting Plans as main view when user lands (home) */}
                 {currentView === 'plans' && <ActionPlanView />}
-                {/* For Diagnostic, we toggle between form and result for demo */}
                 {currentView === 'diagnostic' && (
                      <div className="h-full bg-slate-50/50 rounded-4xl border border-white/50 shadow-inner p-8 overflow-y-auto">
-                        {/* Simple toggle for demo */}
                         <div className="mb-4 flex gap-4">
                              <DiagnosticWrapper /> 
                         </div>
                      </div>
                 )}
             </div>
+
+            {/* STRATEGY WIDGET OVERLAY */}
+            <StrategyWidget 
+                isOpen={isStrategyOpen}
+                isMinimized={isStrategyMinimized}
+                isCompleted={isStrategyCompleted}
+                onClose={() => setIsStrategyOpen(false)}
+                onMinimize={() => setIsStrategyMinimized(true)}
+                onMaximize={() => setIsStrategyMinimized(false)}
+                onComplete={() => setIsStrategyCompleted(true)}
+                onReset={() => setIsStrategyCompleted(false)}
+            />
         </div>
     );
 }

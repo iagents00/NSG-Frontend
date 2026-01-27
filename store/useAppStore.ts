@@ -43,6 +43,19 @@ interface AppState {
   setUserId: (id: string) => void;
   setUserLocation: (location: AppState['userLocation']) => void;
   setUserProfile: (profile: AppState['userProfile']) => void;
+  strategyPreferences: StrategyPreferences | null;
+  setStrategyPreferences: (prefs: StrategyPreferences) => void;
+}
+
+export interface StrategyPreferences {
+    entregable: string;
+    learningStyle: string;
+    depth: string;
+    context: string;
+    strength: string;
+    friction: string;
+    numerology: boolean;
+    birthDate?: string;
 }
 
 export const useAppStore = create<AppState>()(
@@ -63,6 +76,7 @@ export const useAppStore = create<AppState>()(
       userId: '',
       userLocation: null,
       userProfile: null,
+      strategyPreferences: null,
 
       setRole: (role) => set({ currentRole: role }),
       setTheme: (theme) => set({ theme }),
@@ -83,6 +97,7 @@ export const useAppStore = create<AppState>()(
       setUserId: (id) => set({ userId: id }),
       setUserLocation: (location) => set({ userLocation: location }),
       setUserProfile: (profile) => set({ userProfile: profile }),
+      setStrategyPreferences: (prefs) => set({ strategyPreferences: prefs }),
     }),
     {
       name: 'nsg-storage',
@@ -92,7 +107,8 @@ export const useAppStore = create<AppState>()(
         conversations: state.conversations,
         userId: state.userId,
         userLocation: state.userLocation,
-        userProfile: state.userProfile
+        userProfile: state.userProfile,
+        strategyPreferences: state.strategyPreferences
       }),
     }
   )

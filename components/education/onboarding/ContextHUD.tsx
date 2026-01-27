@@ -1,77 +1,103 @@
 "use client";
 
-import { Crown, Clock, Zap, Target } from "lucide-react";
+import { Crown, Clock, Activity, Target } from "lucide-react";
 import { useEffect, useState } from "react";
 import clsx from "clsx";
 
+import { StrategyPreferences } from "@/store/useAppStore";
+
 interface ContextHUDProps {
     currentStep: number;
+    answers?: Partial<StrategyPreferences>;
 }
 
-export default function ContextHUD({ currentStep }: ContextHUDProps) {
-    const [goals, setGoals] = useState<string>("Detecting...");
+export default function ContextHUD({ currentStep, answers }: ContextHUDProps) {
+    const [goals, setGoals] = useState<string>("Detectando...");
     const [time, setTime] = useState<string>("--");
     const [format, setFormat] = useState<string>("--");
 
     // Simulate real-time data extraction based on steps
     useEffect(() => {
-        if (currentStep > 2) setGoals("Aumentar Ingresos Q4");
-        if (currentStep > 4) setTime("4h / semana");
-        if (currentStep > 6) setFormat("Video + Audio");
-    }, [currentStep]);
+        if (answers?.entregable && currentStep > 1) setGoals(answers.entregable);
+        if (answers?.learningStyle && currentStep > 2) setTime(answers.learningStyle);
+        if (answers?.context && currentStep > 4) setFormat(answers.context);
+    }, [currentStep, answers]);
 
     return (
-        <div className="h-full flex flex-col gap-4">
+        <div className="h-full flex flex-col gap-6">
             {/* Main HUD Card */}
-            <div className="flex-1 bg-white/40 backdrop-blur-xl border border-white/20 shadow-2xl shadow-blue-900/5 rounded-4xl p-6 flex flex-col">
-                <div className="flex items-center gap-3 mb-6">
-                    <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
-                        <Target className="w-4 h-4" />
+            <div className="flex-1 bg-white/60 backdrop-blur-2xl border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04)] rounded-[2.5rem] p-8 flex flex-col relative overflow-hidden group">
+                <div className="absolute inset-0 bg-linear-to-b from-white/50 to-transparent pointer-events-none" />
+                
+                <div className="flex items-center gap-4 mb-10 relative z-10">
+                    <div className="w-10 h-10 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-lg shadow-slate-900/20 ring-1 ring-black/5">
+                        <Target className="w-5 h-5" />
                     </div>
-                    <h3 className="text-sm font-bold text-navy-900 uppercase tracking-wider">Live Context</h3>
+                    <div>
+                        <h3 className="text-sm font-bold text-slate-900 tracking-tight leading-none">Contexto Activo</h3>
+                        <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest mt-1">Live Analytics</p>
+                    </div>
                 </div>
 
-                <div className="space-y-6">
-                    <HUDItem 
+                <div className="space-y-8 relative z-10">
+                    {/* Connecting Line */}
+                    <div className="absolute left-[1.15rem] top-4 bottom-4 w-px bg-slate-200/50 -z-10" />
+
+                     <HUDItem 
                         icon={<Crown className="w-4 h-4" />}
-                        label="Primary Goal"
+                        label="Entregable"
                         value={goals}
-                        isActive={currentStep > 2}
+                        isActive={currentStep > 1}
                     />
                      <HUDItem 
                         icon={<Clock className="w-4 h-4" />}
-                        label="Time Available"
+                        label="Estilo de Aprendizaje"
                         value={time}
-                        isActive={currentStep > 4}
+                        isActive={currentStep > 2}
                         delay={100}
                     />
                      <HUDItem 
-                        icon={<Zap className="w-4 h-4" />}
-                        label="Format"
+                        icon={<Activity className="w-4 h-4" />}
+                        label="Enfoque Principal"
                         value={format}
-                        isActive={currentStep > 6}
+                        isActive={currentStep > 3}
                         delay={200}
                     />
                 </div>
 
-                <div className="mt-auto pt-6 border-t border-white/10">
-                    <p className="text-[10px] text-slate-400 font-medium leading-relaxed">
-                        AI Analysis active. Context is being built in real-time to generate your strategic plan.
-                    </p>
+                <div className="mt-auto pt-8 border-t border-slate-100/50 relative z-10">
+                    <div className="flex items-center gap-3">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
+                        <p className="text-[10px] text-slate-400 font-medium leading-relaxed tracking-wide">
+                            Análisis en tiempo real activo
+                        </p>
+                    </div>
                 </div>
             </div>
 
-            {/* Micro Widget */}
-            <div className="h-32 bg-linear-to-br from-blue-600 to-blue-700 rounded-4xl p-6 text-white shadow-lg relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <Zap className="w-16 h-16" />
+            {/* Micro Widget - Status */}
+            <div className="h-36 bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-[0_20px_40px_-12px_rgba(15,23,42,0.4)] relative overflow-hidden group transition-transform duration-500 hover:scale-[1.02]">
+                <div className="absolute -right-6 -top-6 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl group-hover:bg-blue-500/30 transition-colors" />
+                
+                <div className="absolute top-8 right-8 text-blue-500/20 group-hover:text-blue-500/40 transition-colors duration-500">
+                    <Activity className="w-12 h-12" />
                 </div>
-                <p className="text-blue-100 text-xs font-bold uppercase tracking-wider mb-1">Status</p>
-                <div className="text-2xl font-display font-bold">
-                    {currentStep < 12 ? "Building..." : "Ready"}
-                </div>
-                <div className="mt-2 w-full h-1 bg-white/20 rounded-full overflow-hidden">
-                     <div className="h-full bg-white/80 animate-pulse" style={{ width: '60%'}}></div>
+
+                <div className="flex flex-col justify-between h-full relative z-10">
+                    <p className="text-blue-200/60 text-[10px] font-bold uppercase tracking-widest mb-1">Estado del Sistema</p>
+                    
+                    <div>
+                        <div className="text-3xl font-display font-medium tracking-tight mb-4">
+                            {currentStep < 8 ? "Calibrando..." : "Listo"}
+                        </div>
+                        
+                        <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden backdrop-blur-sm">
+                             <div 
+                                className="h-full bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.6)] transition-all duration-1000 ease-out rounded-full" 
+                                style={{ width: `${Math.min((currentStep / 7) * 100, 100)}%`}}
+                            />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -89,21 +115,27 @@ interface HUDItemProps {
 function HUDItem({ icon, label, value, isActive, delay = 0 }: HUDItemProps) {
     return (
         <div className={clsx(
-            "group transition-all duration-500",
-            isActive ? "opacity-100 translate-x-0" : "opacity-50 translate-x-2 grayscale"
-        )}>
-            <div className="flex items-center gap-2 text-slate-400 mb-1">
-                {icon}
-                <span className="text-[10px] font-bold uppercase tracking-widest">{label}</span>
-            </div>
+            "group flex items-start gap-4 transition-all duration-700 ease-out",
+            isActive ? "opacity-100 translate-x-0" : "opacity-40 translate-x-4 grayscale"
+        )} style={{ transitionDelay: `${delay}ms` }}>
+            
             <div className={clsx(
-                "text-lg font-semibold text-navy-900 transition-all pl-6 relative",
-                isActive && "text-blue-600"
+                "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-all duration-500 shadow-sm",
+                isActive 
+                    ? "bg-white border-blue-100 text-blue-600 shadow-blue-500/10 ring-2 ring-blue-500/5" 
+                    : "bg-slate-50 border-slate-100 text-slate-300"
             )}>
-                {isActive && (
-                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-blue-500 rounded-full animate-ping" />
-                )}
-                {value}
+                {icon}
+            </div>
+
+            <div className="pt-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">{label}</span>
+                <div className={clsx(
+                    "text-base font-medium text-slate-900 transition-all font-display tracking-tight",
+                    isActive && "text-slate-900"
+                )}>
+                    {value}
+                </div>
             </div>
         </div>
     )

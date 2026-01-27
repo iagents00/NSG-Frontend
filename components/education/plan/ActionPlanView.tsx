@@ -6,9 +6,9 @@ import clsx from "clsx";
 
 export default function ActionPlanView() {
     return (
-        <div className="flex flex-col h-full bg-slate-50/50 rounded-4xl overflow-y-auto p-8 lg:px-20 lg:py-12">
+        <div className="flex flex-col h-full bg-slate-50/50 rounded-4xl overflow-y-auto p-4 md:p-8 lg:px-20 lg:py-12">
             {/* Header / Summary Card */}
-            <div className="bg-white rounded-4xl p-8 shadow-xl shadow-slate-200/50 border border-white mb-10 relative overflow-hidden">
+            <div className="bg-white rounded-4xl p-6 md:p-8 shadow-xl shadow-slate-200/50 border border-white mb-6 md:mb-10 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2"></div>
                 
                 <h2 className="font-display font-bold text-3xl text-navy-900 mb-6 relative z-10">

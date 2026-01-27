@@ -21,19 +21,26 @@ const MOCK_DATA: EducationContent[] = [
     },
 ];
 
-export default function ContentGrid() {
+interface ContentGridProps {
+    onSelect?: (item: EducationContent) => void;
+}
+
+export default function ContentGrid({ onSelect }: ContentGridProps) {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-10">
             {MOCK_DATA.map((item) => (
-                <ContentCard key={item.id} item={item} />
+                <ContentCard key={item.id} item={item} onClick={() => onSelect?.(item)} />
             ))}
         </div>
     )
 }
 
-function ContentCard({ item }: { item: EducationContent }) {
+function ContentCard({ item, onClick }: { item: EducationContent; onClick?: () => void }) {
     return (
-        <div className="group bg-white rounded-3xl border border-slate-100 p-3 hover:border-blue-200 hover:shadow-[0_10px_40px_-10px_rgba(59,130,246,0.15)] transition-all duration-300 hover:-translate-y-1 cursor-pointer relative overflow-hidden">
+        <div 
+            onClick={onClick}
+            className="group bg-white rounded-3xl border border-slate-100 p-3 hover:border-blue-200 hover:shadow-[0_10px_40px_-10px_rgba(59,130,246,0.15)] transition-all duration-300 hover:-translate-y-1 cursor-pointer relative overflow-hidden"
+        >
             {/* Thumbnail Area */}
             <div className="aspect-video rounded-2xl bg-slate-100 relative overflow-hidden mb-4">
                 {item.thumbnailUrl ? (
