@@ -1,75 +1,199 @@
 "use client";
 
-import ComingSoon from "@/components/ComingSoon";
+import { useState, useEffect } from "react";
+import {
+    Newspaper,
+    TrendingUp,
+    Zap,
+    Search,
+    Loader2,
+    Sparkles,
+    ArrowRight
+} from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
-import { Newspaper, TrendingUp } from "lucide-react";
+import api from "@/lib/api";
+import clsx from "clsx";
+import ComingSoon from "@/components/ComingSoon";
+import { NewsCard } from "@/components/ui/NewsCard";
+import { useUIStore } from "@/store/useUIStore";
+
+interface NewsItem {
+    _id: string;
+    title: string;
+    content: string;
+    date: string;
+    link?: string;
+    categories: string[];
+    tag: string;
+    source: string;
+    color: string;
+    analysis?: string;
+    createdAt: string;
+}
 
 export default function NSGNews() {
     const { currentRole } = useAppStore();
+    const { openAI, setAIMode } = useUIStore();
+    const [activeTab, setActiveTab] = useState<"market" | "archive">("market");
+    const [news, setNews] = useState<NewsItem[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [analyzingId, setAnalyzingId] = useState<string | null>(null);
 
-    // Admin puede acceder a la interfaz completa
-    if (currentRole === "admin") {
+    useEffect(() => {
+        fetchNews();
+    }, [activeTab]);
+
+    const fetchNews = async () => {
+        setLoading(true);
+        try {
+            const endpoint = activeTab === "archive"
+                ? "/news/search?type=analyzed"
+                : "/news/search";
+            const response = await api.get(endpoint);
+            setNews(response.data);
+        } catch (error) {
+            console.error("Error fetching news:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleAnalyze = async (id: string) => {
+        setAnalyzingId(id);
+        try {
+            // Trigger backend process
+            await api.post(`/news/analyze/${id}`);
+
+            // Open AI Modal in research mode to show the analysis "progress" in UI
+            setAIMode('research');
+            openAI();
+        } catch (error) {
+            console.error("Error analyzing news:", error);
+        } finally {
+            setAnalyzingId(null);
+        }
+    };
+
+    const hasAccess = ["admin", "psychologist", "consultant", "manager"].includes(currentRole || "");
+
+    if (!hasAccess && currentRole !== "patient") {
         return (
-            <div className="flex-1 overflow-y-auto custom-scroll safe-bottom-scroll scroll-smooth w-full animate-fade-in-up flex flex-col items-center bg-white text-slate-900">
-                <div className="w-full px-2 xs:px-4 lg:px-12 py-8 max-w-[1700px]">
-                    {/* Hero Banner (Clarity Style) */}
-                    <div className="relative overflow-hidden bg-linear-to-br from-navy-950 via-slate-900 to-navy-950 px-5 py-6 sm:px-8 sm:py-8 rounded-4xl border border-white/5 shadow-2xl group transition-all duration-700 hover:shadow-emerald-500/10 mb-8 shrink-0">
-                        <div className="relative z-10">
-                            <span className="text-[10px] font-bold tracking-[0.2em] text-emerald-400 uppercase mb-2 block">
-                                Actualidad y Análisis Global
-                            </span>
-                            <h2 className="font-display font-bold text-2xl lg:text-3xl tracking-tight mb-2">
-                                <span className="text-transparent bg-clip-text bg-linear-to-r from-emerald-400 to-blue-400">
-                                    NSG News
-                                </span>
-                            </h2>
-                            <p className="text-slate-300 text-sm max-w-3xl leading-relaxed">
-                                Mantente al día con un feed de inteligencia
-                                diseñado para rastrear noticias globales y
-                                detectar tendencias estratégicas en tiempo real,
-                                permitiéndote tomar decisiones informadas con
-                                datos precisos.
-                            </p>
-                        </div>
-
-                        {/* Background Accent */}
-                        <div className="absolute -right-20 -top-20 w-64 h-64 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none group-hover:bg-blue-500/10 transition-all duration-1000"></div>
-                    </div>
-
-                    {/* Content Placeholder */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {[1, 2, 3].map((i) => (
-                            <div
-                                key={i}
-                                className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-all"
-                            >
-                                <div className="flex items-center gap-2 mb-3">
-                                    <TrendingUp className="w-4 h-4 text-emerald-600" />
-                                    <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">
-                                        Global Insight
-                                    </span>
-                                </div>
-                                <h3 className="text-lg font-bold text-navy-950 mb-2">
-                                    Noticia de Ejemplo {i}
-                                </h3>
-                                <p className="text-slate-600 text-sm">
-                                    Contenido de la noticia estará disponible
-                                    cuando se integre el feed de noticias.
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
+            <ComingSoon
+                title="NSG News"
+                subtitle="Sistema de Inteligencia de Noticias Globales en desarrollo"
+                estimatedDate="Q2 2026"
+            />
         );
     }
 
-    // Otros roles ven ComingSoon
     return (
-        <ComingSoon
-            title="NSG News"
-            subtitle="Sistema de Inteligencia de Noticias Globales en desarrollo"
-            estimatedDate="Q2 2026"
-        />
+        <div className="flex-1 overflow-y-auto custom-scroll safe-bottom-scroll scroll-smooth w-full animate-fade-in-up flex flex-col items-center bg-slate-50/10">
+            <div className="w-full px-2 xs:px-4 lg:px-12 py-8 max-w-[1700px]">
+
+                {/* Header Section - Legacy Style */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-10 gap-6">
+                    <div className="space-y-1">
+                        <div className="flex items-center gap-2 mb-2">
+                            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg">
+                                <Sparkles className="w-4 h-4 text-white" />
+                            </div>
+                            <span className="text-[10px] font-bold tracking-[0.2em] text-blue-600 uppercase">
+                                Hyper-Intelligence Feed
+                            </span>
+                        </div>
+                        <h1 className="font-display font-bold text-3xl lg:text-5xl text-navy-950 tracking-tight">
+                            NSG Hyper-News
+                        </h1>
+                        <p className="text-slate-500 mt-2 text-base lg:text-lg max-w-2xl font-medium">
+                            Inteligencia de mercado curada algorítmicamente para acelerar tus objetivos estratégicos.
+                        </p>
+                    </div>
+
+                    <div className="flex flex-col gap-4 w-full sm:w-auto items-end">
+                        <span className="text-xs font-black bg-blue-50 text-blue-600 px-5 py-2.5 rounded-2xl border border-blue-100 flex items-center gap-2 w-full sm:w-auto justify-center shadow-sm">
+                            <Zap className="w-4 h-4 fill-blue-600" /> Precision Filter Active
+                        </span>
+
+                        <div className="flex bg-white p-1 rounded-2xl border border-slate-200 shadow-sm w-full md:w-auto">
+                            <button
+                                onClick={() => setActiveTab("market")}
+                                className={clsx(
+                                    "flex-1 md:flex-none px-6 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2",
+                                    activeTab === "market"
+                                        ? "bg-navy-950 text-white shadow-md"
+                                        : "text-slate-500 hover:text-navy-950 hover:bg-slate-50"
+                                )}
+                            >
+                                Inteligencia
+                            </button>
+                            <button
+                                onClick={() => setActiveTab("archive")}
+                                className={clsx(
+                                    "flex-1 md:flex-none px-6 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2",
+                                    activeTab === "archive"
+                                        ? "bg-navy-950 text-white shadow-md"
+                                        : "text-slate-500 hover:text-navy-950 hover:bg-slate-50"
+                                )}
+                            >
+                                Archivo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Search Bar */}
+                <div className="mb-10 relative max-w-xl group">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                    <input
+                        type="text"
+                        placeholder="Buscar noticias o tendencias estratégicas..."
+                        className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-3xl shadow-sm focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500/50 transition-all outline-none text-slate-800 font-medium"
+                    />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 px-3 py-1 bg-slate-100 rounded-full text-[10px] font-bold text-slate-400">
+                        K
+                    </div>
+                </div>
+
+                {/* News Grid */}
+                {loading ? (
+                    <div className="flex flex-col items-center justify-center py-32 gap-6">
+                        <div className="relative">
+                            <div className="w-16 h-16 border-4 border-slate-100 border-t-blue-600 rounded-full animate-spin"></div>
+                            <Sparkles className="w-6 h-6 text-blue-600 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                        </div>
+                        <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] animate-pulse">
+                            Decodificando Frecuencias Globales...
+                        </p>
+                    </div>
+                ) : news.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {news.map((item) => (
+                            <NewsCard
+                                key={item._id}
+                                source={item.source || "NSG"}
+                                title={item.title}
+                                tag={item.tag || item.categories[0] || "Global"}
+                                color={item.color || "blue"}
+                                description={item.content}
+                                time={new Date(item.createdAt).toLocaleDateString("es-ES", { day: 'numeric', month: 'short' })}
+                                isAnalyzed={!!item.analysis}
+                                onAnalyze={() => handleAnalyze(item._id)}
+                                isAnalyzing={analyzingId === item._id}
+                            />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="bg-white rounded-[3rem] p-24 border-2 border-dashed border-slate-100 flex flex-col items-center text-center max-w-3xl mx-auto shadow-sm">
+                        <div className="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center mb-6 border border-slate-100">
+                            <Newspaper className="w-10 h-10 text-slate-200" />
+                        </div>
+                        <h3 className="text-2xl font-bold text-navy-950 mb-2 font-display">Feed Silencioso</h3>
+                        <p className="text-slate-500 max-w-sm">
+                            No se han detectado nuevas señales en este canal. Vuelve pronto para nuevos insights estratégicos.
+                        </p>
+                    </div>
+                )}
+            </div>
+        </div>
     );
 }

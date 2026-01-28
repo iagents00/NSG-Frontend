@@ -1,5 +1,6 @@
-import { ArrowRight, Clock } from "lucide-react";
+import { ArrowRight, Clock, Loader2 } from "lucide-react";
 import BrandAtom from "@/components/ui/BrandAtom";
+import clsx from "clsx";
 
 interface NewsCardProps {
   source: string;
@@ -9,10 +10,11 @@ interface NewsCardProps {
   description: string;
   time: string;
   isAnalyzed?: boolean;
+  isAnalyzing?: boolean;
   onAnalyze: () => void;
 }
 
-export function NewsCard({ source, title, tag, color, description, time, isAnalyzed, onAnalyze }: NewsCardProps) {
+export function NewsCard({ source, title, tag, color, description, time, isAnalyzed, isAnalyzing, onAnalyze }: NewsCardProps) {
   const colorMap: Record<string, string> = {
     blue: "bg-blue-50 text-blue-600 border-blue-100",
     purple: "bg-purple-50 text-purple-600 border-purple-100",
@@ -31,10 +33,10 @@ export function NewsCard({ source, title, tag, color, description, time, isAnaly
 
   return (
     <div
-      onClick={onAnalyze}
+      onClick={isAnalyzing ? undefined : onAnalyze}
       className="group relative bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg transition-all duration-500 cursor-pointer overflow-hidden flex flex-col"
     >
-      <div className={`w-1 h-full absolute left-0 top-0 z-20 ${accentColor[color] || accentColor['blue']} opacity-50`}></div>
+      <div className={clsx("w-1 h-full absolute left-0 top-0 z-20 opacity-50", accentColor[color] || accentColor['blue'])}></div>
 
       <div className="p-4 md:p-5 flex flex-col relative">
         <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300">
@@ -47,7 +49,7 @@ export function NewsCard({ source, title, tag, color, description, time, isAnaly
           <div className="flex items-center gap-2">
             <span className="text-[0.6rem] font-black text-slate-400 uppercase tracking-widest">{source}</span>
             <div className="h-0.5 w-0.5 rounded-full bg-slate-200"></div>
-            <span className={`text-[0.55rem] font-bold px-2 py-0.5 rounded-md border ${colorMap[color] || colorMap['blue']}`}>
+            <span className={clsx("text-[0.55rem] font-bold px-2 py-0.5 rounded-md border", colorMap[color] || colorMap['blue'])}>
               {tag}
             </span>
           </div>
@@ -77,14 +79,26 @@ export function NewsCard({ source, title, tag, color, description, time, isAnaly
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onAnalyze();
+              if (!isAnalyzing) onAnalyze();
             }}
-            className={`px-4 py-1.5 rounded-lg text-[0.6rem] font-bold uppercase tracking-widest transition-all duration-300 ${isAnalyzed
+            disabled={isAnalyzing}
+            className={clsx(
+              "px-4 py-1.5 rounded-lg text-[0.6rem] font-bold uppercase tracking-widest transition-all duration-300 flex items-center gap-2",
+              isAnalyzed
                 ? "bg-emerald-600 text-white shadow-md shadow-emerald-500/20"
                 : "bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white"
-              }`}
+            )}
           >
-            {isAnalyzed ? "Ver Análisis" : "Solicitar Análisis"}
+            {isAnalyzing ? (
+              <>
+                <Loader2 className="w-3 h-3 animate-spin" />
+                Analizando
+              </>
+            ) : isAnalyzed ? (
+              "Ver Análisis"
+            ) : (
+              "Solicitar Análisis"
+            )}
           </button>
         </div>
       </div>
