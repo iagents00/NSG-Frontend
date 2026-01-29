@@ -12,12 +12,12 @@ export default function ActionPlanView() {
                 <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2"></div>
                 
                 <h2 className="font-display font-bold text-3xl text-navy-900 mb-6 relative z-10">
-                    Estrategia de Escalamiento Q4
+                    Directiva Operativa Q4
                 </h2>
                 
                 <div className="grid md:grid-cols-2 gap-8 relative z-10">
                     <div className="space-y-4">
-                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Resumen Esencial</h3>
+                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Informe Ejecutivo</h3>
                         <ul className="space-y-3">
                             {["Enfocar el 80% del tiempo en High-Ticket Sales.", "Delegar operaciones diarias antes de Noviembre.", "Implementar sistema de referidos automatizado.", "Revisar métricas de CAC semanalmente."].map((item, i) => (
                                 <li key={i} className="flex items-start gap-3 text-navy-800 font-medium">
@@ -28,9 +28,9 @@ export default function ActionPlanView() {
                         </ul>
                     </div>
                     <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100">
-                         <h3 className="text-xs font-bold text-blue-500 uppercase tracking-widest mb-3">Cómo aplica a ti</h3>
+                         <h3 className="text-xs font-bold text-blue-500 uppercase tracking-widest mb-3">Implicaciones Estratégicas</h3>
                          <p className="text-slate-600 text-sm leading-relaxed">
-                            Dado que tu objetivo es <strong>liberar 4 horas a la semana</strong>, esta estrategias se centra en <em>eliminación</em> antes que en adición. El sistema de referidos aprovechará tu red actual (Consultant) sin requerir outreach en frío.
+                            Dado que el objetivo primario es <strong>liberar 4 horas semanales</strong>, esta directiva prioriza la <em>eliminación de fricción</em> operativa. El sistema de referidos aprovechará su red actual (Nivel Consultor) sin requerir despliegue en frío.
                          </p>
                     </div>
                 </div>
@@ -43,19 +43,19 @@ export default function ActionPlanView() {
                     <div>
                         <h3 className="text-xl font-bold text-navy-900 mb-4 flex items-center gap-2">
                             <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                            Acciones para Hoy
+                            Protocolos Inmediatos
                         </h3>
                         <div className="space-y-3">
-                             <TaskItem text="Escribir el script de petición de referidos para clientes Top 10." />
-                             <TaskItem text="Bloquear 2 horas en calendario para Deep Work de ventas." />
-                             <TaskItem text="Instalar plugin de CRM para tracking de leads." />
+                             <TaskItem text="Redactar script de solicitud de referidos para Top 10 Clientes." />
+                             <TaskItem text="Bloquear 2 horas en calendario para Deep Work (Ventas)." />
+                             <TaskItem text="Implementar plugin CRM para trazabilidad de leads." />
                         </div>
                     </div>
 
                     <div>
                         <h3 className="text-xl font-bold text-navy-900 mb-4 flex items-center gap-2">
                              <Calendar className="w-5 h-5 text-blue-500" />
-                             Plan Semanal
+                             Cronograma de Despliegue
                         </h3>
                          <div className="bg-white rounded-2xl border border-slate-200 p-1 divide-y divide-slate-100">
                             <WeekItem day="Lunes" task="Auditoría de procesos actuales." />
@@ -70,7 +70,7 @@ export default function ActionPlanView() {
                     <div className="bg-navy-900 text-white rounded-3xl p-6 shadow-2xl shadow-navy-900/20">
                         <div className="flex items-center gap-2 mb-6 opacity-80">
                             <TrendingUp className="w-4 h-4" />
-                            <span className="text-xs font-bold uppercase tracking-widest">KPIs de Éxito</span>
+                            <span className="text-xs font-bold uppercase tracking-widest">Vectores de Rendimiento</span>
                         </div>
                         <div className="space-y-6">
                             <KPIItem label="Nuevos Leads" value="+15" trend="+20%" />
@@ -81,7 +81,7 @@ export default function ActionPlanView() {
 
                     <button className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-blue-600/30 hover:shadow-blue-600/40 hover:-translate-y-1 active:scale-95 group">
                         <Download className="w-4 h-4 group-hover:animate-bounce" />
-                        Guardar Plan
+                        Guardar Directiva
                     </button>
                     
                     <button className="w-full flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-navy-900 font-bold py-3 rounded-2xl border border-slate-200 transition-all">

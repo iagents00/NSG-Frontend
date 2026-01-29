@@ -57,6 +57,18 @@ export async function POST(req: Request) {
       fetchOptions.headers = { 'Content-Type': 'application/json' };
     }
     
+    // 3. Forward Authorization Header (Security)
+    const authHeader = req.headers.get('authorization');
+    if (authHeader) {
+        // If headers is undefined (FormData case), init it
+        if (!fetchOptions.headers) {
+             fetchOptions.headers = {};
+        }
+        // If it's a Headers object (unlikely here as we init with object), handle strictly
+        // We initialized fetchOptions above. strict typing might need casting if we assume HeadersInit
+        (fetchOptions.headers as Record<string, string>)['Authorization'] = authHeader;
+    }
+    
     // Map mode to path (secure fallback)
     const validModes = ['pulse', 'compare', 'fusion', 'deep'];
     // User requested 'ai/pulse', 'ai/compare', 'ai/fusion'. Assuming 'deep' maps to ai/deep or fallback.

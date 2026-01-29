@@ -123,11 +123,83 @@ export const educationService = {
      * Saves the final strategy preferences to the backend
      */
     async savePreferences(prefs: StrategyPreferences): Promise<void> {
+        // Map camelCase to snake_case for backend
+        const backendPrefs = {
+            entregable: prefs.entregable,
+            learning_style: prefs.learningStyle,
+            depth: prefs.depth,
+            context: prefs.context,
+            strength: prefs.strength,
+            friction: prefs.friction,
+            numerology_enabled: prefs.numerology || false,
+            birth_date: prefs.birthDate || null
+        };
+
+        console.log("📤 Enviando preferencias al backend:", {
+            frontend: prefs,
+            backend: backendPrefs
+        });
+
         try {
-            await api.post("/education/preferences", prefs);
+            await api.post("/education/preferences", backendPrefs);
+            console.log("✅ Preferencias guardadas exitosamente");
         } catch (error) {
-            console.warn("Failed to sync preferences to backend", error);
-            // We don't throw here because we want the app to continue using local state
+            console.warn("❌ Failed to sync preferences to backend", error);
+            throw error; // Throw so UI can show error
+        }
+    },
+
+    /**
+     * Gets onboarding status from backend
+     */
+    async getOnboardingStatus(): Promise<{ onboarding_completed: boolean; completed_at?: string }> {
+        try {
+            const response = await api.get("/education/onboarding/status");
+            return response.data;
+        } catch (error: any) {
+            // If 404, onboarding not completed
+            if (error.response?.status === 404) {
+                return { onboarding_completed: false };
+            }
+            throw error;
+        }
+    },
+
+    /**
+     * Gets user preferences from backend
+     */
+    async getPreferences(): Promise<StrategyPreferences> {
+        try {
+            const response = await api.get("/education/preferences");
+            const data = response.data.preferences;
+            
+            // Map snake_case to camelCase
+            return {
+                entregable: data.entregable,
+                learningStyle: data.learning_style,
+                depth: data.depth,
+                context: data.context,
+                strength: data.strength,
+                friction: data.friction,
+                numerology: data.numerology_enabled,
+                birthDate: data.birth_date
+            };
+        } catch (error) {
+            console.warn("Failed to get preferences from backend", error);
+            throw error;
+        }
+    },
+
+    /**
+     * Resets onboarding status
+     */
+    async resetOnboarding(): Promise<void> {
+        try {
+            await api.post("/education/onboarding/reset");
+            console.log("✅ Onboarding reseteado exitosamente");
+        } catch (error) {
+            console.warn("❌ Failed to reset onboarding", error);
+            throw error;
         }
     }
 };

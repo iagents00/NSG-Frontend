@@ -23,7 +23,6 @@ export default function NSGIntelligence() {
 
     // Lista de secciones bloqueadas con "Próximamente" (solo para roles que no son admin)
     const comingSoonSections = [
-        "nsg_news",
         "clinical_radar",
         "patients",
         "library",
@@ -156,11 +155,10 @@ function ModuleCard({
         shadow-sm transition-all duration-500 cubic-bezier(0.25,1,0.5,1) 
         overflow-hidden p-5 xs:p-8 flex flex-col justify-between animate-fade-in-up fill-mode-backwards 
         will-change-transform
-        ${
-            isComingSoon
-                ? "opacity-60 cursor-not-allowed"
-                : "hover:border-blue-300 hover:shadow-[0_20px_50px_-10px_rgba(59,130,246,0.2)] hover:scale-[1.02] cursor-pointer"
-        }
+        ${isComingSoon
+                    ? "opacity-60 cursor-not-allowed"
+                    : "hover:border-blue-300 hover:shadow-[0_20px_50px_-10px_rgba(59,130,246,0.2)] hover:scale-[1.02] cursor-pointer"
+                }
       `}
         >
             {/* Coming Soon Badge */}
@@ -189,11 +187,10 @@ function ModuleCard({
                     className={`
           w-16 h-16 rounded-2xl border flex items-center justify-center 
           transition-all duration-500 shadow-md
-          ${
-              isComingSoon
-                  ? "bg-slate-100 border-slate-200 text-slate-400"
-                  : "bg-white border-slate-200 text-slate-400 group-hover:bg-linear-to-br group-hover:from-blue-500 group-hover:to-blue-600 group-hover:border-transparent group-hover:text-white group-hover:shadow-lg group-hover:shadow-blue-200"
-          }
+          ${isComingSoon
+                            ? "bg-slate-100 border-slate-200 text-slate-400"
+                            : "bg-white border-slate-200 text-slate-400 group-hover:bg-linear-to-br group-hover:from-blue-500 group-hover:to-blue-600 group-hover:border-transparent group-hover:text-white group-hover:shadow-lg group-hover:shadow-blue-200"
+                        }
         `}
                 >
                     <Icon strokeWidth={1.5} className="w-8 h-8" />
@@ -211,11 +208,10 @@ function ModuleCard({
                 <h3
                     className={`
           text-2xl font-bold tracking-tight mb-3 transition-colors duration-300
-          ${
-              isComingSoon
-                  ? "text-slate-400"
-                  : "text-navy-950 group-hover:text-blue-600"
-          }
+          ${isComingSoon
+                            ? "text-slate-400"
+                            : "text-navy-950 group-hover:text-blue-600"
+                        }
         `}
                 >
                     {title}
@@ -223,11 +219,10 @@ function ModuleCard({
                 <p
                     className={`
           text-[15px] font-medium leading-relaxed transition-colors line-clamp-2 pr-4
-          ${
-              isComingSoon
-                  ? "text-slate-400"
-                  : "text-slate-500 group-hover:text-slate-700"
-          }
+          ${isComingSoon
+                            ? "text-slate-400"
+                            : "text-slate-500 group-hover:text-slate-700"
+                        }
         `}
                 >
                     {description}

@@ -100,22 +100,22 @@ export default function AIModal() {
 
                             {/* Dynamic Back Button - Responsive & Pro UI */}
                             <m.div
-                                initial={{ opacity: 0, x: -20 }}
+                                initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.2, duration: 0.3 }}
-                                className="absolute top-6 left-6 md:top-8 md:left-8 z-60"
+                                className="absolute top-6 right-6 md:top-8 md:right-8 z-60"
                             >
                                 <button
                                     onClick={toggleAI}
-                                    className="group flex items-center justify-center gap-2 p-2 md:pl-3 md:pr-4 md:py-2.5 rounded-full bg-white/80 backdrop-blur-md border border-white/50 shadow-sm hover:shadow-md hover:bg-white transition-all duration-300 transform active:scale-95 cursor-pointer"
+                                    className="group flex items-center justify-center gap-2 p-2 md:pl-4 md:pr-3 md:py-2.5 rounded-full bg-white/80 backdrop-blur-md border border-white/50 shadow-sm hover:shadow-md hover:bg-white transition-all duration-300 transform active:scale-95 cursor-pointer"
                                     aria-label="Volver"
                                 >
-                                    <div className="bg-slate-100 group-hover:bg-blue-50 text-slate-500 group-hover:text-blue-600 rounded-full p-1.5 transition-colors">
-                                        <ArrowLeft className="w-5 h-5 md:w-4 md:h-4" />
-                                    </div>
                                     <span className="hidden md:block text-sm font-semibold text-slate-600 group-hover:text-slate-900 tracking-tight">
                                         Volver
                                     </span>
+                                    <div className="bg-slate-100 group-hover:bg-blue-50 text-slate-500 group-hover:text-blue-600 rounded-full p-1.5 transition-colors">
+                                        <ArrowLeft className="w-5 h-5 md:w-4 md:h-4 rotate-180" />
+                                    </div>
                                 </button>
                             </m.div>
 

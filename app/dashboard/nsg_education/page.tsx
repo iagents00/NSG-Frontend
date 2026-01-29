@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import OnboardingLayout from "@/components/education/onboarding/OnboardingLayout";
 import ContentLibrary from "@/components/education/library/ContentLibrary";
 import ActionPlanView from "@/components/education/plan/ActionPlanView";
 import DiagnosticForm from "@/components/education/diagnostic/DiagnosticForm";
@@ -9,6 +8,8 @@ import ProposalView from "@/components/education/diagnostic/ProposalView";
 import { GraduationCap, BookOpen, Layers, Zap } from "lucide-react";
 import clsx from "clsx";
 import StrategyWidget from "@/components/education/onboarding/StrategyWidget";
+import { educationService } from "@/lib/education";
+import { useAppStore } from "@/store/useAppStore";
 
 type EducationView = "onboarding" | "library" | "plans" | "diagnostic";
 
@@ -20,7 +21,12 @@ export default function NSGEducationPage() {
     const [isStrategyMinimized, setIsStrategyMinimized] = useState(false);
     const [isStrategyCompleted, setIsStrategyCompleted] = useState(false);
 
-    // Initial load: Open strategy if not completed (simulated)
+    // Get strategy preferences from store (only for display, NOT for auth)
+    const strategyPreferences = useAppStore(
+        (state) => state.strategyPreferences,
+    );
+
+    // Check onboarding status on mount - ALWAYS from database (NO CACHE)
     useEffect(() => {
         // Here we would check DB if onboarding is done
         setIsStrategyOpen(true);
@@ -36,6 +42,10 @@ export default function NSGEducationPage() {
     const handleOpenStrategy = () => {
         setIsStrategyOpen(true);
         setIsStrategyMinimized(false);
+    };
+
+    const handleOnboardingComplete = () => {
+        setIsStrategyCompleted(true);
     };
 
     return (
@@ -98,36 +108,62 @@ export default function NSGEducationPage() {
             </div>
 
             {/* STRATEGY WIDGET OVERLAY */}
-            <StrategyWidget 
+            <StrategyWidget
                 isOpen={isStrategyOpen}
                 isMinimized={isStrategyMinimized}
                 isCompleted={isStrategyCompleted}
                 onClose={() => setIsStrategyOpen(false)}
                 onMinimize={() => setIsStrategyMinimized(true)}
                 onMaximize={() => setIsStrategyMinimized(false)}
-                onComplete={() => setIsStrategyCompleted(true)}
+                onComplete={handleOnboardingComplete}
                 onReset={() => setIsStrategyCompleted(false)}
             />
         </div>
     );
 }
 
-// Wrapper to switch between form and proposal in Diagnostic view
+// ─── HELPER COMPONENTS ──────────────────────────────────────────────
+
 function DiagnosticWrapper() {
     const [showResult, setShowResult] = useState(false);
-
     return (
-        <div className="w-full h-full flex flex-col">
+        <div className="w-full">
             <div className="flex justify-end mb-4">
-                <button
+                 <button
                     onClick={() => setShowResult(!showResult)}
                     className="text-xs text-blue-500 underline"
                 >
-                    Alternar Vista (Demo):{" "}
-                    {showResult ? "Ver Formulario" : "Ver Resultado"}
+                    {showResult ? "Ver Formulario" : "Ver Resultado Demo"}
                 </button>
             </div>
-            {showResult ? <ProposalView /> : <DiagnosticForm />}
+            {showResult ? <ProposalView /> : <DiagnosticForm onComplete={() => setShowResult(true)} />}
         </div>
     );
 }
+
+function StrategyPill({
+    icon: Icon,
+    label,
+    value,
+}: {
+    icon: any;
+    label: string;
+    value: string;
+}) {
+    return (
+        <div className="flex flex-col gap-2">
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none ml-1">
+                {label}
+            </span>
+            <div className="flex items-center gap-3 px-4 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl hover:bg-white/10 transition-all cursor-default group">
+                <Icon className="w-5 h-5 text-blue-400 group-hover:scale-110 transition-transform" />
+                <span className="text-sm font-bold text-white whitespace-nowrap">
+                    {value}
+                </span>
+            </div>
+        </div>
+    );
+}
+
+
+
