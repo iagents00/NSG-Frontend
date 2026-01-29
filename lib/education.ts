@@ -201,50 +201,5 @@ export const educationService = {
             console.warn("❌ Failed to reset onboarding", error);
             throw error;
         }
-    },
-
-    /**
-     * Sends a URL or file type for ingestion and analysis
-     */
-    async ingestContent(url: string, type: string): Promise<EducationContent> {
-        try {
-            const response = await api.post("/education/ingest", { url, type });
-            const item = response.data.content;
-            return {
-                id: item._id,
-                title: item.title,
-                originalUrl: item.source_url,
-                type: item.source_type,
-                status: item.status,
-                createdAt: item.createdAt,
-                thumbnailUrl: item.thumbnail_url
-            };
-        } catch (error) {
-            console.error("❌ Failed to ingest content", error);
-            throw error;
-        }
-    },
-
-    /**
-     * Fetches all user content from backend
-     */
-    async getContents(): Promise<EducationContent[]> {
-        try {
-            const response = await api.get<any[]>("/education/content");
-            return response.data.map(item => ({
-                id: item._id,
-                title: item.title,
-                originalUrl: item.source_url,
-                type: item.source_type,
-                status: item.status as any,
-                thumbnailUrl: item.thumbnail_url,
-                transcription: item.transcription,
-                analysis: item.analysis,
-                createdAt: new Date(item.createdAt).toLocaleDateString(),
-            }));
-        } catch (error) {
-            console.error("❌ Failed to get contents", error);
-            return []; // Return empty on error 
-        }
     }
 };

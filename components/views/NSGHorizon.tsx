@@ -608,10 +608,7 @@ export default function NSGHorizon() {
                                             </span>
                                         </h2>
                                         <p className="text-blue-100/80 text-base leading-relaxed max-w-xl mx-auto md:mx-0">
-                                            Sincroniza automáticamente tus
-                                            grabaciones. Analizamos cada detalle
-                                            para generar insights estratégicos
-                                            al instante.
+                                            Sincronización de inteligencia de reuniones. El sistema ingesta y procesa flujos de audio para destilar inteligencia estratégica en tiempo real.
                                         </p>
                                         <div className="pt-2 flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                                             <button
@@ -803,7 +800,7 @@ export default function NSGHorizon() {
                                             Selecciona Tipo
                                         </h4>
                                         <p className="text-xs text-slate-500">
-                                            Audio o transcripción de texto
+                                            Ingesta de audio o texto estructurado
                                         </p>
                                     </div>
                                 </div>
@@ -819,7 +816,7 @@ export default function NSGHorizon() {
                                             Sube tu Contenido
                                         </h4>
                                         <p className="text-xs text-slate-500">
-                                            Haz clic o arrastra archivos
+                                            Integración segura de archivos
                                         </p>
                                     </div>
                                 </div>
@@ -835,7 +832,7 @@ export default function NSGHorizon() {
                                             Recibe Análisis
                                         </h4>
                                         <p className="text-xs text-slate-500">
-                                            Insights estratégicos al instante
+                                            Extracción de insights estratégicos
                                         </p>
                                     </div>
                                 </div>
@@ -861,10 +858,7 @@ export default function NSGHorizon() {
                                             Análisis Manual de Contenido
                                         </h3>
                                         <p className="text-slate-600 leading-relaxed">
-                                            Procesa tus grabaciones de audio o
-                                            transcripciones de texto para
-                                            obtener insights estratégicos
-                                            impulsados por IA.
+                                            Módulo de procesamiento de lenguaje natural. Transforma activos de audio y texto no estructurado en inteligencia ejecutiva estructurada mediante modelos neuronales avanzados.
                                         </p>
                                     </div>
 

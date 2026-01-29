@@ -1,99 +1,56 @@
-import {
-    Play,
-    FileText,
-    CheckCircle2,
-    Clock,
-    Loader2,
-    RefreshCw,
-} from "lucide-react";
+"use client";
+
+import { Play, FileText, CheckCircle2, Clock, Loader2 } from "lucide-react";
 import { EducationContent } from "@/types/education";
+import clsx from "clsx";
 import Image from "next/image";
-import {
-    useEffect,
-    useState,
-    useCallback,
-    useImperativeHandle,
-    forwardRef,
-} from "react";
-import { educationService } from "@/lib/education";
+
+const MOCK_DATA: EducationContent[] = [
+    {
+        id: "1",
+        title: "Cómo escalar tu agencia en 2024",
+        type: "video",
+        status: "ready",
+        thumbnailUrl:
+            "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+        createdAt: "Hace 2 horas",
+        summary: "",
+    },
+    {
+        id: "2",
+        title: "Protocolo de Sueño Huberman",
+        type: "pdf",
+        status: "processing",
+        createdAt: "Hace 5 min",
+        summary: "",
+    },
+    {
+        id: "3",
+        title: "Estrategia de Ventas Q4",
+        type: "article",
+        status: "pending",
+        createdAt: "Hace 1 min",
+        summary: "",
+    },
+];
 
 interface ContentGridProps {
     onSelect?: (item: EducationContent) => void;
 }
 
-export interface ContentGridRef {
-    refresh: () => void;
+export default function ContentGrid({ onSelect }: ContentGridProps) {
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-10">
+            {MOCK_DATA.map((item) => (
+                <ContentCard
+                    key={item.id}
+                    item={item}
+                    onClick={() => onSelect?.(item)}
+                />
+            ))}
+        </div>
+    );
 }
-
-const ContentGrid = forwardRef<ContentGridRef, ContentGridProps>(
-    ({ onSelect }, ref) => {
-        const [contents, setContents] = useState<EducationContent[]>([]);
-        const [isLoading, setIsLoading] = useState(true);
-
-        const loadContents = useCallback(async () => {
-            setIsLoading(true);
-            try {
-                const data = await educationService.getContents();
-                setContents(data);
-            } catch (error) {
-                console.error("Error loading contents:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        }, []);
-
-        useEffect(() => {
-            loadContents();
-        }, [loadContents]);
-
-        // Expose refresh to parent
-        useImperativeHandle(ref, () => ({
-            refresh: loadContents,
-        }));
-
-        if (isLoading && contents.length === 0) {
-            return (
-                <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-                    <Loader2 className="w-8 h-8 animate-spin mb-4" />
-                    <p className="font-medium">Cargando tu biblioteca...</p>
-                </div>
-            );
-        }
-
-        if (contents.length === 0) {
-            return (
-                <div className="flex flex-col items-center justify-center py-20 px-6 text-center bg-slate-50 rounded-[40px] border border-dashed border-slate-200">
-                    <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center shadow-sm mb-6">
-                        <RefreshCw className="w-8 h-8 text-slate-300" />
-                    </div>
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">
-                        Tu biblioteca está vacía
-                    </h3>
-                    <p className="text-slate-500 max-w-sm mx-auto">
-                        Pega un enlace arriba para procesar tu primer contenido
-                        con IA.
-                    </p>
-                </div>
-            );
-        }
-
-        return (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-10">
-                {contents.map((item) => (
-                    <ContentCard
-                        key={item.id}
-                        item={item}
-                        onClick={() => onSelect?.(item)}
-                    />
-                ))}
-            </div>
-        );
-    },
-);
-
-ContentGrid.displayName = "ContentGrid";
-
-export default ContentGrid;
 
 function ContentCard({
     item,

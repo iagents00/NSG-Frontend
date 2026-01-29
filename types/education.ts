@@ -36,14 +36,6 @@ export interface EducationContent {
   type: ContentType;
   status: ContentStatus;
   thumbnailUrl?: string;
-  transcription?: string; // New: Full transcription
-  analysis?: {
-    summary: string;
-    actions: string[];
-    guide?: string;
-    script?: string;
-    full_report?: string;
-  }; // New: AI analysis result
   summary?: string;
   createdAt: string;
 }

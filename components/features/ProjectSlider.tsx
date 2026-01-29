@@ -22,7 +22,7 @@ const slides = [
         title: "NSG Intelligence",
         subtitle: "Neural Strategic Gateway",
         description:
-            "Plataforma de inteligencia artificial avanzada diseñada para transformar datos en decisiones estratégicas con precisión neuronal.",
+            "Infraestructura de inteligencia artificial de grado institucional. Procesa vectores de datos masivos para generar reconocimiento estratégico autónomo y soporte a la decisión de alta precisión.",
         gradient: "from-blue-400 to-cyan-400",
     },
     {
@@ -31,7 +31,7 @@ const slides = [
         title: "Clarity Protocol",
         subtitle: "Ejecución Diaria de Alto Rendimiento",
         description:
-            "Sistema de protocolos estructurados que optimiza tu flujo de trabajo diario mediante alineación estratégica y seguimiento inteligente.",
+            "Protocolo de precisión operativa y alineación estratégica. Sincroniza la ejecución táctica diaria con los objetivos macro-estratégicos mediante algoritmos adaptativos.",
         gradient: "from-emerald-400 to-teal-400",
     },
     {
@@ -40,7 +40,7 @@ const slides = [
         title: "Horizon Planning",
         subtitle: "Arquitectura del Futuro",
         description:
-            "Análisis profundo de reuniones y sesiones convertido en insights accionables mediante IA, creando hojas de ruta de implementación precisas.",
+            "Arquitectura de planificación predictiva basada en redes neuronales. Sintetiza el diálogo ejecutivo en hojas de ruta deterministas y proyecciones de escenarios futuros.",
         gradient: "from-blue-500 to-cyan-500",
     },
     {
@@ -125,8 +125,7 @@ export default function ProjectSlider() {
                         <div className="space-y-1.5">
                             <h2
                                 className={clsx(
-                                    "font-display font-bold text-2xl sm:text-3xl lg:text-3xl tracking-tight text-transparent bg-clip-text bg-linear-to-r transition-all duration-700",
-                                    current.gradient,
+                                    "font-display font-bold text-2xl sm:text-3xl lg:text-3xl tracking-tight text-white transition-all duration-700",
                                 )}
                             >
                                 {current.title}

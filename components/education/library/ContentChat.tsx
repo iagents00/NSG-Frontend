@@ -20,7 +20,7 @@ export default function ContentChat({ item, onBack }: ContentChatProps) {
         {
             id: '1',
             role: 'system',
-            content: `Hola. Veo que te interesa "${item.title}". Para generar un reporte de aplicación práctica personalizado${strategyPreferences?.entregable ? ` (formato ${strategyPreferences.entregable})` : ''}, necesito saber: ¿Cuál es tu mayor desafío relacionado con este tema actualmente?`,
+            content: `Enlace establecido para "${item.title}". Para generar un informe de inteligencia personalizado${strategyPreferences?.entregable ? ` (formato ${strategyPreferences.entregable})` : ''}, solicito coordenadas: ¿Cuál es su desafío operativo actual referente a este objetivo?`,
             type: 'text'
         }
     ]);
@@ -66,14 +66,14 @@ export default function ContentChat({ item, onBack }: ContentChatProps) {
     };
 
     return (
-        <div className="flex h-full gap-6">
+        <div className="flex flex-col lg:flex-row h-full gap-4 md:gap-6">
             {/* Main Chat Area */}
-            <div className="flex-1 flex flex-col h-full relative bg-white/50 rounded-[2.5rem] overflow-hidden border border-white/60 shadow-inner backdrop-blur-md transition-all">
+            <div className="flex-1 flex flex-col h-full relative bg-white/50 rounded-3xl md:rounded-[2.5rem] overflow-hidden border border-white/60 shadow-inner backdrop-blur-md transition-all min-h-[500px]">
                 {/* Header */}
-                <div className="flex items-center gap-4 p-6 px-8 border-b border-white/20 bg-white/40">
+                <div className="flex items-center gap-3 md:gap-4 p-4 md:p-6 px-4 md:px-8 border-b border-white/20 bg-white/40">
                     <button 
                         onClick={onBack}
-                        className="p-2.5 rounded-full text-slate-500 hover:text-navy-900 hover:bg-white transition-all hover:scale-105 active:scale-95"
+                        className="p-2.5 rounded-full text-slate-500 hover:text-navy-900 hover:bg-white transition-all hover:scale-105 active:scale-95 cursor-pointer"
                     >
                         <ArrowLeft className="w-5 h-5" />
                     </button>
@@ -81,13 +81,13 @@ export default function ContentChat({ item, onBack }: ContentChatProps) {
                         <h2 className="text-lg font-bold text-navy-900 leading-tight">{item.title}</h2>
                         <p className="text-xs font-medium text-slate-500 uppercase tracking-widest flex items-center gap-1.5 mt-0.5">
                             <Activity className="w-3 h-3 text-emerald-500" />
-                            Asistente Inteligente Activo
+                            Protocolo Diplomático Activo
                         </p>
                     </div>
                 </div>
 
                 {/* Messages Area */}
-                <div className="flex-1 overflow-y-auto p-8 space-y-8 scroll-smooth" style={{ scrollbarWidth: 'none' }}>
+                <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 md:space-y-8 scroll-smooth" style={{ scrollbarWidth: 'none' }}>
                     {messages.map((msg, idx) => (
                         <div
                             key={msg.id}
@@ -104,7 +104,7 @@ export default function ContentChat({ item, onBack }: ContentChatProps) {
                                 </div>
                             )}
 
-                            <div className="max-w-[85%] flex flex-col gap-2">
+                            <div className="max-w-[90%] md:max-w-[85%] flex flex-col gap-2">
                                 <div className={clsx(
                                     "p-6 text-[15px] leading-relaxed relative group transition-all duration-300 shadow-sm",
                                     msg.role === 'user' 
@@ -120,7 +120,7 @@ export default function ContentChat({ item, onBack }: ContentChatProps) {
                                                 <button
                                                     key={i}
                                                     onClick={() => handleSend(opt)}
-                                                    className="px-5 py-2.5 bg-white border border-slate-200/60 hover:border-slate-300 hover:bg-slate-50 text-slate-600 hover:text-slate-900 text-sm font-semibold rounded-xl transition-all hover:-translate-y-0.5 shadow-sm"
+                                                    className="px-5 py-2.5 bg-white border border-slate-200/60 hover:border-slate-300 hover:bg-slate-50 text-slate-600 hover:text-slate-900 text-sm font-semibold rounded-xl transition-all hover:-translate-y-0.5 shadow-sm cursor-pointer"
                                                 >
                                                     {opt}
                                                 </button>
@@ -166,20 +166,20 @@ export default function ContentChat({ item, onBack }: ContentChatProps) {
                 </div>
 
                 {/* Input Area */}
-                <div className="p-8 pt-4 bg-gradient-to-t from-white/60 via-white/30 to-transparent">
+                <div className="p-4 md:p-8 pt-2 md:pt-4 bg-gradient-to-t from-white/60 via-white/30 to-transparent">
                     <div className="relative flex items-center gap-2 bg-white/80 backdrop-blur-xl rounded-full p-2 pl-6 pr-2 border border-white/50 transition-all shadow-lg shadow-slate-200/20 focus-within:shadow-xl focus-within:border-blue-200 focus-within:ring-4 focus-within:ring-blue-500/5">
                         <input
                             type="text"
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleSend(input)}
-                            placeholder="Haz una pregunta o pide un análisis..."
-                            className="w-full bg-transparent py-3 text-navy-900 placeholder:text-slate-400 focus:outline-none font-medium text-base"
+                            placeholder="Ingrese coordenadas o solicite análisis..."
+                            className="w-full bg-transparent py-3 text-navy-900 placeholder:text-slate-500 focus:outline-none font-medium text-base"
                         />
                         <button 
                             onClick={() => handleSend(input)}
                             disabled={!input.trim()}
-                            className="p-3 bg-slate-900 text-white rounded-full hover:bg-black transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100 shadow-lg shadow-slate-900/20"
+                            className="p-3 bg-slate-900 text-white rounded-full hover:bg-black transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100 shadow-lg shadow-slate-900/20 cursor-pointer"
                         >
                             <ArrowRight className="w-5 h-5" />
                         </button>
@@ -188,10 +188,10 @@ export default function ContentChat({ item, onBack }: ContentChatProps) {
             </div>
 
             {/* LATERAL SIDEBAR (Analysis Uploads) */}
-            <div className="w-80 h-full flex flex-col bg-white/60 backdrop-blur-2xl rounded-[2.5rem] border border-white/60 shadow-lg relative overflow-hidden shrink-0">
+            <div className="w-full lg:w-80 h-48 lg:h-full flex flex-col bg-white/60 backdrop-blur-2xl rounded-3xl md:rounded-[2.5rem] border border-white/60 shadow-lg relative overflow-hidden shrink-0">
                 <div className="p-6 border-b border-slate-100/50">
                     <h3 className="text-sm font-bold text-navy-900 uppercase tracking-wider flex items-center gap-2">
-                        Archivos IA
+                        Expedientes de Inteligencia
                     </h3>
                 </div>
                 
@@ -201,8 +201,8 @@ export default function ContentChat({ item, onBack }: ContentChatProps) {
                             <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3 text-slate-300">
                                 <FileText className="w-6 h-6" />
                             </div>
-                            <p className="text-sm text-slate-500 font-medium">No hay análisis generados aún.</p>
-                            <p className="text-xs text-slate-400 mt-1">Interactúa con el chat para generar documentos.</p>
+                            <p className="text-sm text-slate-500 font-medium">Sin expedientes generados.</p>
+                            <p className="text-xs text-slate-400 mt-1">Interactúe con el enlace para generar inteligencia.</p>
                         </div>
                     ) : (
                         documents.map((doc) => (
@@ -237,7 +237,7 @@ export default function ContentChat({ item, onBack }: ContentChatProps) {
 
             {/* DOCUMENT VIEWER MODAL (Overlay) */}
             {selectedDoc && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 bg-slate-900/40 backdrop-blur-sm animate-fade-in text-left">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-2 md:p-4 lg:p-8 bg-slate-900/40 backdrop-blur-sm animate-fade-in text-left">
                     <div className="bg-white w-full max-w-4xl h-[90vh] rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden relative animate-fade-in-up">
                         {/* Modal Header */}
                         <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10">
@@ -248,12 +248,12 @@ export default function ContentChat({ item, onBack }: ContentChatProps) {
                                 <h2 className="text-2xl font-display font-bold text-navy-900">{selectedDoc.title}</h2>
                             </div>
                             <div className="flex gap-3">
-                                <button className="p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all">
+                                <button className="p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all cursor-pointer">
                                     <Download className="w-6 h-6" />
                                 </button>
                                 <button 
                                     onClick={() => setSelectedDoc(null)}
-                                    className="p-3 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all"
+                                    className="p-3 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all cursor-pointer"
                                 >
                                     <X className="w-6 h-6" />
                                 </button>
