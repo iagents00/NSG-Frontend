@@ -25,6 +25,7 @@ interface Message {
     role: 'system' | 'user';
     content: string;
     type?: 'text' | 'options' | 'confirmation';
+    title?: string;
     options?: string[];
 }
 
@@ -46,7 +47,7 @@ export default function StrategyWidget({
         {
             id: '1',
             role: 'system',
-            content: 'Te tomo 1–2 minutos. Con 5 respuestas calibro cómo procesar videos para ti (formato + profundidad + ejemplos). Puedes responder con botones o con 🎙️ audio.',
+            content: '¡Excelente! Para poder brindarte una experiencia educativa superior, necesitamos hacer una breve consulta:',
             type: 'text',
         }
     ]);
@@ -211,14 +212,15 @@ export default function StrategyWidget({
                 systemResponse.push({
                      id: Date.now().toString(),
                      role: 'system',
-                     content: "Pregunta opcional: ¿Quieres usar numerología como herramienta de reflexión para personalizar enfoque y riesgos?",
+                     title: "Aniagrama Básico Educativo",
+                     content: "Proporciónanos tu **fecha de nacimiento** para ayudarte a estudiar de forma más inteligente considerando tus fortalezas:",
                      type: 'options',
-                     options: ["A) Sí", "B) No"]
+                     options: ["Continuar", "Saltar"]
                 });
             }
             // Numerology Yes -> Ask Date OR No -> Finish
             else if (currentStep === 6) {
-                const wantsNumerology = text.toLowerCase().includes('sí') || text.toLowerCase().includes('si') || text.includes('A)');
+                const wantsNumerology = text.toLowerCase().includes('continuar');
                 setAnswers(prev => ({ ...prev, numerology: wantsNumerology }));
 
                 if (wantsNumerology) {
@@ -226,7 +228,7 @@ export default function StrategyWidget({
                     systemResponse.push({
                          id: Date.now().toString(),
                          role: 'system',
-                         content: "Comparte tu fecha de nacimiento (DD/MM/AAAA).",
+                         content: "Por favor escribe tu fecha (DD/MM/AAAA):",
                          type: 'text'
                     });
                 } else {
@@ -339,35 +341,35 @@ export default function StrategyWidget({
              <div className="w-full md:max-w-6xl h-full md:h-[90vh] bg-white/80 backdrop-blur-2xl md:rounded-[2.5rem] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.2)] flex overflow-hidden border border-white/40 ring-1 ring-white/60 relative transition-all mx-auto">
                  
                  {/* Sidebar (Context HUD) */}
-                 <div className="w-96 border-r border-slate-100/50 bg-slate-50/30 p-8 hidden md:block backdrop-blur-sm shrink-0">
+                 <div className="w-96 border-r border-slate-100/50 bg-slate-50/30 p-8 hidden lg:block backdrop-blur-sm shrink-0">
                      <ContextHUD currentStep={currentStep} answers={answers} />
                  </div>
 
                  {/* Main Chat Area */}
-                 <div className="flex-1 flex flex-col relative bg-transparent">
+                 <div className="flex-1 flex flex-col relative bg-transparent w-full">
                       {/* Close / Minimize Controls */}
                       <div className="absolute top-6 right-6 z-10 flex gap-2">
-                          <button onClick={onMinimize} className="p-2.5 hover:bg-slate-100/50 rounded-full transition-colors text-slate-400 hover:text-slate-900 backdrop-blur-sm">
+                          <button onClick={onMinimize} className="p-2.5 hover:bg-slate-100/50 rounded-full transition-colors text-slate-400 hover:text-slate-900 backdrop-blur-sm cursor-pointer">
                                <Minimize2 className="w-4 h-4" />
                           </button>
-                          <button onClick={onClose} className="p-2.5 hover:bg-red-50/50 rounded-full transition-colors text-slate-400 hover:text-red-500 backdrop-blur-sm">
+                          <button onClick={onClose} className="p-2.5 hover:bg-red-50/50 rounded-full transition-colors text-slate-400 hover:text-red-500 backdrop-blur-sm cursor-pointer">
                                <X className="w-4 h-4" />
                           </button>
                       </div>
 
                       {/* Header */}
-                      <div className="px-10 pt-10 pb-6 pr-32">
-                          <h2 className="text-3xl font-display font-bold text-slate-900 leading-tight tracking-tight">
+                      <div className="px-6 md:px-10 pt-8 md:pt-10 pb-4 md:pb-6 pr-20 md:pr-32">
+                          <h2 className="text-2xl md:text-3xl font-display font-bold text-slate-900 leading-tight tracking-tight">
                               Estrategia
                           </h2>
                           <div className="flex items-center gap-2 mt-2">
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                              <p className="text-slate-500 text-sm font-medium">NSG Intelligence Assistant</p>
+                              <p className="text-slate-500 text-xs md:text-sm font-medium">NSG Intelligence Assistant</p>
                           </div>
                       </div>
 
                       {/* Messages Flow */}
-                      <div className="flex-1 overflow-y-auto px-10 py-4 space-y-8 scroll-smooth" style={{ scrollbarWidth: 'none' }}>
+                      <div className="flex-1 overflow-y-auto px-4 md:px-10 py-4 space-y-6 md:space-y-8 scroll-smooth" style={{ scrollbarWidth: 'none' }}>
                             {messages.map((msg, idx) => (
                                 <div
                                     key={msg.id}
@@ -382,7 +384,7 @@ export default function StrategyWidget({
                                         </div>
                                     )}
 
-                                    <div className="max-w-[75%] flex flex-col gap-3">
+                                    <div className="max-w-[90%] md:max-w-[75%] flex flex-col gap-3">
                                         <div className={clsx(
                                             "p-6 text-[15px] leading-relaxed relative shadow-sm",
                                             msg.role === 'user' 
@@ -390,6 +392,23 @@ export default function StrategyWidget({
                                                 : "bg-white/60 text-slate-700 rounded-[1.5rem] rounded-tl-md border border-white/50 backdrop-blur-md"
                                         )}>
                                             {(() => {
+                                                const formatContent = (text: string) => text.split('**').map((part, i) => 
+                                                    i % 2 === 1 ? <strong key={i} className="font-bold text-slate-900">{part}</strong> : part
+                                                );
+
+                                                if (msg.title) {
+                                                    return (
+                                                        <div className="flex flex-col gap-2">
+                                                            <span className="text-sm font-bold text-blue-400 uppercase tracking-widest leading-relaxed">
+                                                                {msg.title}
+                                                            </span>
+                                                            <p className="font-medium text-slate-800 text-[15px]">
+                                                                {formatContent(msg.content)}
+                                                            </p>
+                                                        </div>
+                                                    );
+                                                }
+
                                                 const stepMatch = msg.role === 'system' ? msg.content.match(/^(\d+\/\d+ — [^.]+)(\.?\s*)(.*)/) : null;
                                                 if (stepMatch) {
                                                     return (
@@ -398,12 +417,12 @@ export default function StrategyWidget({
                                                                 {stepMatch[1]}
                                                             </span>
                                                             <p className="font-medium text-slate-800 text-[15px]">
-                                                                {stepMatch[3]}
+                                                                {formatContent(stepMatch[3])}
                                                             </p>
                                                         </div>
                                                     );
                                                 }
-                                                return <p className="font-medium">{msg.content}</p>;
+                                                return <p className="font-medium">{formatContent(msg.content)}</p>;
                                             })()}
                                         </div>
 
@@ -414,7 +433,7 @@ export default function StrategyWidget({
                                                     <button
                                                         key={i}
                                                         onClick={() => handleSend(opt)}
-                                                        className="px-5 py-2.5 bg-white border border-slate-200/60 hover:border-slate-300 hover:bg-slate-50 text-slate-600 hover:text-slate-900 text-sm font-semibold rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all hover:-translate-y-0.5 duration-300"
+                                                        className="px-5 py-2.5 bg-white border border-slate-200/60 hover:border-slate-300 hover:bg-slate-50 text-slate-600 hover:text-slate-900 text-sm font-semibold rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all hover:-translate-y-0.5 duration-300 cursor-pointer"
                                                     >
                                                         {opt}
                                                     </button>
@@ -427,14 +446,14 @@ export default function StrategyWidget({
                                              <div className="flex gap-3 animate-fade-in pl-2 mt-2">
                                                  <button 
                                                     onClick={handleConfirm}
-                                                    className="flex items-center gap-2 px-6 py-3 bg-emerald-500 text-white hover:bg-emerald-400 rounded-xl font-bold text-sm shadow-[0_4px_12px_rgba(16,185,129,0.3)] transition-all hover:scale-105 active:scale-95 duration-300"
+                                                    className="flex items-center gap-2 px-6 py-3 bg-emerald-500 text-white hover:bg-emerald-400 rounded-xl font-bold text-sm shadow-[0_4px_12px_rgba(16,185,129,0.3)] transition-all hover:scale-105 active:scale-95 duration-300 cursor-pointer"
                                                  >
                                                      <CheckCircle2 className="w-4 h-4" />
                                                      Confirmar y Guardar
                                                  </button>
                                                  <button 
                                                     onClick={handleRestart}
-                                                    className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-xl font-bold text-sm transition-all shadow-sm"
+                                                    className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-xl font-bold text-sm transition-all shadow-sm cursor-pointer"
                                                  >
                                                      <RefreshCw className="w-4 h-4" />
                                                      Reiniciar
@@ -458,7 +477,7 @@ export default function StrategyWidget({
                       </div>
 
                       {/* Input Area */}
-                      <div className="p-8 pt-4 bg-gradient-to-t from-white/80 via-white/40 to-transparent">
+                      <div className="p-4 md:p-8 pt-2 md:pt-4 bg-gradient-to-t from-white/80 via-white/40 to-transparent">
                          <div className={clsx(
                              "relative flex items-center gap-2 bg-white/80 backdrop-blur-xl rounded-full p-2 pl-6 pr-2 border transition-all shadow-[0_8px_32px_rgba(0,0,0,0.05)]",
                              isRecording ? "border-red-200 ring-4 ring-red-500/5" : "border-white/50 focus-within:border-blue-200 focus-within:ring-4 focus-within:ring-blue-500/5 hover:border-slate-200"
@@ -476,7 +495,7 @@ export default function StrategyWidget({
                              <button 
                                 onClick={handleMicClick}
                                 className={clsx(
-                                    "p-3 rounded-full transition-all duration-300",
+                                    "p-3 rounded-full transition-all duration-300 cursor-pointer",
                                     isRecording ? "text-red-500 bg-red-50 animate-pulse" : "text-slate-400 hover:text-slate-900 hover:bg-slate-100"
                                 )}
                              >
@@ -486,7 +505,7 @@ export default function StrategyWidget({
                              <button 
                                  onClick={() => handleSend(input)}
                                  disabled={!input.trim() || isRecording}
-                                 className="p-3 bg-slate-900 text-white rounded-full hover:bg-black transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 active:scale-95 shadow-lg shadow-slate-900/20"
+                                 className="p-3 bg-slate-900 text-white rounded-full hover:bg-black transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 active:scale-95 shadow-lg shadow-slate-900/20 cursor-pointer"
                              >
                                  <ArrowRight className="w-5 h-5" />
                              </button>

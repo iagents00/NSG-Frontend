@@ -4,7 +4,8 @@ export interface Message {
   id: string;
   role: EducationRole;
   content: string;
-  type?: 'text' | 'options' | 'input' | 'report';
+  type?: 'text' | 'options' | 'input' | 'report' | 'confirmation';
+  title?: string;
   options?: string[];
   reportData?: AnalysisDocument;
   timestamp?: Date;

@@ -48,7 +48,7 @@ export default function NSGEducationPage() {
                             key={item.id}
                             onClick={() => setCurrentView(item.id)}
                             className={clsx(
-                                "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all",
+                                "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all cursor-pointer",
                                 currentView === item.id 
                                     ? "bg-navy-900 text-white shadow-md shadow-navy-900/20" 
                                     : "text-slate-500 hover:bg-slate-50 hover:text-navy-900"
@@ -63,7 +63,7 @@ export default function NSGEducationPage() {
                      <button
                         onClick={handleOpenStrategy}
                         className={clsx(
-                            "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ml-2",
+                            "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ml-2 cursor-pointer",
                             isStrategyOpen && !isStrategyMinimized
                                 ? "bg-amber-100 text-amber-700"
                                 : "text-slate-500 hover:bg-slate-50 hover:text-navy-900"
@@ -121,7 +121,7 @@ function DiagnosticWrapper() {
             <div className="flex justify-end mb-4">
                 <button
                     onClick={() => setShowResult(!showResult)}
-                    className="text-xs text-blue-500 underline"
+                    className="text-xs text-blue-500 underline cursor-pointer"
                 >
                     Alternar Vista (Demo):{" "}
                     {showResult ? "Ver Formulario" : "Ver Resultado"}

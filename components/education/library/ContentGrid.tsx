@@ -71,7 +71,7 @@ function ContentCard({ item, onClick }: { item: EducationContent; onClick?: () =
                     <span>{item.createdAt}</span>
                     
                     {item.status === 'ready' && (
-                        <button className="text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors">
+                        <button className="text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer">
                             Crear Plan
                         </button>
                     )}

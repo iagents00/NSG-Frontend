@@ -23,7 +23,7 @@ export default function ContentLibrary() {
             <div className="flex flex-col gap-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-0">
                      <h1 className="text-2xl md:text-3xl font-display font-bold text-navy-900 tracking-tight">Biblioteca de Conocimiento</h1>
-                     <button className="bg-navy-900 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-navy-800 transition-all shadow-lg shadow-navy-900/20 active:scale-95">
+                     <button className="bg-navy-900 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-navy-800 transition-all shadow-lg shadow-navy-900/20 active:scale-95 cursor-pointer">
                         Importar Archivo
                      </button>
                 </div>
@@ -44,15 +44,15 @@ export default function ContentLibrary() {
                                 className="pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all w-full md:w-64"
                             />
                         </div>
-                        <button className="p-2 text-slate-400 hover:text-navy-900 hover:bg-slate-100 rounded-lg transition-colors">
+                        <button className="p-2 text-slate-400 hover:text-navy-900 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer">
                             <Filter className="w-4 h-4" />
                         </button>
                      </div>
                      <div className="flex items-center bg-slate-100 p-1 rounded-lg">
-                        <button className="p-1.5 bg-white shadow-sm rounded-md text-navy-900">
+                        <button className="p-1.5 bg-white shadow-sm rounded-md text-navy-900 cursor-pointer">
                              <LayoutGrid className="w-4 h-4" />
                         </button>
-                        <button className="p-1.5 text-slate-400 hover:text-navy-900">
+                        <button className="p-1.5 text-slate-400 hover:text-navy-900 cursor-pointer">
                              <List className="w-4 h-4" />
                         </button>
                      </div>

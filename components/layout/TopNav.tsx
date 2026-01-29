@@ -62,13 +62,7 @@ export default function TopNav() {
                         {/* Role Badge */}
                         {currentRole && (
                             <span
-                                className={`hidden md:inline-flex items-center px-1.5 py-0.5 rounded text-[0.55rem] font-bold uppercase tracking-wider border ${
-                                    currentRole === "admin"
-                                        ? "bg-red-50 text-red-600 border-red-100"
-                                        : currentRole === "patient"
-                                          ? "bg-emerald-50 text-emerald-600 border-emerald-100"
-                                          : "bg-blue-50 text-blue-600 border-blue-100"
-                                }`}
+                                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-blue-50 border border-blue-100 text-blue-600 font-bold text-[0.55rem] uppercase tracking-wider"
                             >
                                 {CONTEXT[currentRole]?.roleDesc || "GUEST"}
                             </span>
