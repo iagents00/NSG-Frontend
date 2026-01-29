@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Play, FileText, CheckCircle2, Clock, Loader2 } from "lucide-react";
 import { EducationContent } from "@/types/education";
 import clsx from "clsx";
@@ -23,12 +24,15 @@ const MOCK_DATA: EducationContent[] = [
 
 interface ContentGridProps {
     onSelect?: (item: EducationContent) => void;
+    extraItems?: EducationContent[];
 }
 
-export default function ContentGrid({ onSelect }: ContentGridProps) {
+export default function ContentGrid({ onSelect, extraItems = [] }: ContentGridProps) {
+    const allItems = [...extraItems, ...MOCK_DATA];
+
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-10">
-            {MOCK_DATA.map((item) => (
+            {allItems.map((item) => (
                 <ContentCard key={item.id} item={item} onClick={() => onSelect?.(item)} />
             ))}
         </div>
@@ -86,7 +90,7 @@ function StatusBadge({ status }: { status: string }) {
         return (
             <div className="bg-blue-500/90 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-lg">
                 <Loader2 className="w-3 h-3 animate-spin" />
-                Processing
+                Procesando
             </div>
         )
     }
@@ -94,14 +98,14 @@ function StatusBadge({ status }: { status: string }) {
         return (
             <div className="bg-emerald-500/90 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-lg">
                 <CheckCircle2 className="w-3 h-3" />
-                Ready
+                Listo
             </div>
         )
     }
     return (
         <div className="bg-amber-400/90 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-lg">
             <Clock className="w-3 h-3" />
-            Pending
+            Pendiente
         </div>
     )
 }

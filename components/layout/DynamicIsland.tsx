@@ -133,7 +133,7 @@ export default function DynamicIsland({ currentMode, setMode, selectedModel, set
                                 key={model}
                                 onClick={() => setSelectedModel && setSelectedModel(model)}
                                 className={clsx(
-                                    "relative flex items-center justify-center px-3 py-1.5 md:px-5 md:py-2 rounded-xl transition-colors duration-300 whitespace-nowrap z-10 gap-2",
+                                    "relative flex items-center justify-center px-3 py-1.5 md:px-5 md:py-2 rounded-xl transition-colors duration-300 whitespace-nowrap z-10 gap-2 cursor-pointer",
                                     !isSelected && "hover:bg-white/10"
                                 )}
                             >

@@ -50,7 +50,7 @@ interface AppState {
   // Chat History
   chatSessions: Record<string, ChatSession>;
   currentSessionId: string | null;
-  createChatSession: (model?: string, mode?: string) => string;
+  createChatSession: (model?: string, mode?: string, customId?: string) => string;
   deleteChatSession: (id: string) => void;
   setCurrentSessionId: (id: string | null) => void;
   updateChatSession: (id: string, updates: Partial<ChatSession>) => void;
@@ -123,8 +123,8 @@ export const useAppStore = create<AppState>()(
       chatSessions: {},
       currentSessionId: null,
 
-      createChatSession: (model = 'Claude', mode = 'standard') => {
-        const id = uuidv4();
+      createChatSession: (model = 'Claude', mode = 'standard', customId?: string) => {
+        const id = customId || uuidv4();
         const newSession: ChatSession = {
             id,
             title: 'New Chat',

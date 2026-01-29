@@ -714,6 +714,7 @@ export default function ChatInterface() {
         "pulse" | "compare" | "fusion" | "deep"
     >("pulse");
     const [isModeOpen, setIsModeOpen] = useState(false);
+    const [isHydrating, setIsHydrating] = useState(false);
 
     // Enforce 'Standard' mode on initial entry & Init Session
     useEffect(() => {
@@ -1202,9 +1203,14 @@ export default function ChatInterface() {
             const inHistory = history.find(h => h.id === currentSessionId);
             if (!inHistory) return;
 
+            setIsHydrating(true);
+
             try {
                 const token = localStorage.getItem("nsg-token");
-                if (!token) return;
+                if (!token) {
+                     setIsHydrating(false);
+                     return;
+                }
 
                 const res = await fetch(`/api/chat/${currentSessionId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
@@ -1224,6 +1230,14 @@ export default function ChatInterface() {
                         createdAt: m.createdAt || new Date()
                     }));
 
+                    // Ensure session exists in store before updating
+                    const currentStoreSession = useAppStore.getState().chatSessions[currentSessionId];
+                    if (!currentStoreSession) {
+                         // Initialize with history data if possible
+                         createChatSession(inHistory.model || 'Claude', inHistory.mode || 'standard', currentSessionId);
+                    }
+
+
                     // Update Store
                     updateChatSession(currentSessionId, {
                         messages: mappedMessages,
@@ -1233,6 +1247,8 @@ export default function ChatInterface() {
                 }
             } catch (err) {
                  console.error("Error hydrating chat:", err);
+            } finally {
+                 setIsHydrating(false);
             }
         }
 
@@ -1503,7 +1519,12 @@ export default function ChatInterface() {
                 <div className="flex-1 min-h-0 overflow-y-auto custom-scroll p-4 md:p-6 lg:p-12 pb-12 space-y-6 md:space-y-8">
                     {/* Messages List */}
                     <div className="flex flex-col gap-6 max-w-3xl mx-auto w-full">
-                        {messages.length === 0 ? (
+                        {isHydrating ? (
+                             <div className="flex flex-col items-center justify-center p-10 mt-10 text-center animate-pulse">
+                                <div className="w-12 h-12 rounded-full border-4 border-slate-200 border-t-blue-500 animate-spin mb-4"></div>
+                                <p className="text-sm text-slate-500 font-medium">Cargando conversación...</p>
+                             </div>
+                        ) : messages.length === 0 ? (
                             <div className="flex flex-col items-center justify-center p-10 opacity-60 mt-10 text-center">
                                 <div className="w-16 h-16 rounded-3xl bg-white shadow-lg flex items-center justify-center mb-4">
                                      <BrandAtom className="w-8 h-8" variant="colored" />
