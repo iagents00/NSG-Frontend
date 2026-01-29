@@ -8,7 +8,10 @@ export interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  type?: 'text' | 'analysis' | 'image' | 'file';
   createdAt?: Date;
+  metadata?: any;
+  targetModel?: string;
 }
 
 interface AppState {

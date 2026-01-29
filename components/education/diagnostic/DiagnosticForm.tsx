@@ -3,8 +3,16 @@
 import { useState } from "react";
 import { Sparkles, ArrowRight, Check } from "lucide-react";
 
-export default function DiagnosticForm() {
+export default function DiagnosticForm({ onComplete }: { onComplete?: () => void }) {
     const [step, setStep] = useState(1);
+
+    const handleNext = () => {
+        if (step < 10) {
+            setStep(s => s + 1);
+        } else if (onComplete) {
+            onComplete();
+        }
+    };
 
     return (
         <div className="w-full max-w-2xl mx-auto py-6 md:py-12">
@@ -31,10 +39,10 @@ export default function DiagnosticForm() {
                     </h3>
                     
                     <div className="space-y-3">
-                        <OptionButton label="Totalmente manual (Yo hago todo)" onClick={() => setStep(s => Math.min(s+1, 10))} />
-                        <OptionButton label="Uso herramientas pero es caótico" onClick={() => setStep(s => Math.min(s+1, 10))} />
-                        <OptionButton label="Tengo equipo pero falta sistema" onClick={() => setStep(s => Math.min(s+1, 10))} />
-                        <OptionButton label="Sistematizado y automatizado" onClick={() => setStep(s => Math.min(s+1, 10))} />
+                        <OptionButton label="Totalmente manual (Yo hago todo)" onClick={handleNext} />
+                        <OptionButton label="Uso herramientas pero es caótico" onClick={handleNext} />
+                        <OptionButton label="Tengo equipo pero falta sistema" onClick={handleNext} />
+                        <OptionButton label="Sistematizado y automatizado" onClick={handleNext} />
                     </div>
                 </div>
             </div>
