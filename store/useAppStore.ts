@@ -35,6 +35,7 @@ interface AppState {
     telegram_id?: number | null;
   } | null;
 
+
   setRole: (role: Role) => void;
   setTheme: (theme: 'light' | 'dark' | 'neon' | 'system') => void;
   toggleSidebar: () => void;
