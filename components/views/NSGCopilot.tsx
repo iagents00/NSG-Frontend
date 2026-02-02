@@ -1026,7 +1026,7 @@ export default function ICopilot() {
                                 Calendar
                             </p>
                             <p className="text-[11px] font-bold text-navy-900 leading-none">
-                                {isConnected ? "Vincular" : "Vincular"}
+                                {isConnected ? "Conectado" : "Vincular"}
                             </p>
                         </div>
                     </button>

@@ -16,11 +16,10 @@ GOOGLE_GENERATIVE_AI_API_KEY=your_google_ai_api_key_here
 # ============================================
 # BACKEND API
 # ============================================
-# Development (when running backend locally)
-# NEXT_PUBLIC_API_URL=http://localhost:3000
+# NEXT_PUBLIC_API_URL=http://localhost:4000
 
-# Production (Vercel)
-NEXT_PUBLIC_API_URL=https://nsg-backend.vercel.app
+# Production (VPS)
+NEXT_PUBLIC_API_URL=https://api.nsgintelligence.com
 
 # ============================================
 # ENVIRONMENT
@@ -40,27 +39,27 @@ NEXT_PUBLIC_APP_ENV=production
 
 ### 1. **GOOGLE_GENERATIVE_AI_API_KEY**
 
--   **Required**: Yes
--   **Purpose**: API key for Google Gemini AI
--   **How to get**:
+- **Required**: Yes
+- **Purpose**: API key for Google Gemini AI
+- **How to get**:
     1. Visit https://aistudio.google.com/app/apikey
     2. Create a new API key
     3. Copy and paste it in `.env.local`
 
 ### 2. **NEXT_PUBLIC_API_URL**
 
--   **Required**: Yes
--   **Purpose**: Backend API base URL
--   **Values**:
-    -   **Development**: `http://localhost:3000` (when running backend locally)
-    -   **Production**: `https://nsg-backend.vercel.app`
--   **Note**: Must start with `NEXT_PUBLIC_` to be accessible in the browser
+- **Required**: Yes
+- **Purpose**: Backend API base URL
+- **Values**:
+    - **Development**: `http://localhost:4000` (when running backend locally)
+    - **Production**: `https://api.nsgintelligence.com`
+- **Note**: Must start with `NEXT_PUBLIC_` to be accessible in the browser
 
 ### 3. **NEXT_PUBLIC_APP_ENV**
 
--   **Required**: No (defaults to development)
--   **Purpose**: Specify the environment
--   **Values**: `development` | `production` | `staging`
+- **Required**: No (defaults to development)
+- **Purpose**: Specify the environment
+- **Values**: `development` | `production` | `staging`
 
 ---
 
@@ -70,7 +69,7 @@ NEXT_PUBLIC_APP_ENV=production
 
 ```env
 GOOGLE_GENERATIVE_AI_API_KEY=your_api_key
-NEXT_PUBLIC_API_URL=http://localhost:3000
+NEXT_PUBLIC_API_URL=http://localhost:4000
 NEXT_PUBLIC_APP_ENV=development
 ```
 
@@ -78,7 +77,7 @@ NEXT_PUBLIC_APP_ENV=development
 
 ```env
 GOOGLE_GENERATIVE_AI_API_KEY=your_api_key
-NEXT_PUBLIC_API_URL=https://nsg-backend.vercel.app
+NEXT_PUBLIC_API_URL=https://api.nsgintelligence.com
 NEXT_PUBLIC_APP_ENV=production
 ```
 
@@ -92,12 +91,12 @@ NEXT_PUBLIC_APP_ENV=production
 2. Navigate to **Environment Variables**
 3. Add the following variables:
 
-| Variable Name                  | Value                              | Environment                      |
-| ------------------------------ | ---------------------------------- | -------------------------------- |
-| `GOOGLE_GENERATIVE_AI_API_KEY` | Your API key                       | Production, Preview, Development |
-| `NEXT_PUBLIC_API_URL`          | `https://nsg-backend.vercel.app` | Production, Preview              |
-| `NEXT_PUBLIC_API_URL`          | `http://localhost:3000`            | Development                      |
-| `NEXT_PUBLIC_APP_ENV`          | `production`                       | Production                       |
+| Variable Name                  | Value                             | Environment                      |
+| ------------------------------ | --------------------------------- | -------------------------------- |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | Your API key                      | Production, Preview, Development |
+| `NEXT_PUBLIC_API_URL`          | `https://api.nsgintelligence.com` | Production, Preview              |
+| `NEXT_PUBLIC_API_URL`          | `http://localhost:4000`           | Development                      |
+| `NEXT_PUBLIC_APP_ENV`          | `production`                      | Production                       |
 
 ### Netlify
 
@@ -141,9 +140,9 @@ console.log(process.env.NEXT_PUBLIC_API_URL);
 
 ## 📚 Additional Resources
 
--   [Next.js Environment Variables Documentation](https://nextjs.org/docs/basic-features/environment-variables)
--   [Google AI API Keys](https://aistudio.google.com/app/apikey)
--   [Vercel Environment Variables](https://vercel.com/docs/concepts/projects/environment-variables)
+- [Next.js Environment Variables Documentation](https://nextjs.org/docs/basic-features/environment-variables)
+- [Google AI API Keys](https://aistudio.google.com/app/apikey)
+- [Vercel Environment Variables](https://vercel.com/docs/concepts/projects/environment-variables)
 
 ---
 
