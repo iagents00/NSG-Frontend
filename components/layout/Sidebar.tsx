@@ -65,7 +65,7 @@ export default function Sidebar() {
         if (firstName || lastName) {
             return `${firstName || ""} ${lastName || ""}`.trim();
         }
-        return `user-nsg${userId?.substring(0, 6) || ""}`;
+        return `user-bs${userId?.substring(0, 6) || ""}`;
     };
 
     // Generate avatar initials
@@ -74,7 +74,7 @@ export default function Sidebar() {
             return (firstName[0] + lastName[0]).toUpperCase();
         }
         if (firstName) return firstName.substring(0, 2).toUpperCase();
-        return "UN"; // User NSG
+        return "BS"; // User BS
     };
 
     // Get avatar color based on ID
@@ -107,7 +107,12 @@ export default function Sidebar() {
             if (item.id === "nsg_intelligence") {
                 acc.intelligence = item;
             } else if (
-                ["nsg_clarity", "nsg_horizon", "nsg_news", "nsg_education"].includes(item.id)
+                [
+                    "nsg_copilot",
+                    "nsg_horizon",
+                    "nsg_news",
+                    "nsg_education",
+                ].includes(item.id)
             ) {
                 acc.nsgModules.push(item);
             } else {
@@ -151,7 +156,7 @@ export default function Sidebar() {
                         </div>
                         <div className="flex flex-col">
                             <span className="font-display font-bold text-white text-base xs:text-lg tracking-tight leading-none">
-                                NSG{" "}
+                                BS{" "}
                                 <span className="font-normal text-blue-400">
                                     Intelligence
                                 </span>
@@ -226,7 +231,7 @@ export default function Sidebar() {
 
                 {/* MENU NAVIGATION with Groups */}
                 <nav className="flex-1 px-4 space-y-4 overflow-y-auto sidebar-scroll pb-6">
-                    {/* NSG Intelligence - Special highlighting */}
+                    {/* BS Intelligence - Special highlighting */}
                     {groupedMenu.intelligence && (
                         <div className="pt-2">
                             <Link
@@ -251,7 +256,7 @@ export default function Sidebar() {
                         <div>
                             <div className="px-3 mb-2">
                                 <p className="text-[0.65rem] font-black text-slate-600 uppercase tracking-widest">
-                                    NSG Modules
+                                    I Modules
                                 </p>
                             </div>
                             <div className="space-y-0.5">

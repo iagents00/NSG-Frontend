@@ -18,7 +18,7 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NSG Intelligence | Deep Processing v14.6",
+  title: "BS Intelligence | Deep Processing v14.6",
   description: "Cognitive Infrastructure for Enterprise",
 };
 

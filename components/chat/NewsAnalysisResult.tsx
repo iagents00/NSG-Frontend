@@ -19,7 +19,7 @@ export default function NewsAnalysisResult({ tag, roleContext }: NewsAnalysisRes
         {/* Card Header */}
         <div className="bg-slate-50/80 p-5 border-b border-slate-100 flex justify-between items-center">
           <span className="text-[0.6rem] font-bold text-blue-600 uppercase tracking-widest bg-blue-50 px-2 py-1 rounded border border-blue-100">
-            NSG Intelligence Report
+            BS Intelligence Report
           </span>
           <span className="text-[0.6rem] font-bold text-slate-400 uppercase">
             {tag || "GENERAL"}

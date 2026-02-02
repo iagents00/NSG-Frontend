@@ -8,7 +8,7 @@ import {
     Target,
     TrendingUp,
     Users,
-    Zap,
+    Activity,
     Shield,
 } from "lucide-react";
 import clsx from "clsx";
@@ -19,11 +19,12 @@ const slides = [
     {
         id: 1,
         icon: Brain,
-        title: "NSG Intelligence",
+        title: "BS Intelligence",
         subtitle: "Neural Strategic Gateway",
         description:
-            "Infraestructura de inteligencia artificial de grado institucional. Procesa vectores de datos masivos para generar reconocimiento estratégico autónomo y soporte a la decisión de alta precisión.",
+            "Infraestructura de inteligencia artificial de grado institucional. Procesa vectores de datos masivos para generar reconocimiento estratégico.",
         gradient: "from-blue-400 to-cyan-400",
+        badge: "NSG SYSTEM OS - CORE",
     },
     {
         id: 2,
@@ -31,8 +32,9 @@ const slides = [
         title: "Clarity Protocol",
         subtitle: "Ejecución Diaria de Alto Rendimiento",
         description:
-            "Protocolo de precisión operativa y alineación estratégica. Sincroniza la ejecución táctica diaria con los objetivos macro-estratégicos mediante algoritmos adaptativos.",
+            "Protocolo de precisión operativa y alineación estratégica. Sincroniza la ejecución táctica diaria con los objetivos macro-estratégicos.",
         gradient: "from-emerald-400 to-teal-400",
+        badge: "NSG SYSTEM OS - EXECUTION",
     },
     {
         id: 3,
@@ -40,8 +42,9 @@ const slides = [
         title: "Horizon Planning",
         subtitle: "Arquitectura del Futuro",
         description:
-            "Arquitectura de planificación predictiva basada en redes neuronales. Sintetiza el diálogo ejecutivo en hojas de ruta deterministas y proyecciones de escenarios futuros.",
+            "Arquitectura de planificación predictiva basada en redes neuronales. Sintetiza el diálogo ejecutivo en hojas de ruta deterministas.",
         gradient: "from-blue-500 to-cyan-500",
+        badge: "NSG SYSTEM OS - STRATEGY",
     },
     {
         id: 4,
@@ -49,17 +52,19 @@ const slides = [
         title: "Ecosystem Integration",
         subtitle: "Sincronización Total",
         description:
-            "Integración perfecta con Telegram, Google Calendar, Fathom Analytics y más, centralizando tu ecosistema digital en un solo lugar.",
+            "Integración perfecta con Telegram, Google Calendar, para centralizar tu ecosistema digital operativo en un solo lugar.",
         gradient: "from-cyan-400 to-teal-400",
+        badge: "NSG SYSTEM OS - CONNECT",
     },
     {
         id: 5,
-        icon: Zap,
+        icon: Activity,
         title: "Real-Time Analytics",
         subtitle: "Métricas de Alto Impacto",
         description:
             "Dashboard ejecutivo con visualizaciones premium que revelan patrones, tendencias y oportunidades de optimización continua.",
         gradient: "from-amber-400 to-orange-400",
+        badge: "NSG SYSTEM OS - ENTERPRISE",
     },
     {
         id: 6,
@@ -67,25 +72,37 @@ const slides = [
         title: "Enterprise Security",
         subtitle: "Protección de Nivel Corporativo",
         description:
-            "Arquitectura segura con autenticación robusta, encriptación end-to-end y cumplimiento de estándares internacionales de privacidad.",
+            "Arquitectura segura con autenticación robusta, encriptación end-to-end y cumplimiento de estándares internacionales.",
         gradient: "from-slate-400 to-slate-300",
+        badge: "NSG SYSTEM OS - SECURITY",
     },
 ];
 
-export default function ProjectSlider() {
-    const [currentSlide, setCurrentSlide] = useState(0);
+interface ProjectSliderProps {
+    onSlideChange?: (index: number) => void;
+}
+
+export default function ProjectSlider({ onSlideChange }: ProjectSliderProps) {
+    // Start with index 0 (BS Intelligence)
+    const [currentSlide, setCurrentSlide] = useState(0); 
     const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
-    // Auto-play functionality - 3 seconds
+    // Auto-play functionality - 5 seconds
     useEffect(() => {
         if (!isAutoPlaying) return;
 
         const interval = setInterval(() => {
             setCurrentSlide((prev) => (prev + 1) % slides.length);
-        }, 3000); // Change slide every 3 seconds
+        }, 5000); 
 
         return () => clearInterval(interval);
     }, [isAutoPlaying]);
+
+    useEffect(() => {
+        if (onSlideChange) {
+            onSlideChange(currentSlide);
+        }
+    }, [currentSlide, onSlideChange]);
 
     const goToSlide = (index: number) => {
         setCurrentSlide(index);
@@ -106,89 +123,87 @@ export default function ProjectSlider() {
     const Icon = current.icon;
 
     return (
-        <div className="relative w-full min-h-[220px] sm:min-h-[280px] overflow-hidden bg-linear-to-r from-navy-950 via-navy-900 to-navy-950 px-5 py-5 sm:px-8 sm:py-10 rounded-3xl border border-navy-800/50 shadow-xl group/slider transition-all duration-700 hover:shadow-2xl select-none antialiased">
-            {/* Content Container */}
-            <div className="relative h-full flex flex-col items-center justify-between z-10">
-                <div className="flex-1 flex flex-col items-center justify-center w-full">
-                    {/* Icon */}
-                    <div className="mb-4 relative">
-                        <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center bg-white/5 backdrop-blur-sm border border-white/10 shadow-lg transition-all duration-700 group-hover/slider:scale-110">
-                            <Icon
-                                className="w-7 h-7 sm:w-8 sm:h-8 text-white/80"
-                                strokeWidth={1.5}
-                            />
-                        </div>
-                    </div>
+        <div className="relative w-full min-h-[420px] bg-white rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] border border-slate-100/60 overflow-hidden group/slider transition-all duration-700 flex flex-col items-center justify-center p-8 xs:p-10 relative">
+            
+            {/* Background Decor - Very subtle blur */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-slate-50 rounded-full blur-[100px] opacity-60 pointer-events-none" />
 
-                    {/* Text Content */}
-                    <div className="text-center max-w-3xl space-y-2">
-                        <div className="space-y-1.5">
-                            <h2
-                                className={clsx(
-                                    "font-display font-bold text-2xl sm:text-3xl lg:text-3xl tracking-tight text-white transition-all duration-700",
-                                )}
-                            >
-                                {current.title}
-                            </h2>
-                            <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] text-slate-400">
-                                {current.subtitle}
-                            </p>
-                        </div>
-                        <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal max-w-2xl mx-auto px-4">
-                            {current.description}
-                        </p>
-                    </div>
-                </div>
-
-                {/* Progress Indicator */}
-                <div className="flex items-center gap-2 mt-6 sm:mt-8 mb-2">
-                    {slides.map((_, index) => (
-                        <button
-                            key={index}
-                            onClick={() => goToSlide(index)}
-                            className={clsx(
-                                "h-1 sm:h-1.5 rounded-full transition-all duration-500 hover:scale-110",
-                                index === currentSlide
-                                    ? "w-6 sm:w-10 bg-linear-to-r " +
-                                          current.gradient
-                                    : "w-1.5 bg-slate-700 hover:bg-slate-600",
-                            )}
-                            aria-label={`Go to slide ${index + 1}`}
-                        />
-                    ))}
-                </div>
-            </div>
-
-            {/* Navigation Buttons */}
+            {/* Navigation Buttons - Left/Right */}
             <button
                 onClick={prevSlide}
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 shadow-lg flex items-center justify-center hover:bg-white/20 hover:scale-110 transition-all duration-300 opacity-0 group-hover/slider:opacity-100 z-20"
+                className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white border border-slate-100 shadow-lg shadow-slate-200/50 flex items-center justify-center hover:bg-slate-50 hover:scale-105 transition-all duration-300 z-30 group-hover/slider:opacity-100 opacity-60 md:opacity-0"
                 aria-label="Previous slide"
             >
-                <ChevronLeft className="w-5 h-5 text-white/80" />
+                <ChevronLeft className="w-5 h-5 text-slate-400" />
             </button>
+
             <button
                 onClick={nextSlide}
-                className="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 shadow-lg flex items-center justify-center hover:bg-white/20 hover:scale-110 transition-all duration-300 opacity-0 group-hover/slider:opacity-100 z-20"
+                className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white border border-slate-100 shadow-lg shadow-slate-200/50 flex items-center justify-center hover:bg-slate-50 hover:scale-105 transition-all duration-300 z-30 group-hover/slider:opacity-100 opacity-60 md:opacity-0"
                 aria-label="Next slide"
             >
-                <ChevronRight className="w-5 h-5 text-white/80" />
+                <ChevronRight className="w-5 h-5 text-slate-400" />
             </button>
 
-            {/* Slide Counter */}
-            <div className="absolute top-4 right-4 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-sm">
-                <span className="text-[10px] font-bold text-slate-300 tracking-wider">
-                    {String(currentSlide + 1).padStart(2, "0")} /{" "}
-                    {String(slides.length).padStart(2, "0")}
-                </span>
-            </div>
+            {/* Content Container */}
+            <div className="relative z-20 flex flex-col items-center text-center max-w-4xl mx-auto space-y-6 animate-fade-in">
+                
+                {/* 1. Icon & Badge */}
+                <div className="flex flex-col items-center gap-4">
+                    {/* Icon Circle */}
+                    <div className="w-20 h-20 rounded-full bg-white shadow-[0_10px_30px_-5px_rgba(59,130,246,0.15)] flex items-center justify-center border border-blue-50/50 relative">
+                        <div className="absolute inset-0 bg-blue-50/30 rounded-full animate-pulse-slow" />
+                        <Icon strokeWidth={1.5} className="w-9 h-9 text-blue-600" />
+                    </div>
 
-            {/* Brand Badge - Moved to Top-Left for symmetry */}
-            <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10 shadow-sm group-hover/slider:border-white/20 transition-all">
-                <BrandAtom className="w-3 h-3" variant="colored" />
-                <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 group-hover:text-slate-300 transition-colors">
-                    NSG Platform
-                </span>
+                    {/* Badge */}
+                    <span className="px-3 py-1 rounded-full bg-slate-50 text-slate-400 text-[9px] font-black uppercase tracking-[0.2em] border border-slate-100">
+                        {current.badge}
+                    </span>
+                </div>
+
+                {/* 2. Main Typography */}
+                <div className="space-y-3">
+                    <h2 className="text-4xl md:text-5xl lg:text-5xl font-bold tracking-tighter text-navy-950">
+                        {current.title}
+                    </h2>
+                    <p className="text-base md:text-lg text-slate-400 font-medium tracking-tight">
+                        {current.subtitle}
+                    </p>
+                </div>
+
+                {/* 3. Description with Blue Vertical Line */}
+                <div className="relative pl-6 py-1 max-w-xl mx-auto text-left border-l-4 border-blue-200">
+                    <p className="text-slate-500 leading-relaxed text-sm md:text-base">
+                        {current.description}
+                    </p>
+                </div>
+
+                {/* 4. CTA and Pagination */}
+                <div className="flex flex-col md:flex-row items-center gap-6 pt-2">
+                    <button className="px-6 py-3 bg-navy-950 text-white rounded-xl font-bold text-xs tracking-wide shadow-xl shadow-navy-900/10 hover:shadow-navy-900/20 hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2 group/btn">
+                        Explorar Módulo
+                        <ChevronRight className="w-3.5 h-3.5 text-white/50 group-hover/btn:translate-x-1 transition-transform" />
+                    </button>
+
+                    {/* Pagination Dots */}
+                    <div className="flex items-center gap-1.5">
+                        {slides.map((_, index) => (
+                            <button
+                                key={index}
+                                onClick={() => goToSlide(index)}
+                                className={clsx(
+                                    "transition-all duration-500 rounded-full",
+                                    index === currentSlide
+                                        ? "w-6 h-1 bg-blue-600"
+                                        : "w-1 h-1 bg-slate-200 hover:bg-slate-300"
+                                )}
+                                aria-label={`Go to slide ${index + 1}`}
+                            />
+                        ))}
+                    </div>
+                </div>
+
             </div>
         </div>
     );

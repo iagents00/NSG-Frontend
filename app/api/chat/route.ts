@@ -75,17 +75,12 @@ export async function POST(req: Request) {
         (fetchOptions.headers as Record<string, string>)['Authorization'] = authHeader;
     }
     
-    // Map mode to path (secure fallback)
-    const validModes = ['pulse', 'compare', 'fusion', 'deep'];
-    // User requested 'ai/pulse', 'ai/compare', 'ai/fusion'. Assuming 'deep' maps to ai/deep or fallback.
-    // Let's sanitize to be safe.
-    const cleanMode = validModes.includes(intelligenceMode) ? intelligenceMode : 'pulse';
-    
-    const endpointPath = `ai/${cleanMode}`;
+    // Unified endpoint as requested: 'ai/dynamic'
+    const endpointPath = "ai/dynamic";
     
     // 3. Execution
     const targetUrl = `${BASE_URL}/${endpointPath}`;
-    console.log(`[N8N Proxy] Forwarding to: ${targetUrl} (Mode: ${cleanMode})`);
+    console.log(`[N8N Proxy] Forwarding to: ${targetUrl} (Mode: ${intelligenceMode})`);
 
     const response = await fetch(targetUrl, fetchOptions);
 

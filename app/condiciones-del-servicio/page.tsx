@@ -32,7 +32,7 @@ export default function TermsOfService() {
                         Condiciones del <span className="text-indigo-600">Servicio</span>
                     </h1>
                     <p className="text-lg text-slate-600 leading-relaxed max-w-2xl">
-                        Bienvenido a NSG Intelligence. Al utilizar nuestra plataforma, aceptas cumplir con los siguientes términos y condiciones. Por favor, léelos cuidadosamente.
+                        Bienvenido a BS Intelligence. Al utilizar nuestra plataforma, aceptas cumplir con los siguientes términos y condiciones. Por favor, léelos cuidadosamente.
                     </p>
                     <div className="mt-8 flex items-center gap-4 text-sm text-slate-400">
                         <span>Última actualización: 26 de Diciembre, 2024</span>
@@ -51,7 +51,7 @@ export default function TermsOfService() {
                         </div>
                         <div className="space-y-4 text-slate-600 leading-relaxed text-sm md:text-base">
                             <p>
-                                Al acceder o utilizar los servicios de NSG Intelligence, confirmas que has leído, entendido y aceptado estar vinculado por este Acuerdo de Términos de Servicio. Si no estás de acuerdo con alguna parte, no podrás acceder a la plataforma.
+                                Al acceder o utilizar los servicios de BS Intelligence, confirmas que has leído, entendido y aceptado estar vinculado por este Acuerdo de Términos de Servicio. Si no estás de acuerdo con alguna parte, no podrás acceder a la plataforma.
                             </p>
                         </div>
                     </section>
@@ -65,7 +65,7 @@ export default function TermsOfService() {
                         </div>
                         <div className="space-y-4 text-slate-600 leading-relaxed text-sm md:text-base">
                             <p>
-                                NSG Intelligence te otorga una licencia limitada, no exclusiva e intransferible para usar el servicio de acuerdo con estos términos. Te comprometes a:
+                                BS Intelligence te otorga una licencia limitada, no exclusiva e intransferible para usar el servicio de acuerdo con estos términos. Te comprometes a:
                             </p>
                             <ul className="list-disc pl-5 space-y-2">
                                 <li>No utilizar la plataforma para fines ilegales o no autorizados.</li>
@@ -85,7 +85,7 @@ export default function TermsOfService() {
                         </div>
                         <div className="space-y-4 text-slate-600 leading-relaxed text-sm md:text-base">
                             <p>
-                                Todo el contenido, características y funcionalidad de la plataforma (incluyendo diseño, código, algoritmos y logotipos) son propiedad exclusiva de NSG Intelligence y están protegidos por leyes internacionales de derechos de autor y propiedad intelectual.
+                                Todo el contenido, características y funcionalidad de la plataforma (incluyendo diseño, código, algoritmos y logotipos) son propiedad exclusiva de BS Intelligence y están protegidos por leyes internacionales de derechos de autor y propiedad intelectual.
                             </p>
                             <p>
                                 Tus datos y el contenido que subas siguen siendo de tu propiedad, pero nos otorgas una licencia necesaria exclusivamente para operar y mejorar los servicios que te proporcionamos.
@@ -102,7 +102,7 @@ export default function TermsOfService() {
                         </div>
                         <div className="space-y-4 text-slate-600 leading-relaxed text-sm md:text-base">
                             <p>
-                                NSG Intelligence se proporciona &quot;tal cual&quot; sin garantías explícitas o implícitas. No seremos responsables de ningún daño indirecto, incidental o consecuente derivado del uso o la imposibilidad de usar el servicio.
+                                BS Intelligence se proporciona &quot;tal cual&quot; sin garantías explícitas o implícitas. No seremos responsables de ningún daño indirecto, incidental o consecuente derivado del uso o la imposibilidad de usar el servicio.
                             </p>
                         </div>
                     </section>
@@ -110,7 +110,7 @@ export default function TermsOfService() {
 
                 <footer className="mt-20 pt-10 border-t border-slate-200 text-center">
                     <p className="text-slate-400 text-sm">
-                        &copy; 2024 NSG Intelligence. Todos los derechos reservados.
+                        &copy; 2024 BS Intelligence. Todos los derechos reservados.
                     </p>
                 </footer>
             </main>

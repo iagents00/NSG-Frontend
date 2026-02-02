@@ -51,7 +51,7 @@ export default function PrivacyPage() {
                     <section className="mb-8">
                         <h2 className="text-2xl font-bold text-navy-950 mb-4">Overview</h2>
                         <p className="text-slate-700 leading-relaxed">
-                            NSG Intelligence ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform.
+                            BS Intelligence ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform.
                         </p>
                     </section>
 

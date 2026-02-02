@@ -21,9 +21,10 @@ import { useAppStore } from "@/store/useAppStore";
 import api from "@/lib/api";
 
 // Import new metrics components
-import MetricsPanel from "@/components/clarity/MetricsPanel";
-import CalendarHeatmap from "@/components/clarity/CalendarHeatmap";
-import CompletionChart from "@/components/clarity/CompletionChart";
+import MetricsPanel from "@/components/copilot/MetricsPanel";
+import CalendarHeatmap from "@/components/copilot/CalendarHeatmap";
+import CompletionChart from "@/components/copilot/CompletionChart";
+import { Banner } from "@/components/ui/Banner";
 
 // --- AUDIO ENGINE ---
 let _audioCtx: AudioContext | null = null;
@@ -471,7 +472,7 @@ function StrategyCard({ strategy }: { strategy: Strategy }) {
 }
 
 // --- MAIN COMPONENT ---
-export default function NSGClarity() {
+export default function ICopilot() {
     const { showToast } = useToast();
     const { userId, userProfile } = useAppStore();
     const telegramId = userProfile?.telegram_id || null;
@@ -580,7 +581,7 @@ export default function NSGClarity() {
             // Fetch streaks
             try {
                 const streaksResponse = await api.get(
-                    `/clarity/streaks/${userId}`,
+                    `/copilot/streaks/${userId}`,
                 );
                 if (streaksResponse.status === 200) {
                     setStreakData(streaksResponse.data.streaks);
@@ -598,7 +599,7 @@ export default function NSGClarity() {
             // Fetch metrics (monthly)
             try {
                 const metricsResponse = await api.get(
-                    `/clarity/metrics/${userId}?period=month`,
+                    `/copilot/metrics/${userId}?period=month`,
                 );
                 if (metricsResponse.status === 200) {
                     setMetricsData(metricsResponse.data.metrics);
@@ -616,7 +617,7 @@ export default function NSGClarity() {
             // Fetch heatmap data
             try {
                 const heatmapResponse = await api.get(
-                    `/clarity/heatmap/${userId}?months=1`,
+                    `/copilot/heatmap/${userId}?months=1`,
                 );
                 if (heatmapResponse.status === 200) {
                     setHeatmapData(heatmapResponse.data.heatmap);
@@ -641,7 +642,7 @@ export default function NSGClarity() {
                 const endDate = today.toISOString().split("T")[0];
 
                 const historyResponse = await api.get(
-                    `/clarity/history/${userId}?startDate=${startDate}&endDate=${endDate}`,
+                    `/copilot/history/${userId}?startDate=${startDate}&endDate=${endDate}`,
                 );
                 if (historyResponse.status === 200) {
                     // Transform data for chart
@@ -705,7 +706,7 @@ export default function NSGClarity() {
         if (!userId) return;
 
         try {
-            const response = await api.get(`/clarity/today/${userId}`);
+            const response = await api.get(`/copilot/today/${userId}`);
             if (response.status === 200) {
                 const completed = response.data.completed;
 
@@ -860,7 +861,7 @@ export default function NSGClarity() {
 
         try {
             // Call backend to toggle completion
-            const response = await api.post("/clarity/toggle", {
+            const response = await api.post("/copilot/toggle", {
                 userId,
                 protocol,
                 metadata: {
@@ -912,62 +913,37 @@ export default function NSGClarity() {
 
     return (
         <div className="max-w-7xl mx-auto px-2 xs:px-4 sm:px-6 lg:px-8 min-h-full flex flex-col animate-fade-in-up pb-12 md:pb-16">
-            {/* 1. HERO BANNER */}
-            <div
+            {/* 1. HERO BANNER - Dashboard Optimized Size */}
+            <Banner
                 onClick={() => syncObjectives(true)}
-                className="relative overflow-hidden bg-linear-to-br from-navy-950 via-slate-900 to-navy-950 px-5 py-6 sm:px-8 sm:py-8 rounded-4xl border border-white/5 shadow-2xl cursor-pointer group transition-all duration-700 hover:shadow-blue-500/10 mb-6 shrink-0"
-                title="Clic para sincronizar objetivos"
-            >
-                <div className="relative z-10">
-                    <span className="text-[10px] font-bold tracking-[0.2em] text-blue-400 uppercase mb-2 block">
-                        Claridad en tus Objetivos
-                    </span>
-                    <h2 className="font-display font-bold text-2xl lg:text-3xl tracking-tight mb-2">
-                        <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-emerald-400">
-                            NSG Clarity
-                        </span>
-                    </h2>
-                    <p className="text-slate-300 text-sm max-w-3xl leading-relaxed">
-                        Gestiona tus protocolos diarios de productividad y
-                        mantén el enfoque absoluto en tus metas de alto impacto.
-                        Sincroniza tus objetivos en tiempo real y optimiza tu
-                        ejecución estratégica.
-                    </p>
-                </div>
-            </div>
+                badge="PROTOCOLO FUNDAMENTAL: I CLARITY"
+                title="I Copilot"
+                titleSuffix="PRO"
+                description={
+                    <>
+                        Sistema Inteligente de Alto Rendimiento. Ejecuta tu{" "}
+                        <span className="text-white font-bold tracking-tight">
+                            Protocolo Clarity
+                        </span>{" "}
+                        diario para mantener enfoque absoluto y sincroniza tus
+                        objetivos estratégicos en tiempo real.
+                    </>
+                }
+            />
 
-            {/* 2. INTEGRATION BAR */}
-            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 lg:gap-4 mb-6 bg-white/50 backdrop-blur-sm p-2.5 xs:p-4 rounded-xl xs:rounded-2xl border border-slate-200/60 shadow-sm transition-all hover:bg-white/60">
-                <div className="flex items-center justify-between w-full lg:w-auto gap-2">
-                    <div
-                        className={clsx(
-                            "flex items-center gap-2 px-2 xs:px-3 py-1 xs:py-1.5 bg-slate-100 rounded-lg border border-slate-200",
-                        )}
-                    >
-                        <Activity className="w-3 xs:w-3.5 h-3 xs:h-3.5 text-blue-600" />
-                        <span className="text-[9px] xs:text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+            {/* 2. INTEGRATION BAR - Matches toolbar row in image */}
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-4 mb-8 bg-white/80 backdrop-blur-md px-6 py-4 rounded-3xl border border-slate-200/60 shadow-sm transition-all hover:bg-white">
+                <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-2.5 px-3.5 py-2 bg-slate-100 rounded-xl border border-slate-200">
+                        <Activity className="w-3.5 h-3.5 text-blue-500" />
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                             Sincronización de Ecosistema
                         </span>
                     </div>
+
                     <button
                         onClick={() => syncObjectives(true)}
-                        className="group flex items-center gap-1.5 px-2 xs:px-2.5 py-1 xs:py-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-all active:scale-95 lg:hidden"
-                        disabled={isLoadingTelegramData}
-                    >
-                        <RefreshCw
-                            className={clsx(
-                                "w-3 xs:w-3.5 h-3 xs:h-3.5",
-                                isLoadingTelegramData && "animate-spin",
-                            )}
-                        />
-                        <span className="text-[9px] xs:text-[10px] font-semibold uppercase tracking-wide">
-                            Refrescar@
-                        </span>
-                    </button>
-                    {/* Desktop Refresh Button */}
-                    <button
-                        onClick={() => syncObjectives(true)}
-                        className="group hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-all active:scale-95"
+                        className="group flex items-center gap-2 px-3 py-2 rounded-xl text-slate-500 hover:text-blue-600 transition-all active:scale-95"
                         disabled={isLoadingTelegramData}
                     >
                         <RefreshCw
@@ -976,80 +952,57 @@ export default function NSGClarity() {
                                 isLoadingTelegramData && "animate-spin",
                             )}
                         />
-                        <span className="text-[10px] font-semibold uppercase tracking-wide">
+                        <span className="text-[10px] font-bold uppercase tracking-wide">
                             Refrescar
                         </span>
                     </button>
                 </div>
 
-                {/* Integration Hub */}
-                <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-4 w-full lg:w-auto">
-                    {/* Telegram Button */}
+                {/* Integration Hub - Right Side Actions */}
+                <div className="flex items-center gap-3">
+                    {/* Telegram */}
                     <button
                         onClick={() => handleConnect("Telegram")}
-                        disabled={telegramId !== null}
                         className={clsx(
-                            "group relative flex items-center gap-2 xs:gap-3 px-3 xs:px-4 sm:px-5 py-2.5 border rounded-2xl xs:rounded-3xl sm:rounded-4xl transition-all duration-500 min-h-[44px] flex-1 sm:flex-none",
+                            "group flex items-center gap-3 px-4 py-2 border rounded-2xl transition-all duration-300",
                             telegramId
-                                ? "bg-emerald-50/60 border-emerald-200 shadow-sm cursor-default"
-                                : "bg-white border-slate-300 hover:shadow-md hover:border-[#0088cc] cursor-pointer shadow-sm hover:bg-[#0088cc]/5",
+                                ? "bg-emerald-50 border-emerald-100"
+                                : "bg-white border-slate-200 hover:border-blue-400 hover:bg-slate-50",
                         )}
                     >
-                        <div
-                            className={clsx(
-                                "w-8 h-8 xs:w-9 xs:h-9 rounded-lg xs:rounded-xl flex items-center justify-center transition-all duration-300 relative overflow-hidden shrink-0",
-                                telegramId
-                                    ? "bg-white ring-2 ring-emerald-200 shadow-sm text-[#0088cc]"
-                                    : "bg-[#0088cc]/10 text-[#0088cc] group-hover:bg-[#0088cc] group-hover:text-white group-hover:ring-2 group-hover:ring-[#0088cc]/30",
-                            )}
-                        >
+                        <div className="w-6 h-6 flex items-center justify-center bg-[#0088cc]/10 rounded-lg text-[#0088cc]">
                             <svg
                                 viewBox="0 0 24 24"
-                                className="w-4 h-4 fill-current relative z-10"
+                                className="w-3.5 h-3.5 fill-current"
                                 xmlns="http://www.w3.org/2000/svg"
                             >
                                 <path d="M11.944 0C5.352 0 0 5.352 0 11.944c0 6.592 5.352 11.944 11.944 11.944c6.592 0 11.944-5.352 11.944-11.944C23.888 5.352 18.536 0 11.944 0zm5.66 8.16l-1.928 9.096c-.144.644-.528.804-1.068.5l-2.936-2.164l-1.416 1.364c-.156.156-.288.288-.588.288l.212-3.04l5.524-4.992c.24-.212-.052-.332-.372-.12l-6.828 4.3l-2.948-.92c-.64-.2-.652-.64.132-.948l11.524-4.44c.532-.2.996.12.804.976z" />
                             </svg>
-                            {telegramId && (
-                                <div className="absolute inset-0 bg-emerald-500/5 animate-pulse"></div>
-                            )}
                         </div>
                         <div className="text-left">
-                            <p className="text-[8px] font-bold uppercase tracking-widest text-slate-500 leading-none mb-1">
+                            <p className="text-[8px] font-bold uppercase tracking-widest text-slate-400 leading-none mb-0.5">
                                 Telegram
                             </p>
-                            <p className="text-xs font-bold leading-none text-navy-900">
+                            <p className="text-[11px] font-bold text-navy-900 leading-none">
                                 {telegramId
-                                    ? telegramData?.username
-                                        ? `@${telegramData.username}`
-                                        : "Conectado"
+                                    ? `@${telegramData?.username || "Conectado"}`
                                     : "Vincular"}
                             </p>
                         </div>
                     </button>
 
-                    {/* Calendar Button */}
+                    {/* Google Calendar */}
                     <button
                         onClick={() => handleConnect("Calendar")}
                         className={clsx(
-                            "group relative flex items-center gap-2 xs:gap-3 px-3 xs:px-4 sm:px-5 py-2.5 border rounded-2xl xs:rounded-3xl sm:rounded-4xl transition-all duration-500 min-h-[44px] flex-1 sm:flex-none",
+                            "group flex items-center gap-3 px-4 py-2 border rounded-2xl transition-all duration-300",
                             isConnected
-                                ? "bg-emerald-50/60 border-emerald-200 shadow-sm cursor-default"
-                                : "bg-white border-slate-300 hover:shadow-md hover:border-blue-400 cursor-pointer shadow-sm hover:bg-blue-50/30",
+                                ? "bg-emerald-50 border-emerald-100"
+                                : "bg-white border-slate-200 hover:border-red-400 hover:bg-slate-50",
                         )}
                     >
-                        <div
-                            className={clsx(
-                                "w-8 h-8 xs:w-9 xs:h-9 rounded-lg xs:rounded-xl flex items-center justify-center transition-all duration-300 relative overflow-hidden shrink-0",
-                                isConnected
-                                    ? "bg-white ring-2 ring-emerald-200 shadow-sm"
-                                    : "bg-slate-50 group-hover:bg-white group-hover:ring-2 group-hover:ring-blue-200",
-                            )}
-                        >
-                            <svg
-                                viewBox="0 0 24 24"
-                                className="w-4 h-4 fill-current"
-                            >
+                        <div className="w-6 h-6 flex items-center justify-center bg-slate-100 rounded-lg">
+                            <svg viewBox="0 0 24 24" className="w-3.5 h-3.5">
                                 <path
                                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                                     fill="#4285F4"
@@ -1067,16 +1020,13 @@ export default function NSGClarity() {
                                     fill="#EA4335"
                                 />
                             </svg>
-                            {isConnected && (
-                                <div className="absolute inset-0 bg-emerald-500/5 animate-pulse"></div>
-                            )}
                         </div>
                         <div className="text-left">
-                            <p className="text-[8px] font-bold uppercase tracking-widest text-slate-500 leading-none mb-1">
+                            <p className="text-[8px] font-bold uppercase tracking-widest text-slate-400 leading-none mb-0.5">
                                 Calendar
                             </p>
-                            <p className="text-xs font-bold leading-none text-navy-900">
-                                {isConnected ? "Sincronizado" : "Vincular"}
+                            <p className="text-[11px] font-bold text-navy-900 leading-none">
+                                {isConnected ? "Vincular" : "Vincular"}
                             </p>
                         </div>
                     </button>
@@ -1119,8 +1069,8 @@ export default function NSGClarity() {
                         <div className="absolute -top-24 -left-24 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl opacity-0 group-hover/left:opacity-100 transition-opacity duration-1000"></div>
 
                         <div className="flex items-center justify-between px-2 relative z-10">
-                            <h4 className="font-bold text-navy-950 text-xl flex items-center gap-3">
-                                <div className="p-2.5 bg-emerald-500 rounded-2xl text-white shadow-lg shadow-emerald-500/20 group-hover/left:scale-110 transition-transform duration-500">
+                            <h4 className="font-bold text-navy-950 text-xl flex items-center gap-4">
+                                <div className="p-3 bg-emerald-500 rounded-2xl text-white shadow-lg shadow-emerald-500/20 group-hover/left:scale-110 transition-transform duration-500">
                                     <Activity className="w-5 h-5 transition-transform group-hover/left:rotate-12" />
                                 </div>
                                 Progreso Diario
@@ -1207,7 +1157,7 @@ export default function NSGClarity() {
 
                         <div className="flex items-center justify-between px-2 relative z-10">
                             <div className="flex items-center gap-4">
-                                <div className="p-3 bg-linear-to-tr from-blue-600 to-indigo-600 rounded-2xl text-white shadow-lg shadow-blue-600/20 group-hover/right:scale-110 transition-transform duration-500">
+                                <div className="p-3 bg-[#111111] rounded-2xl text-white shadow-lg shadow-slate-900/20 group-hover/right:scale-110 transition-transform duration-500">
                                     <Target className="w-5 h-5 transition-transform group-hover/right:rotate-12" />
                                 </div>
                                 <div>
@@ -1216,10 +1166,10 @@ export default function NSGClarity() {
                                     </h4>
                                     <div className="flex items-center gap-2 mt-0.5">
                                         <div className="px-1.5 py-0.5 bg-blue-100 text-blue-600 rounded text-[8px] font-black uppercase tracking-wider">
-                                            Semanal
+                                            SEMANAL
                                         </div>
                                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                            Estrategia de Enfoque
+                                            ESTRATEGIA DE ENFOQUE
                                         </p>
                                     </div>
                                 </div>

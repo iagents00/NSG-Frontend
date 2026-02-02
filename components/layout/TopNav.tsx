@@ -5,6 +5,7 @@ import { CONTEXT } from "@/data/context";
 import { Menu, Bell, FileText } from "lucide-react";
 import { useState, useMemo } from "react";
 import { usePathname } from "next/navigation";
+import BrandAtom from "@/components/ui/BrandAtom";
 
 export default function TopNav() {
     const { toggleSidebar, openAI, setAIMode } = useUIStore();
@@ -55,20 +56,18 @@ export default function TopNav() {
                     <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
                 </button>
                 <div className="overflow-hidden">
-                    <div className="flex items-center gap-2">
-                        <h2 className="font-display text-sm sm:text-base lg:text-xl font-bold text-navy-900 truncate tracking-tight">
+                    <div className="flex items-center gap-3 mb-0.5">
+                        <h2 className="font-display text-lg sm:text-xl lg:text-xl font-bold text-navy-950 truncate tracking-tight">
                             {title}
                         </h2>
                         {/* Role Badge */}
                         {currentRole && (
-                            <span
-                                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-blue-50 border border-blue-100 text-blue-600 font-bold text-[0.55rem] uppercase tracking-wider"
-                            >
-                                {CONTEXT[currentRole]?.roleDesc || "GUEST"}
+                            <span className="hidden sm:inline-flex px-2 py-0.5 rounded-md bg-blue-50 text-blue-600 text-[9px] font-black uppercase tracking-wider border border-blue-100">
+                                {CONTEXT[currentRole]?.roleDesc || "System Admin"}
                             </span>
                         )}
                     </div>
-                    <p className="text-[0.6rem] font-bold text-slate-500 uppercase tracking-widest mt-0.5 hidden md:block">
+                    <p className="text-[0.6rem] font-bold text-slate-400 uppercase tracking-widest hidden md:block pl-0.5">
                         {subtitle}
                     </p>
                 </div>
@@ -114,7 +113,7 @@ export default function TopNav() {
                     )}
                 </div>
 
-                {/* NSG Intelligence AI Trigger Button */}
+                {/* BS Intelligence AI Trigger Button */}
                 <div className="relative group/intel">
                     <button
                         onClick={() => {
@@ -130,49 +129,12 @@ export default function TopNav() {
                                 : "bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed opacity-60"
                         }`}
                     >
-                        <div className="w-5 h-5 relative shrink-0 atom-container">
-                            <div className="w-full h-full atom-breathe">
-                                <svg
-                                    viewBox="0 0 100 100"
-                                    className={`w-full h-full transition-colors ${
-                                        hasTelegram
-                                            ? "text-blue-300"
-                                            : "text-slate-300"
-                                    }`}
-                                    fill="none"
-                                    strokeWidth="4"
-                                >
-                                    <circle
-                                        cx="50"
-                                        cy="50"
-                                        r="42"
-                                        stroke="currentColor"
-                                        className="morph-orbit orbit-1 ui-orbit"
-                                    />
-                                    <circle
-                                        cx="50"
-                                        cy="50"
-                                        r="42"
-                                        stroke="currentColor"
-                                        className="morph-orbit orbit-2 ui-orbit"
-                                    />
-                                    <circle
-                                        cx="50"
-                                        cy="50"
-                                        r="42"
-                                        stroke="currentColor"
-                                        className="morph-orbit orbit-3 ui-orbit"
-                                    />
-                                    <circle
-                                        cx="50"
-                                        cy="50"
-                                        r="14"
-                                        fill={hasTelegram ? "white" : "#94a3b8"}
-                                    />
-                                </svg>
+                        <div className="flex items-center gap-2">
+                            <div className="w-5 h-5 relative shrink-0">
+                                <BrandAtom className="w-full h-full text-blue-300" variant="colored" />
                             </div>
+                            <span className="tracking-tight uppercase text-[10px] sm:text-[11px] font-black">BS Intelligence</span>
                         </div>
-                        <span className="tracking-tight">NSG Intelligence</span>
                     </button>
 
                     {/* Tooltip when disabled */}
@@ -184,7 +146,7 @@ export default function TopNav() {
                                 </p>
                                 <p className="text-slate-300">
                                     Conecta tu cuenta de Telegram en
-                                    Configuración para activar NSG Intelligence.
+                                    Configuración para activar BS Intelligence.
                                 </p>
                                 <div className="absolute top-0 right-4 transform -translate-y-1/2 rotate-45 w-2 h-2 bg-navy-950 border-l border-t border-navy-800"></div>
                             </div>

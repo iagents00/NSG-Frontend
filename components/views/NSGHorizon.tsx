@@ -40,6 +40,7 @@ import remarkGfm from "remark-gfm";
 import AtomEffect from "@/components/ui/AtomEffect";
 import BrandAtom from "@/components/ui/BrandAtom";
 import { SkeletonCard } from "@/components/ui/Skeleton";
+import { Banner } from "@/components/ui/Banner";
 
 // --- Types ---
 interface TranscriptItem {
@@ -92,7 +93,7 @@ interface ManualRecording {
     size: string;
 }
 
-export default function NSGHorizon() {
+export default function IHorizon() {
     const { userId } = useAppStore();
     const { showToast } = useToast();
     const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -536,26 +537,12 @@ export default function NSGHorizon() {
 
         return (
             <div className="max-w-7xl mx-auto px-2 xs:px-4 sm:px-6 lg:px-8 h-full flex flex-col animate-fade-in-up pb-12 md:pb-16">
-                {/* Dark Header Banner - Clarity Style */}
-                <div className="relative overflow-hidden bg-linear-to-r from-navy-950 via-navy-900 to-navy-950 px-4 py-5 xs:px-5 sm:px-8 sm:py-6 rounded-2xl xs:rounded-3xl border border-navy-800/50 shadow-xl mb-5 shrink-0">
-                    <div className="relative z-10">
-                        <span className="text-[10px] font-bold tracking-[0.2em] text-cyan-400 uppercase mb-2 block">
-                            Planificación y Proyección
-                        </span>
-                        <h2 className="font-display font-bold text-2xl lg:text-3xl tracking-tight mb-2">
-                            <span className="text-transparent bg-clip-text bg-linear-to-r from-cyan-400 to-blue-500">
-                                NSG Horizon
-                            </span>
-                        </h2>
-                        <p className="text-slate-300 text-sm max-w-3xl leading-relaxed">
-                            Analiza tus reuniones y grabaciones con inteligencia
-                            artificial para extraer insights estratégicos.
-                            Planificación neuronal activa diseñada para la
-                            precisión máxima y el éxito proyectado en cada
-                            objetivo.
-                        </p>
-                    </div>
-                </div>
+                {/* 1. HERO BANNER - Dashboard Optimized Style */}
+                <Banner
+                    badge="Planificación y Proyección"
+                    title="I Horizon"
+                    description="Analiza tus reuniones y grabaciones con inteligencia artificial para extraer insights estratégicos. Planificación neuronal activa diseñada para la precisión máxima y el éxito proyectado en cada objetivo."
+                />
 
                 {/* TAB NAVIGATION - Clarity Style */}
                 <div className="flex p-1.5 bg-slate-100/50 backdrop-blur-md rounded-2xl w-full sm:w-fit mb-6 border border-slate-200/50 self-center">
@@ -608,7 +595,11 @@ export default function NSGHorizon() {
                                             </span>
                                         </h2>
                                         <p className="text-blue-100/80 text-base leading-relaxed max-w-xl mx-auto md:mx-0">
-                                            Sincronización de inteligencia de reuniones. El sistema ingesta y procesa flujos de audio para destilar inteligencia estratégica en tiempo real.
+                                            Sincronización de inteligencia de
+                                            reuniones. El sistema ingesta y
+                                            procesa flujos de audio para
+                                            destilar inteligencia estratégica en
+                                            tiempo real.
                                         </p>
                                         <div className="pt-2 flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                                             <button
@@ -800,7 +791,8 @@ export default function NSGHorizon() {
                                             Selecciona Tipo
                                         </h4>
                                         <p className="text-xs text-slate-500">
-                                            Ingesta de audio o texto estructurado
+                                            Ingesta de audio o texto
+                                            estructurado
                                         </p>
                                     </div>
                                 </div>
@@ -858,7 +850,12 @@ export default function NSGHorizon() {
                                             Análisis Manual de Contenido
                                         </h3>
                                         <p className="text-slate-600 leading-relaxed">
-                                            Módulo de procesamiento de lenguaje natural. Transforma activos de audio y texto no estructurado en inteligencia ejecutiva estructurada mediante modelos neuronales avanzados.
+                                            Módulo de procesamiento de lenguaje
+                                            natural. Transforma activos de audio
+                                            y texto no estructurado en
+                                            inteligencia ejecutiva estructurada
+                                            mediante modelos neuronales
+                                            avanzados.
                                         </p>
                                     </div>
 

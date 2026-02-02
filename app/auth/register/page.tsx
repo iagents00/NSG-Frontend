@@ -210,7 +210,7 @@ function RegisterContent() {
                                 Crear Cuenta
                             </h1>
                             <p className="text-slate-500 text-sm font-medium">
-                                Únete a NSG Intelligence
+                                Únete a BS Intelligence
                             </p>
                         </div>
                     </div>

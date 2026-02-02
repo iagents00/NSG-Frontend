@@ -32,7 +32,7 @@ export default function PrivacyPolicy() {
                         Política de <span className="text-blue-600">Privacidad</span>
                     </h1>
                     <p className="text-lg text-slate-600 leading-relaxed max-w-2xl">
-                        En NSG Intelligence, la seguridad y privacidad de tus datos son nuestra máxima prioridad. 
+                        En BS Intelligence, la seguridad y privacidad de tus datos son nuestra máxima prioridad. 
                         Este documento explica cómo recopilamos, usamos y protegemos tu información.
                     </p>
                     <div className="mt-8 flex items-center gap-4 text-sm text-slate-400">
@@ -109,7 +109,7 @@ export default function PrivacyPolicy() {
 
                 <footer className="mt-20 pt-10 border-t border-slate-200 text-center">
                     <p className="text-slate-400 text-sm">
-                        &copy; 2024 NSG Intelligence. Todos los derechos reservados.
+                        &copy; 2024 BS Intelligence. Todos los derechos reservados.
                     </p>
                 </footer>
             </main>

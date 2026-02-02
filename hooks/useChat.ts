@@ -6,7 +6,7 @@ interface UseChatProps {
     field?: string;
 }
 
-export function useChat({ field = 'NSG Intelligence' }: UseChatProps = {}) {
+export function useChat({ field = 'BS Intelligence' }: UseChatProps = {}) {
     const [currentChatId, setCurrentChatId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const { userId } = useAppStore();

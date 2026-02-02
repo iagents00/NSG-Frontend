@@ -10,7 +10,7 @@ import remarkGfm from "remark-gfm";
 import { motion, AnimatePresence } from "framer-motion";
 
 // --- CONFIGURATION ---
-const BASE_SYSTEM_PROMPT = `Eres NSG Intelligence. Tu personalidad es sofisticada, estratégica y ejecutiva. 
+const BASE_SYSTEM_PROMPT = `Eres BS Intelligence. Tu personalidad es sofisticada, estratégica y ejecutiva. 
 Responde ÚNICAMENTE con texto directo y elegante. Debes guiar al usuario a la acción, sin textos confusos. Usa puntuación perfecta (puntos y comas).
 ESTÁ PROHIBIDO usar emojis, líneas de separación, markdown complejo o mencionar componentes de UI.
 Sé extremadamente conciso. Tono 'Apple Pro': minimalista pero poderoso.`;
@@ -607,7 +607,7 @@ export default function NSGAssistant() {
                                         />
                                     </div>
                                     <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest pl-1">
-                                        NSG Intelligence
+                                        BS Intelligence
                                     </span>
                                 </div>
                                 <button
@@ -667,7 +667,7 @@ export default function NSGAssistant() {
                             placeholder={
                                 status === "LISTENING"
                                     ? "Escuchando..."
-                                    : "Pregunta a NSG Intelligence..."
+                                    : "Pregunta a BS Intelligence..."
                             }
                             className="bg-transparent border-none text-[14px] font-medium text-slate-200 placeholder:text-slate-500 focus:outline-none w-full tracking-wide selection:bg-blue-500/30"
                         />

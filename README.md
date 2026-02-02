@@ -1,4 +1,4 @@
-# NSG Intelligence - Next.js Migration
+# BS Intelligence - Next.js Migration
 
 Modern, production-ready Next.js application migrated from the legacy NSG.html prototype.
 
@@ -177,4 +177,4 @@ This is a migration project. For questions or issues, please refer to the implem
 
 ---
 
-**NSG Intelligence** | Deep Processing v14.6 | Powered by Google Gemini
+**BS Intelligence** | Deep Processing v14.6 | Powered by Google Gemini

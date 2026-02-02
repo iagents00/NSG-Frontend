@@ -26,7 +26,7 @@ export default function OnboardingLayout() {
                                 Inicia tu entrevista
                             </h2>
                             <span className="text-xs font-medium text-slate-500 tracking-wide uppercase">
-                                NSG Intelligence • Strategic Onboarding
+                                BS Intelligence • Strategic Onboarding
                             </span>
                         </div>
 

@@ -24,7 +24,7 @@
 - Agregado timeout de 5 segundos para geolocalización
 - No bloquea el registro si el usuario no responde
 
-### 4. NSG Intelligence Button - Condicional ✅
+### 4. BS Intelligence Button - Condicional ✅
 
 **Archivo**: `components/layout/TopNav.tsx`
 
@@ -104,7 +104,7 @@
 ### Para Usuarios Nuevos:
 
 1. ✅ **Menú intuitivo** - Clarity está antes que Horizon (flujo natural)
-2. ✅ **NSG Intelligence bloqueado** - Guía clara sobre conectar Telegram
+2. ✅ **BS Intelligence bloqueado** - Guía clara sobre conectar Telegram
 3. ✅ **Settings funcional** - Botones visibles, tarjetas compactas
 4. ✅ **Clarity preciso** - Progreso 0% cuando no hay datos (no confunde)
 5. ✅ **Espaciado correcto** - Paneles no pegados a bordes

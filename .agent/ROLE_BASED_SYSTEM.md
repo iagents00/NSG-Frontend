@@ -1,7 +1,7 @@
 # Role-Based Dashboard System - Implementation Summary
 
 ## Overview
-The NSG Intelligence platform now has a complete role-based access control system where each user role (Consultant, Psychologist, Manager, Patient) has exclusive access to specific views and features.
+The BS Intelligence platform now has a complete role-based access control system where each user role (Consultant, Psychologist, Manager, Patient) has exclusive access to specific views and features.
 
 ## How It Works
 
@@ -27,7 +27,7 @@ This is where the magic happens:
 
 ### **Consultant** (Dr. Arriaga)
 ✅ Available Views:
-- `nsg_ios` - NSG Intelligence (Main System)
+- `nsg_ios` - BS Intelligence (Main System)
 - `nsg_news` - NSG News
 - `nsg_clarity` - NSG Clarity
 - `nsg_horizon` - NSG Horizon
@@ -38,7 +38,7 @@ This is where the magic happens:
 
 ### **Psychologist** (Lic. Sofia)
 ✅ Available Views:
-- `nsg_ios` - NSG Intelligence (Main System)
+- `nsg_ios` - BS Intelligence (Main System)
 - `nsg_news` - NSG News
 - `nsg_clarity` - NSG Clarity
 - `nsg_horizon` - NSG Horizon
@@ -49,7 +49,7 @@ This is where the magic happens:
 
 ### **Manager** (Roberto V. - CEO)
 ✅ Available Views:
-- `nsg_ios` - NSG Intelligence (Main System)
+- `nsg_ios` - BS Intelligence (Main System)
 - `nsg_news` - NSG News
 - `nsg_clarity` - NSG Clarity
 - `nsg_horizon` - NSG Horizon
@@ -61,7 +61,7 @@ This is where the magic happens:
 
 ### **Patient** (Paciente)
 ✅ Available Views:
-- `nsg_ios` - NSG Intelligence (Main System)
+- `nsg_ios` - BS Intelligence (Main System)
 - `wellness` - Bienestar ⭐ *Exclusive to Patient*
 - `calendar` - Agenda
 

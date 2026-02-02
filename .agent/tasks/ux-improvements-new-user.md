@@ -30,7 +30,7 @@
 - [ ] Corregir barra "Progreso Diario" para mostrar 0% cuando usuario no tiene datos
 - [ ] Agregar padding/margin a paneles de rendimiento para separarlos del borde
 
-## 7. NSG Intelligence Button (TopNav) ✅
+## 7. BS Intelligence Button (TopNav) ✅
 
 - [ ] Deshabilitar botón si usuario no tiene telegram_id
 - [ ] Solo activar cuando telegram_id está presente
@@ -38,7 +38,7 @@
 ## Orden de Implementación
 
 1. Sidebar (orden menú)
-2. TopNav (botón NSG Intelligence condicional)
+2. TopNav (botón BS Intelligence condicional)
 3. Settings (tarjetas de integraciones)
 4. Profile (simplificar y botón reset password)
 5. Clarity (progreso diario y padding)

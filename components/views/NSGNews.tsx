@@ -1,21 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-    Newspaper,
-    TrendingUp,
-    Zap,
-    Search,
-    Loader2,
-    Sparkles,
-    ArrowRight
-} from "lucide-react";
+import { Newspaper, Zap, Search, Sparkles } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import api from "@/lib/api";
 import clsx from "clsx";
 import ComingSoon from "@/components/ComingSoon";
 import { NewsCard } from "@/components/ui/NewsCard";
 import { useUIStore } from "@/store/useUIStore";
+import { Banner } from "@/components/ui/Banner";
 
 interface NewsItem {
     _id: string;
@@ -31,7 +24,7 @@ interface NewsItem {
     createdAt: string;
 }
 
-export default function NSGNews() {
+export default function INews() {
     const { currentRole } = useAppStore();
     const { openAI, setAIMode } = useUIStore();
     const [activeTab, setActiveTab] = useState<"market" | "archive">("market");
@@ -40,23 +33,24 @@ export default function NSGNews() {
     const [analyzingId, setAnalyzingId] = useState<string | null>(null);
 
     useEffect(() => {
+        const fetchNews = async () => {
+            setLoading(true);
+            try {
+                const endpoint =
+                    activeTab === "archive"
+                        ? "/news/search?type=analyzed"
+                        : "/news/search";
+                const response = await api.get(endpoint);
+                setNews(response.data);
+            } catch (error) {
+                console.error("Error fetching news:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
         fetchNews();
     }, [activeTab]);
-
-    const fetchNews = async () => {
-        setLoading(true);
-        try {
-            const endpoint = activeTab === "archive"
-                ? "/news/search?type=analyzed"
-                : "/news/search";
-            const response = await api.get(endpoint);
-            setNews(response.data);
-        } catch (error) {
-            console.error("Error fetching news:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleAnalyze = async (id: string) => {
         setAnalyzingId(id);
@@ -65,7 +59,7 @@ export default function NSGNews() {
             await api.post(`/news/analyze/${id}`);
 
             // Open AI Modal in research mode to show the analysis "progress" in UI
-            setAIMode('research');
+            setAIMode("research");
             openAI();
         } catch (error) {
             console.error("Error analyzing news:", error);
@@ -74,12 +68,17 @@ export default function NSGNews() {
         }
     };
 
-    const hasAccess = ["admin", "psychologist", "consultant", "manager"].includes(currentRole || "");
+    const hasAccess = [
+        "admin",
+        "psychologist",
+        "consultant",
+        "manager",
+    ].includes(currentRole || "");
 
     if (!hasAccess && currentRole !== "patient") {
         return (
             <ComingSoon
-                title="NSG News"
+                title="I News"
                 subtitle="Sistema de Inteligencia de Noticias Globales en desarrollo"
                 estimatedDate="Q2 2026"
             />
@@ -89,55 +88,45 @@ export default function NSGNews() {
     return (
         <div className="flex-1 overflow-y-auto custom-scroll safe-bottom-scroll scroll-smooth w-full animate-fade-in-up flex flex-col items-center bg-slate-50/10">
             <div className="w-full px-2 xs:px-4 lg:px-12 py-8 max-w-[1700px]">
+                {/* 1. HERO BANNER - Dashboard Optimized Style */}
+                <Banner
+                    badge="Hyper-Intelligence Feed"
+                    title="I Hyper-News"
+                    description="Inteligencia de mercado curada algorítmicamente para acelerar tus objetivos estratégicos."
+                />
 
-                {/* Header Section - Legacy Style */}
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-10 gap-6">
-                    <div className="space-y-1">
-                        <div className="flex items-center gap-2 mb-2">
-                            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg">
-                                <Sparkles className="w-4 h-4 text-white" />
-                            </div>
-                            <span className="text-[10px] font-bold tracking-[0.2em] text-blue-600 uppercase">
-                                Hyper-Intelligence Feed
-                            </span>
-                        </div>
-                        <h1 className="font-display font-bold text-3xl lg:text-5xl text-navy-950 tracking-tight">
-                            NSG Hyper-News
-                        </h1>
-                        <p className="text-slate-500 mt-2 text-base lg:text-lg max-w-2xl font-medium">
-                            Inteligencia de mercado curada algorítmicamente para acelerar tus objetivos estratégicos.
-                        </p>
+                {/* Sub-header Controls */}
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8 bg-white/80 backdrop-blur-md px-6 py-4 rounded-3xl border border-slate-200/60 shadow-sm">
+                    <div className="flex items-center gap-3">
+                        <span className="text-[10px] font-bold bg-blue-50 text-blue-600 px-4 py-2 rounded-xl border border-blue-100 flex items-center gap-2 shadow-sm">
+                            <Zap className="w-3.5 h-3.5 fill-blue-600" />
+                            Precision Filter Active
+                        </span>
                     </div>
 
-                    <div className="flex flex-col gap-4 w-full sm:w-auto items-end">
-                        <span className="text-xs font-black bg-blue-50 text-blue-600 px-5 py-2.5 rounded-2xl border border-blue-100 flex items-center gap-2 w-full sm:w-auto justify-center shadow-sm">
-                            <Zap className="w-4 h-4 fill-blue-600" /> Precision Filter Active
-                        </span>
-
-                        <div className="flex bg-white p-1 rounded-2xl border border-slate-200 shadow-sm w-full md:w-auto">
-                            <button
-                                onClick={() => setActiveTab("market")}
-                                className={clsx(
-                                    "flex-1 md:flex-none px-6 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2",
-                                    activeTab === "market"
-                                        ? "bg-navy-950 text-white shadow-md"
-                                        : "text-slate-500 hover:text-navy-950 hover:bg-slate-50"
-                                )}
-                            >
-                                Inteligencia
-                            </button>
-                            <button
-                                onClick={() => setActiveTab("archive")}
-                                className={clsx(
-                                    "flex-1 md:flex-none px-6 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2",
-                                    activeTab === "archive"
-                                        ? "bg-navy-950 text-white shadow-md"
-                                        : "text-slate-500 hover:text-navy-950 hover:bg-slate-50"
-                                )}
-                            >
-                                Archivo
-                            </button>
-                        </div>
+                    <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200/50 shadow-sm w-full md:w-auto">
+                        <button
+                            onClick={() => setActiveTab("market")}
+                            className={clsx(
+                                "flex-1 md:flex-none px-6 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2",
+                                activeTab === "market"
+                                    ? "bg-white text-navy-950 shadow-sm"
+                                    : "text-slate-500 hover:text-navy-950 hover:bg-white/50",
+                            )}
+                        >
+                            Inteligencia
+                        </button>
+                        <button
+                            onClick={() => setActiveTab("archive")}
+                            className={clsx(
+                                "flex-1 md:flex-none px-6 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2",
+                                activeTab === "archive"
+                                    ? "bg-white text-navy-950 shadow-sm"
+                                    : "text-slate-500 hover:text-navy-950 hover:bg-white/50",
+                            )}
+                        >
+                            Archivo
+                        </button>
                     </div>
                 </div>
 
@@ -175,7 +164,12 @@ export default function NSGNews() {
                                 tag={item.tag || item.categories[0] || "Global"}
                                 color={item.color || "blue"}
                                 description={item.content}
-                                time={new Date(item.createdAt).toLocaleDateString("es-ES", { day: 'numeric', month: 'short' })}
+                                time={new Date(
+                                    item.createdAt,
+                                ).toLocaleDateString("es-ES", {
+                                    day: "numeric",
+                                    month: "short",
+                                })}
                                 isAnalyzed={!!item.analysis}
                                 onAnalyze={() => handleAnalyze(item._id)}
                                 isAnalyzing={analyzingId === item._id}
@@ -187,9 +181,12 @@ export default function NSGNews() {
                         <div className="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center mb-6 border border-slate-100">
                             <Newspaper className="w-10 h-10 text-slate-200" />
                         </div>
-                        <h3 className="text-2xl font-bold text-navy-950 mb-2 font-display">Feed Silencioso</h3>
+                        <h3 className="text-2xl font-bold text-navy-950 mb-2 font-display">
+                            Feed Silencioso
+                        </h3>
                         <p className="text-slate-500 max-w-sm">
-                            No se han detectado nuevas señales en este canal. Vuelve pronto para nuevos insights estratégicos.
+                            No se han detectado nuevas señales en este canal.
+                            Vuelve pronto para nuevos insights estratégicos.
                         </p>
                     </div>
                 )}

@@ -363,7 +363,21 @@ export default function ContentChat({ item, onBack }: ContentChatProps) {
                                                 ? "bg-slate-900 text-white rounded-[1.5rem] rounded-tr-md shadow-slate-900/10" 
                                                 : "bg-white/80 backdrop-blur-xl border border-white/60 text-slate-700 rounded-[1.5rem] rounded-tl-md"
                                         )}>
-                                            <p className="font-medium whitespace-pre-wrap">{msg.content}</p>
+                                            {(() => {
+                                                let displayContent = msg.content;
+                                                if (msg.role === 'system' && typeof displayContent === 'string' && displayContent.trim().startsWith('{')) {
+                                                    try {
+                                                        const parsed = JSON.parse(displayContent);
+                                                        displayContent = parsed.answer || parsed.response || parsed.output || parsed.text || displayContent;
+                                                        // Secondary check for nested objects in 'answer'
+                                                        if (displayContent && typeof displayContent === 'object') {
+                                                            const obj = displayContent as any;
+                                                            displayContent = obj.answer || obj.response || obj.text || JSON.stringify(obj);
+                                                        }
+                                                    } catch {}
+                                                }
+                                                return <p className="font-medium whitespace-pre-wrap">{displayContent}</p>;
+                                            })()}
 
                                             {/* Options Buttons */}
                                             {msg.role === 'system' && msg.type === 'options' && msg.options && (

@@ -4,17 +4,16 @@ import axios from "axios";
 // API Configuration
 // ============================================
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://nsg-backend.vercel.app";
 const isDevelopment = process.env.NEXT_PUBLIC_APP_ENV === "development" || process.env.NODE_ENV === "development";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-// Validate API URL
-if (!process.env.NEXT_PUBLIC_API_URL && isDevelopment) {
-    console.warn(
-        "[WARNING] NEXT_PUBLIC_API_URL not set. Using default:",
-        API_URL
-    );
+if (!API_URL) {
+    if (isDevelopment) {
+        console.warn("[WARNING] NEXT_PUBLIC_API_URL is not set. API calls will fail.");
+    } else {
+        throw new Error("NEXT_PUBLIC_API_URL is required in production environments.");
+    }
 }
-
 // Create axios instance
 const api = axios.create({
     baseURL: API_URL,

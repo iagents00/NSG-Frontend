@@ -37,7 +37,7 @@
 ### 6. Sistema de Navegación y Tooltips ✅
 
 - **Archivo**: `components/layout/TopNav.tsx`
-- Tooltip de NSG Intelligence corregido (aparece abajo, totalmente visible).
+- Tooltip de BS Intelligence corregido (aparece abajo, totalmente visible).
 - Lógica de acceso condicional operando al 100%.
 
 ## 🎯 Resultado Final
