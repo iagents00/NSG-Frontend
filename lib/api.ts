@@ -1,13 +1,14 @@
 import axios from "axios";
 
 // ============================================
-// API Configuration
+// Client-side API Configuration
 // ============================================
+// This API client connects to Next.js API routes (server-side proxy)
+// The API routes then forward requests to the actual backend
+// This keeps the backend URL hidden from the client bundle
 
-import { CONFIG, isProduction } from "./config";
-
-const isDevelopment = !isProduction;
-const API_URL = CONFIG.API_URL;
+// All calls go through Next.js API routes (same-origin)
+const API_URL = "/api/backend";
 
 // Create axios instance
 const api = axios.create({
@@ -17,11 +18,6 @@ const api = axios.create({
     },
     timeout: 30000, // 30 seconds
 });
-
-// Log API URL on initialization (development only)
-if (isDevelopment && typeof window !== "undefined") {
-    console.info("[API] Base URL:", API_URL);
-}
 
 // ============================================
 // Request Interceptor
@@ -37,7 +33,7 @@ api.interceptors.request.use(
         }
 
         // Log request in development
-        if (isDevelopment && typeof window !== "undefined") {
+        if (process.env.NODE_ENV === 'development' && typeof window !== "undefined") {
             console.debug("[API] Request:", {
                 method: config.method?.toUpperCase(),
                 url: config.url,
@@ -48,7 +44,7 @@ api.interceptors.request.use(
         return config;
     },
     (error) => {
-        if (isDevelopment) {
+        if (process.env.NODE_ENV === 'development') {
             console.error("[ERROR] Request Error:", error);
         }
         return Promise.reject(error);
@@ -61,7 +57,7 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => {
         // Log response in development
-        if (isDevelopment && typeof window !== "undefined") {
+        if (process.env.NODE_ENV === 'development' && typeof window !== "undefined") {
             console.debug("[API] Response:", {
                 status: response.status,
                 url: response.config.url,
@@ -76,7 +72,7 @@ api.interceptors.response.use(
             const status = error.response.status;
             const message = error.response.data?.message || error.message;
 
-            if (isDevelopment && status !== 404) {
+            if (process.env.NODE_ENV === 'development' && status !== 404) {
                 console.error(`[API Error] ${status} ${message} - URL: ${error.config?.url}`);
             }
 
@@ -104,7 +100,7 @@ api.interceptors.response.use(
                     break;
                 case 404:
                     // Don't log 404 as errors - many are expected for new users
-                    if (isDevelopment) {
+                    if (process.env.NODE_ENV === 'development') {
                         console.log("[INFO] Resource not found:", error.config?.url);
                     }
                     break;
@@ -114,14 +110,14 @@ api.interceptors.response.use(
             }
         } else if (error.request) {
             // Request made but no response received
-            if (isDevelopment) {
+            if (process.env.NODE_ENV === 'development') {
                 console.error("[ERROR] Network Error: No response from server", {
                     url: error.config?.url,
                 });
             }
         } else {
             // Something else happened
-            if (isDevelopment) {
+            if (process.env.NODE_ENV === 'development') {
                 console.error("[ERROR] Error:", error.message);
             }
         }
