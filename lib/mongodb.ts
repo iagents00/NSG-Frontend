@@ -1,16 +1,10 @@
 import { MongoClient } from 'mongodb';
 
-const uri = process.env.MONGODB_URI || "";
+const uri = process.env.MONGODB_URI;
 const options = {};
 
 let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
-
-if (!process.env.MONGODB_URI) {
-  // In development mode, we might want to log a warning, 
-  // but for now we'll throw to ensure the user sets it.
-  throw new Error('Please add your Mongo URI to .env.local');
-}
 
 if (process.env.NODE_ENV === 'development') {
   // In development mode, use a global variable so that the value
@@ -20,14 +14,28 @@ if (process.env.NODE_ENV === 'development') {
   };
 
   if (!globalWithMongo._mongoClientPromise) {
-    client = new MongoClient(uri, options);
-    globalWithMongo._mongoClientPromise = client.connect();
+    if (!uri) {
+      // Create a promise that rejects when awaited
+      globalWithMongo._mongoClientPromise = Promise.reject(new Error('Please add your Mongo URI to .env.local'));
+      // Prevent unhandled rejection at module level
+      globalWithMongo._mongoClientPromise.catch(() => {});
+    } else {
+      client = new MongoClient(uri, options);
+      globalWithMongo._mongoClientPromise = client.connect();
+    }
   }
   clientPromise = globalWithMongo._mongoClientPromise;
 } else {
   // In production mode, it's best to not use a global variable.
-  client = new MongoClient(uri, options);
-  clientPromise = client.connect();
+  if (!uri) {
+    // Create a promise that rejects when awaited
+    clientPromise = Promise.reject(new Error('Please add your Mongo URI to environment variables'));
+    // Prevent unhandled rejection at module level
+    clientPromise.catch(() => {});
+  } else {
+    client = new MongoClient(uri, options);
+    clientPromise = client.connect();
+  }
 }
 
 // Export a module-scoped MongoClient promise. By doing this in a
