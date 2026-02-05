@@ -8,16 +8,16 @@ import Image from "next/image";
 
 const MOCK_DATA: EducationContent[] = [
     {
-        id: '1', title: 'Cómo escalar tu agencia en 2024', type: 'video', status: 'ready', 
-        thumbnailUrl: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3', 
-        createdAt: 'Hace 2 horas', summary: '' 
+        id: '1', title: 'Cómo escalar tu agencia en 2024', type: 'video', status: 'ready',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
+        createdAt: 'Hace 2 horas', summary: ''
     },
     {
-        id: '2', title: 'Protocolo de Sueño Huberman', type: 'pdf', status: 'processing', 
+        id: '2', title: 'Protocolo de Sueño Huberman', type: 'pdf', status: 'processing',
         createdAt: 'Hace 5 min', summary: ''
     },
     {
-        id: '3', title: 'Estrategia de Ventas Q4', type: 'article', status: 'pending', 
+        id: '3', title: 'Estrategia de Ventas Q4', type: 'article', status: 'pending',
         createdAt: 'Hace 1 min', summary: ''
     },
 ];
@@ -36,12 +36,12 @@ export default function ContentGrid({ onSelect, extraItems = [] }: ContentGridPr
                 <ContentCard key={item.id} item={item} onClick={() => onSelect?.(item)} />
             ))}
         </div>
-    )
+    );
 }
 
-function ContentCard({ item, onClick }: { item: EducationContent; onClick?: () => void }) {
+function ContentCard({ item, onClick }: { item: EducationContent; onClick?: () => void; }) {
     return (
-        <div 
+        <div
             onClick={onClick}
             className="group bg-white rounded-3xl border border-slate-100 p-3 hover:border-blue-200 hover:shadow-[0_10px_40px_-10px_rgba(59,130,246,0.15)] transition-all duration-300 hover:-translate-y-1 cursor-pointer relative overflow-hidden"
         >
@@ -54,7 +54,7 @@ function ContentCard({ item, onClick }: { item: EducationContent; onClick?: () =
                         {item.type === 'pdf' ? <FileText className="w-12 h-12" /> : <Play className="w-12 h-12" />}
                     </div>
                 )}
-                
+
                 {/* Status Badge */}
                 <div className="absolute top-3 right-3">
                     <StatusBadge status={item.status} />
@@ -73,7 +73,7 @@ function ContentCard({ item, onClick }: { item: EducationContent; onClick?: () =
                 </h3>
                 <div className="flex items-center justify-between text-xs font-medium text-slate-400">
                     <span>{item.createdAt}</span>
-                    
+
                     {item.status === 'ready' && (
                         <button className="text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer">
                             Crear Plan
@@ -82,17 +82,17 @@ function ContentCard({ item, onClick }: { item: EducationContent; onClick?: () =
                 </div>
             </div>
         </div>
-    )
+    );
 }
 
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({ status }: { status: string; }) {
     if (status === 'processing') {
         return (
             <div className="bg-blue-500/90 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-lg">
                 <Loader2 className="w-3 h-3 animate-spin" />
                 Procesando
             </div>
-        )
+        );
     }
     if (status === 'ready') {
         return (
@@ -100,12 +100,12 @@ function StatusBadge({ status }: { status: string }) {
                 <CheckCircle2 className="w-3 h-3" />
                 Listo
             </div>
-        )
+        );
     }
     return (
         <div className="bg-amber-400/90 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-lg">
             <Clock className="w-3 h-3" />
             Pendiente
         </div>
-    )
+    );
 }

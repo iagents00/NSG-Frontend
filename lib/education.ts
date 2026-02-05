@@ -30,21 +30,21 @@ export const educationService = {
      * @returns AI response message
      */
     async strategyChat(
-        messages: Message[], 
+        messages: Message[],
         userContext: Partial<StrategyPreferences>
     ): Promise<ChatResponse> {
         try {
             // EXPERIMENTAL: Connect to actual backend
             // const response = await api.post<ChatResponse>("/education/strategy/chat", { messages, userContext });
             // return response.data;
-            
+
             // FALLBACK: Mock Logic (simulating backend latency)
             await new Promise(resolve => setTimeout(resolve, 1500));
-            
+
             // This is where we would normally call the backend. 
             // For now, we simulate the "Next Question" logic that was previously in the component.
             // But to truly "connect" it, we structure it so switching to real API is just uncommenting above.
-            
+
             // Note: The component currently handles the step logic heavily. 
             // We will return a generic response if the component falls back to this service.
             throw new Error("Backend not available yet, using local logic");
@@ -69,26 +69,26 @@ export const educationService = {
         preferences: StrategyPreferences | null
     ): Promise<Message> {
         try {
-            const response = await api.post<{ message: Message }>(`/education/content/${contentId}/chat`, {
+            const response = await api.post<{ message: Message; }>(`/education/content/${contentId}/chat`, {
                 message,
                 history,
                 preferences
             });
             return response.data.message;
         } catch (error) {
-             console.warn("Education Service: Fallback to mock", error);
-             
-             // MOCK RESPONSE
-             await new Promise(r => setTimeout(r, 1500));
-             
-             // Simple echo/logic for demonstration if backend fails
-             return {
-                 id: Date.now().toString(),
-                 role: 'system',
-                 content: "Entendido. Estoy procesando tu solicitud con base en tu perfil estratégico. (Modo Demo: Backend no conectado)",
-                 type: 'text',
-                 timestamp: new Date()
-             } as Message;
+            console.warn("Education Service: Fallback to mock", error);
+
+            // MOCK RESPONSE
+            await new Promise(r => setTimeout(r, 1500));
+
+            // Simple echo/logic for demonstration if backend fails
+            return {
+                id: Date.now().toString(),
+                role: 'system',
+                content: "Entendido. Estoy procesando tu solicitud con base en tu perfil estratégico. (Modo Demo: Backend no conectado)",
+                type: 'text',
+                timestamp: new Date()
+            } as Message;
         }
     },
 
@@ -105,7 +105,7 @@ export const educationService = {
         } catch (error) {
             console.warn("Education Service: Fallback report", error);
             await new Promise(r => setTimeout(r, 2000));
-            
+
             // Mock Report
             return {
                 id: Date.now().toString(),
@@ -152,7 +152,7 @@ export const educationService = {
     /**
      * Gets onboarding status from backend
      */
-    async getOnboardingStatus(): Promise<{ onboarding_completed: boolean; completed_at?: string }> {
+    async getOnboardingStatus(): Promise<{ onboarding_completed: boolean; completed_at?: string; }> {
         try {
             const response = await api.get("/education/onboarding/status");
             return response.data;
@@ -172,7 +172,7 @@ export const educationService = {
         try {
             const response = await api.get("/education/preferences");
             const data = response.data.preferences;
-            
+
             // Map snake_case to camelCase
             return {
                 entregable: data.entregable,
