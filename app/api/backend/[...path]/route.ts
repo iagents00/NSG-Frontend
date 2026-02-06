@@ -63,12 +63,12 @@ async function forwardRequest(
     try {
         // Construct the backend URL
         const path = pathSegments.join('/');
-        const backendUrl = `${CONFIG.API_URL}/${path}`;
-        
-        // Get query parameters
-        const searchParams = request.nextUrl.searchParams;
-        const queryString = searchParams.toString();
-        const fullUrl = queryString ? `${backendUrl}?${queryString}` : backendUrl;
+        const backendUrl = CONFIG.API_URL;
+        const fullUrl = `${backendUrl}/${path}${request.nextUrl.search}`;
+
+        if (process.env.NODE_ENV === 'development' || process.env.APP_ENV === 'production') {
+            console.log(`[Backend Proxy] ${method} ${request.nextUrl.pathname} -> ${fullUrl}`);
+        }
 
         // Forward headers (especially Authorization)
         const headers: HeadersInit = {};

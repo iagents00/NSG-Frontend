@@ -12,17 +12,17 @@ const isProduction = APP_ENV === 'production';
 
 export const CONFIG = {
     // Backend API URL - ONLY available on server
-    API_URL: process.env.API_URL || (isProduction 
+    API_URL: (process.env.API_URL || (isProduction 
         ? 'https://api.nsgintelligence.com' 
-        : 'http://localhost:4000'),
+        : 'http://localhost:4000')).replace(/\/$/, ''),
     
     // Frontend App URL - ONLY available on server
-    APP_URL: process.env.APP_URL || (isProduction
+    APP_URL: (process.env.APP_URL || (isProduction
         ? 'https://nsgintelligence.com'
-        : 'http://localhost:3000'),
+        : 'http://localhost:3000')).replace(/\/$/, ''),
     
     // N8N Webhooks Base URL - ONLY available on server
-    N8N_URL: (process.env.N8N_WEBHOOK || 'https://personal-n8n.suwsiw.easypanel.host/webhook').trim(),
+    N8N_URL: (process.env.N8N_WEBHOOK || 'https://personal-n8n.suwsiw.easypanel.host/webhook').trim().replace(/\/$/, ''),
     
     // Environment
     APP_ENV,
