@@ -52,6 +52,17 @@ export async function DELETE(
     return forwardRequest(request, params.path, 'DELETE');
 }
 
+export async function OPTIONS() {
+    return new NextResponse(null, {
+        status: 204,
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        },
+    });
+}
+
 // ============================================
 // Helper Function to Forward Requests
 // ============================================
@@ -63,6 +74,24 @@ async function forwardRequest(
     try {
         // Construct the backend URL
         const path = pathSegments.join('/');
+
+        // DEBUG: Health check for the proxy
+        if (path === 'debug/ping') {
+            return NextResponse.json({
+                status: 'Proxy is alive',
+                config: {
+                    API_URL: CONFIG.API_URL,
+                    APP_ENV: CONFIG.APP_ENV,
+                    isProduction: CONFIG.isProduction
+                },
+                request: {
+                    method,
+                    path,
+                    url: request.url
+                }
+            });
+        }
+
         const backendUrl = CONFIG.API_URL;
         const fullUrl = `${backendUrl}/${path}${request.nextUrl.search}`;
 
@@ -110,7 +139,14 @@ async function forwardRequest(
         }
 
         // Return the response with the same status code
-        return NextResponse.json(data, { status: response.status });
+        const nextResponse = NextResponse.json(data, { status: response.status });
+        
+        // Add CORS headers to the response
+        nextResponse.headers.set('Access-Control-Allow-Origin', '*');
+        nextResponse.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+        nextResponse.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        
+        return nextResponse;
         
     } catch (error) {
         console.error('[Backend Proxy] Error forwarding request:', error);
@@ -119,7 +155,12 @@ async function forwardRequest(
                 error: 'Internal proxy error',
                 message: error instanceof Error ? error.message : 'Unknown error'
             },
-            { status: 500 }
+            { 
+                status: 500,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                }
+            }
         );
     }
 }
