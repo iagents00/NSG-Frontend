@@ -1,17 +1,6 @@
 "use client";
 
-import {
-    UploadCloud,
-    Youtube,
-    FileText,
-    Mic,
-    Type,
-    ArrowRight,
-    Search,
-    X,
-    FileAudio,
-    FileCheck,
-} from "lucide-react";
+import { Youtube, FileText, Mic, ArrowRight, Search, X } from "lucide-react";
 import { useState, useRef } from "react";
 import clsx from "clsx";
 
@@ -37,7 +26,7 @@ export default function IngestInput({ onIngest }: IngestInputProps) {
         try {
             const newUrl = new URL(string);
             return newUrl.protocol === "http:" || newUrl.protocol === "https:";
-        } catch (_) {
+        } catch {
             return false;
         }
     };
@@ -140,7 +129,7 @@ export default function IngestInput({ onIngest }: IngestInputProps) {
                             onKeyDown={(e) =>
                                 e.key === "Enter" && handleIngest()
                             }
-                            placeholder="Pega un enlace de YouTube o URL válida..."
+                            placeholder="Pega un enlace de YouTube, Instagram, TikTok o URL válida..."
                             className="flex-1 w-full min-w-0 bg-transparent px-5 py-5 text-[17px] font-medium text-navy-950 placeholder:text-slate-400 focus:outline-none"
                         />
 
@@ -201,7 +190,7 @@ export default function IngestInput({ onIngest }: IngestInputProps) {
                     )}
                 >
                     <Youtube className="w-3.5 h-3.5" />
-                    YouTube
+                    Video URL
                 </button>
 
                 <button
