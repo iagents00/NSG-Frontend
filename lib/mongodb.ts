@@ -16,7 +16,7 @@ if (process.env.NODE_ENV === 'development') {
   if (!globalWithMongo._mongoClientPromise) {
     if (!uri) {
       // Create a promise that rejects when awaited
-      globalWithMongo._mongoClientPromise = Promise.reject(new Error('Please add your Mongo URI to .env.local'));
+      globalWithMongo._mongoClientPromise = Promise.reject(new Error('Please add your Mongo URI to .env'));
       // Prevent unhandled rejection at module level
       globalWithMongo._mongoClientPromise.catch(() => {});
     } else {

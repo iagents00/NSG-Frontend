@@ -2,148 +2,82 @@
 
 ## 📝 Setup Instructions
 
-### 1. Create `.env.local` file
+### 1. Create `.env` file
 
-Create a file named `.env.local` in the root of the `NSG-Frontend` directory with the following content:
+Create a file named `.env` in the root of the `NSG-Frontend` directory with the following content:
 
 ```env
 # ============================================
-# GOOGLE AI API
+# ENVIRONMENT
 # ============================================
-# Get your API key from: https://aistudio.google.com/app/apikey
-GOOGLE_GENERATIVE_AI_API_KEY=your_google_ai_api_key_here
+APP_ENV=production
 
 # ============================================
 # BACKEND API
 # ============================================
-# NEXT_PUBLIC_API_URL=http://localhost:4000
-
 # Production (VPS)
-NEXT_PUBLIC_API_URL=https://api.nsgintelligence.com
+API_URL=https://api.nsgintelligence.com
+
+# Frontend URL
+APP_URL=https://nsgintelligence.com
 
 # ============================================
-# ENVIRONMENT
+# DATABASE (Server-side only)
 # ============================================
-NEXT_PUBLIC_APP_ENV=production
+MONGODB_URI=your_mongodb_atlas_uri
 
 # ============================================
-# OPTIONAL: Analytics & Monitoring
+# N8N WEBHOOKS
 # ============================================
-# NEXT_PUBLIC_SENTRY_DSN=your_sentry_dsn_here
-# NEXT_PUBLIC_GA_MEASUREMENT_ID=your_ga_id_here
+N8N_WEBHOOK=https://personal-n8n.suwsiw.easypanel.host/webhook
+
+# ============================================
+# GOOGLE AI API
+# ============================================
+# Get your API key from: https://aistudio.google.com/app/apikey
+# GOOGLE_GENERATIVE_AI_API_KEY=your_key
 ```
 
 ---
 
 ## 🔑 Required Variables
 
-### 1. **GOOGLE_GENERATIVE_AI_API_KEY**
-
-- **Required**: Yes
-- **Purpose**: API key for Google Gemini AI
-- **How to get**:
-    1. Visit https://aistudio.google.com/app/apikey
-    2. Create a new API key
-    3. Copy and paste it in `.env.local`
-
-### 2. **NEXT_PUBLIC_API_URL**
+### 1. **API_URL**
 
 - **Required**: Yes
 - **Purpose**: Backend API base URL
-- **Values**:
-    - **Development**: `http://localhost:4000` (when running backend locally)
-    - **Production**: `https://api.nsgintelligence.com`
-- **Note**: Must start with `NEXT_PUBLIC_` to be accessible in the browser
+- **Value**: `https://api.nsgintelligence.com`
+- **Note**: This is used server-side only to avoid leaking secrets.
 
-### 3. **NEXT_PUBLIC_APP_ENV**
+### 2. **APP_ENV**
 
-- **Required**: No (defaults to development)
+- **Required**: Yes (defaults to production in this setup)
 - **Purpose**: Specify the environment
-- **Values**: `development` | `production` | `staging`
+- **Value**: `production`
 
----
+### 3. **MONGODB_URI**
 
-## 🌍 Environment-Specific Configuration
-
-### Development
-
-```env
-GOOGLE_GENERATIVE_AI_API_KEY=your_api_key
-NEXT_PUBLIC_API_URL=http://localhost:4000
-NEXT_PUBLIC_APP_ENV=development
-```
-
-### Production (Vercel/Local Build)
-
-```env
-GOOGLE_GENERATIVE_AI_API_KEY=your_api_key
-NEXT_PUBLIC_API_URL=https://api.nsgintelligence.com
-NEXT_PUBLIC_APP_ENV=production
-```
-
----
-
-## 🚀 Deployment Configuration
-
-### Vercel
-
-1. Go to your project settings in Vercel
-2. Navigate to **Environment Variables**
-3. Add the following variables:
-
-| Variable Name                  | Value                             | Environment                      |
-| ------------------------------ | --------------------------------- | -------------------------------- |
-| `GOOGLE_GENERATIVE_AI_API_KEY` | Your API key                      | Production, Preview, Development |
-| `NEXT_PUBLIC_API_URL`          | `https://api.nsgintelligence.com` | Production, Preview              |
-| `NEXT_PUBLIC_API_URL`          | `http://localhost:4000`           | Development                      |
-| `NEXT_PUBLIC_APP_ENV`          | `production`                      | Production                       |
-
-### Netlify
-
-Add the same variables in **Site Settings → Environment Variables**
-
-### Docker
-
-Create a `.env.production` file (gitignored) and mount it when running the container.
+- **Required**: Yes (for storage/onboarding features)
+- **Purpose**: Connection string for MongoDB Atlas
 
 ---
 
 ## ⚠️ Security Notes
 
-1. **Never commit `.env.local`** - It's already in `.gitignore`
-2. **Never expose secret keys** in `NEXT_PUBLIC_*` variables (they're visible in browser)
-3. **Use server-side environment variables** for sensitive data (without `NEXT_PUBLIC_` prefix)
-4. **Rotate API keys regularly** especially if they're accidentally exposed
+1. **Never commit `.env`** - It is included in `.gitignore`.
+2. **Never expose secret keys** in browser-accessible variables.
+3. **Use server-side environment variables** only (no `NEXT_PUBLIC_` prefix for sensitive data).
 
 ---
 
 ## ✅ Verification
 
-After creating `.env.local`, verify it's working:
+After creating `.env`, verify it's working:
 
-```bash
-# Start the development server
-npm run dev
-
-# Check the console for the API URL being used
-# It should show your configured NEXT_PUBLIC_API_URL
-```
-
-In the browser console, you can verify:
-
-```javascript
-// This should show your backend URL
-console.log(process.env.NEXT_PUBLIC_API_URL);
-```
+1. Restart the dev server: `npm run dev`
+2. Check the server logs for any connectivity errors.
+3. Verify that requests to the backend are using `https://api.nsgintelligence.com`.
 
 ---
 
-## 📚 Additional Resources
-
-- [Next.js Environment Variables Documentation](https://nextjs.org/docs/basic-features/environment-variables)
-- [Google AI API Keys](https://aistudio.google.com/app/apikey)
-- [Vercel Environment Variables](https://vercel.com/docs/concepts/projects/environment-variables)
-
----
-
-**Last Updated**: 2026-01-11
+**Last Updated**: 2026-02-06

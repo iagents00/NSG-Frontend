@@ -33,6 +33,7 @@ export async function POST(req: Request) {
 
     if (!response.ok) {
       const errorText = await response.text();
+      console.error(`[Education API] N8N Error (${response.status}):`, errorText);
       return NextResponse.json(
         { error: `N8N responded with ${response.status}`, details: errorText },
         { status: response.status }
@@ -51,7 +52,7 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET(req: Request) {
+export async function GET() {
     // Mock getting library items (Eventually from n8n or database)
     return NextResponse.json({
         success: true,

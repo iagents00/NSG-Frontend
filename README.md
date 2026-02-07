@@ -27,11 +27,11 @@ Modern, production-ready Next.js application migrated from the legacy NSG.html p
 
 2. **Configure Environment Variables**
 
-    Create a `.env.local` file in the root directory:
+    Create a `.env` file in the root directory:
 
     ```bash
     GOOGLE_GENERATIVE_AI_API_KEY=your_api_key_here
-    NEXT_PUBLIC_APP_ENV=development
+    APP_ENV=production
     ```
 
 3. **Run Development Server**
@@ -124,12 +124,12 @@ The app uses Google AI's Context Caching to store role-specific system instructi
 
 ### Environment Variables
 
-Create `.env.local` file (see [ENV_CONFIGURATION.md](./ENV_CONFIGURATION.md) for details):
+Create `.env` file (see [ENV_CONFIGURATION.md](./ENV_CONFIGURATION.md) for details):
 
 ```env
 GOOGLE_GENERATIVE_AI_API_KEY=your_api_key
-NEXT_PUBLIC_API_URL=https://nsg-backend.vercel.app
-NEXT_PUBLIC_APP_ENV=production
+API_URL=https://api.nsgintelligence.com
+APP_ENV=production
 ```
 
 ### Build & Deploy

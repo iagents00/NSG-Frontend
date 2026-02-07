@@ -34,7 +34,10 @@ export default function ContentLibrary() {
         } catch (error: unknown) {
             console.error("Error loading library:", error);
             // Fallback to mock data if backend is not available
-            if ((error as any).response?.status === 404) {
+            if (
+                (error as { response?: { status?: number } }).response
+                    ?.status === 404
+            ) {
                 console.warn(
                     "[Education] Backend endpoint not deployed yet, using mock data",
                 );
@@ -55,19 +58,28 @@ export default function ContentLibrary() {
     }, []);
 
     const handleIngest = async (data: {
-        url: string;
+        text: string;
         document: File | null;
-        audio: File | null;
+        image: File | null;
     }) => {
         setIsProcessing(true);
         try {
+            if (!userId) {
+                throw new Error(
+                    "ID de usuario no encontrado. Por favor, reinicia sesión.",
+                );
+            }
+
             // Create FormData to handle both text and files
             const formData = new FormData();
-            formData.append("userId", userId || "");
+            formData.append("userId", userId);
 
-            if (data.url) formData.append("url", data.url);
+            // Forward text, document or image
+            if (data.text) formData.append("text", data.text);
             if (data.document) formData.append("document", data.document);
-            if (data.audio) formData.append("audio", data.audio);
+            if (data.image) formData.append("image", data.image);
+
+            console.log(`[Education Ingest] Sending data for user: ${userId}`);
 
             // Get token from localStorage for the proxy
             const token =
@@ -85,10 +97,15 @@ export default function ContentLibrary() {
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || "Error en el servidor");
+                const err = new Error(
+                    errorData.error ||
+                        `N8N respondió con error ${response.status}`,
+                ) as Error & { details?: unknown };
+                err.details = errorData.details;
+                throw err;
             }
 
-            const result = await response.json();
+            await response.json();
 
             // Success feedback
             showToast("Recurso enviado exitosamente a la nube NSG", "success");
@@ -98,31 +115,16 @@ export default function ContentLibrary() {
 
             // Reload library to show new content
             await loadContent();
+        } catch (error: unknown) {
+            const err = error as Error & { details?: unknown };
+            console.error("❌ Error en la ingesta:", err);
 
-            // Check if it's our specific demo URL for the instant feedback
-            if (
-                data.url &&
-                data.url.trim() ===
-                "https://www.youtube.com/watch?v=Fbt7qNMMdas"
-            ) {
-                // Success feedback with the mock item for visual demo
-                const newItem: EducationContent = {
-                    id: "brian-tracy-fenix",
-                    title: "Seminario Fénix (Brian Tracy)",
-                    type: "video",
-                    status: "ready",
-                    thumbnailUrl:
-                        "https://i.ytimg.com/vi/Fbt7qNMMdas/mqdefault.jpg",
-                    createdAt: "Recién añadido",
-                    summary:
-                        "Psicología del éxito y desbloqueo del potencial humano.",
-                };
-
-                setSelectedItem(newItem);
+            // Log technical details if available (from route.ts / n8n)
+            if (err.details) {
+                console.error("🔍 Detalles técnicos de N8N:", err.details);
             }
-        } catch (error: any) {
-            console.error("❌ Error en la ingesta:", error);
-            showToast(error.message || "Error al procesar el recurso", "error");
+
+            showToast(err.message || "Error al procesar el recurso", "error");
         } finally {
             setIsProcessing(false);
         }
@@ -149,7 +151,7 @@ export default function ContentLibrary() {
                     Generando Campo de Inteligencia...
                 </h2>
                 <p className="mt-2 text-slate-500 font-medium">
-                    Decodificando Seminario Fénix y Cruzando con Perfil #1
+                    Procesando Recurso y Cruzando con Perfil Estratégico
                 </p>
                 <div className="mt-6 w-64 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                     <div

@@ -1,24 +1,35 @@
 "use client";
 
-import { useState } from "react";
 import { Play, FileText, CheckCircle2, Clock, Loader2 } from "lucide-react";
 import { EducationContent } from "@/types/education";
-import clsx from "clsx";
 import Image from "next/image";
 
 const MOCK_DATA: EducationContent[] = [
     {
-        id: '1', title: 'Cómo escalar tu agencia en 2024', type: 'video', status: 'ready',
-        thumbnailUrl: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
-        createdAt: 'Hace 2 horas', summary: ''
+        id: "1",
+        title: "Cómo escalar tu agencia en 2024",
+        type: "video",
+        status: "ready",
+        thumbnailUrl:
+            "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+        createdAt: "Hace 2 horas",
+        summary: "",
     },
     {
-        id: '2', title: 'Protocolo de Sueño Huberman', type: 'pdf', status: 'processing',
-        createdAt: 'Hace 5 min', summary: ''
+        id: "2",
+        title: "Protocolo de Sueño Huberman",
+        type: "pdf",
+        status: "processing",
+        createdAt: "Hace 5 min",
+        summary: "",
     },
     {
-        id: '3', title: 'Estrategia de Ventas Q4', type: 'article', status: 'pending',
-        createdAt: 'Hace 1 min', summary: ''
+        id: "3",
+        title: "Estrategia de Ventas Q4",
+        type: "article",
+        status: "pending",
+        createdAt: "Hace 1 min",
+        summary: "",
     },
 ];
 
@@ -27,19 +38,53 @@ interface ContentGridProps {
     extraItems?: EducationContent[];
 }
 
-export default function ContentGrid({ onSelect, extraItems = [] }: ContentGridProps) {
+export default function ContentGrid({
+    onSelect,
+    extraItems = [],
+}: ContentGridProps) {
     const allItems = [...extraItems, ...MOCK_DATA];
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-10">
             {allItems.map((item) => (
-                <ContentCard key={item.id} item={item} onClick={() => onSelect?.(item)} />
+                <ContentCard
+                    key={item.id}
+                    item={item}
+                    onClick={() => onSelect?.(item)}
+                />
             ))}
         </div>
     );
 }
 
-function ContentCard({ item, onClick }: { item: EducationContent; onClick?: () => void; }) {
+const getThumbnailUrl = (url?: string) => {
+    if (!url) return null;
+
+    // Si es una URL de YouTube corta (youtu.be)
+    if (url.includes("youtu.be/")) {
+        const id = url.split("youtu.be/")[1]?.split(/[?#]/)[0];
+        if (id) return `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+    }
+
+    // Si es una URL de YouTube estándar
+    if (url.includes("youtube.com/watch")) {
+        const urlParams = new URLSearchParams(new URL(url).search);
+        const id = urlParams.get("v");
+        if (id) return `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+    }
+
+    return url;
+};
+
+function ContentCard({
+    item,
+    onClick,
+}: {
+    item: EducationContent;
+    onClick?: () => void;
+}) {
+    const thumbnailUrl = getThumbnailUrl(item.thumbnailUrl);
+
     return (
         <div
             onClick={onClick}
@@ -47,11 +92,22 @@ function ContentCard({ item, onClick }: { item: EducationContent; onClick?: () =
         >
             {/* Thumbnail Area */}
             <div className="aspect-video rounded-2xl bg-slate-100 relative overflow-hidden mb-4">
-                {item.thumbnailUrl ? (
-                    <Image src={item.thumbnailUrl} alt={item.title} width={800} height={450} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                {thumbnailUrl ? (
+                    <Image
+                        src={thumbnailUrl}
+                        alt={item.title}
+                        width={800}
+                        height={450}
+                        unoptimized={thumbnailUrl.includes("ytimg.com")}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center text-slate-300">
-                        {item.type === 'pdf' ? <FileText className="w-12 h-12" /> : <Play className="w-12 h-12" />}
+                        {item.type === "pdf" ? (
+                            <FileText className="w-12 h-12" />
+                        ) : (
+                            <Play className="w-12 h-12" />
+                        )}
                     </div>
                 )}
 
@@ -62,7 +118,11 @@ function ContentCard({ item, onClick }: { item: EducationContent; onClick?: () =
 
                 {/* Type Icon overlay */}
                 <div className="absolute bottom-3 left-3 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-navy-900 shadow-sm">
-                    {item.type === 'video' ? <Play className="w-3.5 h-3.5 fill-current" /> : <FileText className="w-3.5 h-3.5" />}
+                    {item.type === "video" ? (
+                        <Play className="w-3.5 h-3.5 fill-current" />
+                    ) : (
+                        <FileText className="w-3.5 h-3.5" />
+                    )}
                 </div>
             </div>
 
@@ -74,7 +134,7 @@ function ContentCard({ item, onClick }: { item: EducationContent; onClick?: () =
                 <div className="flex items-center justify-between text-xs font-medium text-slate-400">
                     <span>{item.createdAt}</span>
 
-                    {item.status === 'ready' && (
+                    {item.status === "ready" && (
                         <button className="text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer">
                             Crear Plan
                         </button>
@@ -85,8 +145,8 @@ function ContentCard({ item, onClick }: { item: EducationContent; onClick?: () =
     );
 }
 
-function StatusBadge({ status }: { status: string; }) {
-    if (status === 'processing') {
+function StatusBadge({ status }: { status: string }) {
+    if (status === "processing") {
         return (
             <div className="bg-blue-500/90 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-lg">
                 <Loader2 className="w-3 h-3 animate-spin" />
@@ -94,7 +154,7 @@ function StatusBadge({ status }: { status: string; }) {
             </div>
         );
     }
-    if (status === 'ready') {
+    if (status === "ready") {
         return (
             <div className="bg-emerald-500/90 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-lg">
                 <CheckCircle2 className="w-3 h-3" />
