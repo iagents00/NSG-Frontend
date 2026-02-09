@@ -16,7 +16,7 @@ const api = axios.create({
     headers: {
         "Content-Type": "application/json",
     },
-    timeout: 30000, // 30 seconds
+    timeout: 120000, // Increased to 2 minutes
 });
 
 // ============================================
@@ -86,9 +86,9 @@ api.interceptors.response.use(
                             console.log("[AUTH] Session invalid (401), clearing token and redirecting");
                             localStorage.removeItem("nsg-token");
                         }
-                        
+
                         // Only redirect if not already on public/login page
-                        if (!window.location.pathname.includes("/auth/login") && 
+                        if (!window.location.pathname.includes("/auth/login") &&
                             !window.location.pathname.includes("/auth/register") &&
                             window.location.pathname !== "/") {
                             window.location.href = "/auth/login";

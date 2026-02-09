@@ -1,5 +1,5 @@
 import api from "./api";
-import { Message } from "@/types/education";
+import { Message, EducationContent } from "@/types/education";
 import { StrategyPreferences } from "@/store/useAppStore";
 
 // ==========================================
@@ -18,6 +18,14 @@ export interface ChatResponse {
 // ==========================================
 
 export const educationService = {
+    /**
+     * Gets a single content item by ID
+     */
+    async getContent(id: string): Promise<EducationContent> {
+        const response = await api.get(`/education/content/${id}`);
+        return response.data.data;
+    },
+
     /**
      * Sends a message to the AI for the Onboarding Strategy flow.
      * @param messages History of messages
