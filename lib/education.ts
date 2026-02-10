@@ -166,5 +166,20 @@ export const educationService = {
             console.warn("❌ Failed to reset onboarding", error);
             throw error;
         }
+    },
+
+    /**
+     * Saves user answers for a content item
+     */
+    async saveAnswers(contentId: string, answers: Record<string, string>): Promise<void> {
+        await api.post(`/education/content/${contentId}/answers`, { answers });
+    },
+
+    /**
+     * Gets the final generated analysis from the backend
+     */
+    async getGeneratedContent(contentId: string): Promise<any> {
+        const response = await api.get(`/education/content/${contentId}/generated`);
+        return response.data.data;
     }
 };
