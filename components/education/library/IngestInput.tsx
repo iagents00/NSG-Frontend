@@ -17,11 +17,15 @@ interface IngestInputProps {
         document: File | null;
         image: File | null;
     }) => void;
+    isProcessing?: boolean;
 }
 
 type InputType = "text" | "document" | "image" | null;
 
-export default function IngestInput({ onIngest }: IngestInputProps) {
+export default function IngestInput({
+    onIngest,
+    isProcessing = false,
+}: IngestInputProps) {
     const [selectedType, setSelectedType] = useState<InputType>(null);
     const [text, setText] = useState("");
     const [document, setDocument] = useState<File | null>(null);
@@ -38,7 +42,8 @@ export default function IngestInput({ onIngest }: IngestInputProps) {
     const handleIngest = () => {
         const textToProcess = text.trim();
 
-        // Validation
+        // Prevent double submission
+        if (isProcessing) return;
         if (!textToProcess && !document && !image) return;
 
         onIngest?.({
@@ -367,7 +372,7 @@ export default function IngestInput({ onIngest }: IngestInputProps) {
                     <div className="mt-6 flex justify-end">
                         <button
                             onClick={handleIngest}
-                            disabled={!hasInput()}
+                            disabled={!hasInput() || isProcessing}
                             className={clsx(
                                 "flex items-center gap-2 px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 shadow-lg",
                                 hasInput()

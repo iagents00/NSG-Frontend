@@ -66,11 +66,11 @@ export default function IEducationPage() {
     };
 
     return (
-        <div className="h-full flex flex-col p-4 md:p-6 gap-4 md:gap-6 relative overflow-y-auto">
+        <div className="h-full flex flex-col p-4 md:p-6 gap-4 md:gap-6 relative overflow-hidden">
             {/* Top Navigation Bar */}
             <div
                 className={clsx(
-                    "flex flex-col sm:flex-row items-stretch sm:items-center justify-between bg-white rounded-2xl p-2 px-4 shadow-sm border border-slate-100 shrink-0 gap-2 sm:gap-0 transition-all duration-500",
+                    "sticky top-0 z-[60] flex flex-col sm:flex-row items-stretch sm:items-center justify-between bg-white rounded-2xl p-2 px-4 shadow-sm border border-slate-100 shrink-0 gap-2 sm:gap-0 transition-all duration-500",
                     !isStrategyCompleted &&
                         "opacity-50 pointer-events-none grayscale",
                 )}
@@ -116,7 +116,7 @@ export default function IEducationPage() {
             {/* Main Content Area */}
             <div
                 className={clsx(
-                    "flex-1 transition-all duration-700 relative",
+                    "flex-1 transition-all duration-700 relative overflow-y-auto no-scrollbar",
                     !isStrategyCompleted &&
                         "blur-md pointer-events-none scale-[0.98] select-none opacity-40",
                 )}

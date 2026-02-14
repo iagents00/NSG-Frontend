@@ -34,7 +34,14 @@ export async function POST(
             throw new Error(`n8n responded with status ${response.status}`);
         }
 
-        const data = await response.json();
+        const responseText = await response.text();
+        let data;
+        try {
+            data = responseText ? JSON.parse(responseText) : { success: true, message: 'Questions workflow started' };
+        } catch {
+            console.warn("[Education Questions] Response was not valid JSON:", responseText);
+            data = { success: true, raw: responseText };
+        }
 
         return NextResponse.json(data);
 

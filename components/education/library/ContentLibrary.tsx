@@ -88,7 +88,7 @@ export default function ContentLibrary() {
                 throw err;
             }
 
-            if (result.status === "success") {
+            if (result.status === "success" || result.success === true) {
                 showToast(`Recurso procesado exitosamente`, "success");
                 // Recargar biblioteca
                 const updatedItems = await loadContent();
@@ -155,7 +155,7 @@ export default function ContentLibrary() {
     }
 
     return (
-        <div className="flex flex-col h-full gap-8 p-6 md:p-8 overflow-y-auto">
+        <div className="flex flex-col h-auto gap-8 p-6 md:p-8">
             <Banner
                 badge="Base de Conocimiento"
                 title="NSG Education"
@@ -170,7 +170,10 @@ export default function ContentLibrary() {
                         Nueva Ingesta
                     </h3>
                 </div>
-                <IngestInput onIngest={handleIngest} />
+                <IngestInput
+                    onIngest={handleIngest}
+                    isProcessing={isProcessing}
+                />
             </section>
 
             {/* LIBRARY AREA */}
