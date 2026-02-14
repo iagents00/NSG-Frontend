@@ -15,15 +15,20 @@ export async function POST(req: Request) {
       (fetchOptions.headers as Record<string, string>)['Authorization'] = authHeader;
     }
 
+    let body = {};
     if (contentType.includes('multipart/form-data')) {
       const formData = await req.formData();
-      // Forward as FormData
       fetchOptions.body = formData;
-      // Note: Fetch naturally sets the correct boundary when body is FormData
     } else {
-      const body = await req.json();
-      fetchOptions.body = JSON.stringify(body);
-      (fetchOptions.headers as Record<string, string>)['Content-Type'] = 'application/json';
+      const text = await req.text();
+      try {
+        body = text ? JSON.parse(text) : {};
+        fetchOptions.body = JSON.stringify(body);
+        (fetchOptions.headers as Record<string, string>)['Content-Type'] = 'application/json';
+      } catch {
+        console.warn("[Education Ingest] Failed to parse request body as JSON:", text);
+        fetchOptions.body = text;
+      }
     }
 
     const WEBHOOK_URL = `${CONFIG.N8N_URL}/education`;
@@ -40,13 +45,21 @@ export async function POST(req: Request) {
       );
     }
 
-    const data = await response.json();
+    const responseText = await response.text();
+    let data;
+    try {
+      data = responseText ? JSON.parse(responseText) : { success: true, message: 'Workflow started' };
+    } catch (parseError) {
+      console.warn("[Education Ingest] Webhook response was not valid JSON:", responseText, parseError);
+      data = { success: true, raw: responseText };
+    }
+
     return NextResponse.json(data);
 
   } catch (error) {
     console.error("[Education Ingest API Error]:", error);
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      { error: "Internal Server Error", details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }
