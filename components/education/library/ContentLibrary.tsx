@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from "react";
 import IngestInput from "./IngestInput";
 import ContentGrid from "./ContentGrid";
 import ContentDetail from "./ContentDetail";
+import EmptyLibrary from "./EmptyLibrary";
 import { Loader2, Database, Sparkles } from "lucide-react";
 import { Banner } from "@/components/ui/Banner";
 import { useToast } from "@/components/ui/ToastProvider";
@@ -81,10 +82,10 @@ export default function ContentLibrary() {
             const result = await response.json().catch(() => ({}));
 
             if (!response.ok) {
+                const resultData = await response.json().catch(() => ({}));
                 const err = new Error(
-                    result.error || `Error: ${response.status}`,
-                ) as any;
-                err.details = result.details;
+                    resultData.error || `Error: ${response.status}`,
+                ) as Error & { details?: string };
                 throw err;
             }
 
@@ -108,8 +109,10 @@ export default function ContentLibrary() {
                     result.message || "Error al procesar el recurso",
                 );
             }
-        } catch (error: any) {
-            showToast(error.message || "Error en la ingesta", "error");
+        } catch (error: unknown) {
+            const message =
+                error instanceof Error ? error.message : "Error en la ingesta";
+            showToast(message, "error");
         } finally {
             setIsProcessing(false);
         }
@@ -122,7 +125,7 @@ export default function ContentLibrary() {
             await api.delete(`/education/content/${id}`);
             showToast("Recurso eliminado correctamente", "success");
             setLibraryItems((prev) => prev.filter((item) => item.id !== id));
-        } catch (error) {
+        } catch {
             showToast("No se pudo eliminar el recurso", "error");
         }
     };
@@ -194,12 +197,14 @@ export default function ContentLibrary() {
                             Sincronizando...
                         </span>
                     </div>
-                ) : (
+                ) : libraryItems.length > 0 ? (
                     <ContentGrid
                         extraItems={libraryItems}
                         onSelect={setSelectedItem}
                         onDelete={handleDelete}
                     />
+                ) : (
+                    <EmptyLibrary />
                 )}
             </section>
         </div>

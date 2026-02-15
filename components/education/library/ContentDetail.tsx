@@ -12,6 +12,7 @@ import {
     ChevronRight,
     Trophy,
     Lightbulb,
+    CheckCircle2,
 } from "lucide-react";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useState, useEffect, useCallback, useRef } from "react";
@@ -24,6 +25,34 @@ interface ContentDetailProps {
     onBack: () => void;
 }
 
+interface QuestionBlock {
+    block: string;
+    intent: string;
+    questions: Array<{
+        id: string;
+        question: string;
+        type: string;
+        options?: string[];
+    }>;
+}
+
+interface GeneratedContent {
+    question_process_generated?: {
+        title?: string;
+        summary?: string;
+        key_insights?: Array<{ icon: string; text: string }>;
+        strategic_analysis?: {
+            alignment: string;
+            friction_bypass: string;
+        };
+        action_plan?: Array<{
+            task: string;
+            impact: string;
+            time: string;
+        }>;
+    };
+}
+
 export default function ContentDetail({ item, onBack }: ContentDetailProps) {
     const { showToast } = useToast();
     const [currentItem, setCurrentItem] = useState<EducationContent>(item);
@@ -32,17 +61,21 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
     const [direction, setDirection] = useState(0);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [generatedData, setGeneratedData] = useState<any>(null);
+    const [generatedData, setGeneratedData] = useState<GeneratedContent | null>(
+        null,
+    );
     const hasTriggeredRef = useRef<boolean>(false);
 
     const qProcess =
-        (currentItem as any)?.question_process ||
-        (currentItem.fullData as any)?.question_process;
+        currentItem.question_process || currentItem.fullData?.question_process;
+
     const isCompleted = qProcess?.completed === true || !!generatedData;
-    const blocks = qProcess?.question_blocks || [];
+    const blocks: QuestionBlock[] = (qProcess?.question_blocks ||
+        []) as QuestionBlock[];
+
     const allQuestions = Array.isArray(blocks)
-        ? blocks.flatMap((b: any) =>
-              (b.questions || []).map((q: any) => ({
+        ? blocks.flatMap((b) =>
+              (b.questions || []).map((q) => ({
                   ...q,
                   blockTitle: b.block,
                   blockIntent: b.intent,
@@ -73,8 +106,6 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                 "success",
             );
 
-            // La petición await educationService.saveAnswers ahora espera el success de n8n
-            // Ahora traemos el recurso de la tabla education_content_generated
             const finalData = await educationService.getGeneratedContent(
                 currentItem.id,
             );
@@ -95,7 +126,6 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
     // Webhook Trigger Logic
     useEffect(() => {
         const triggerWebhook = async () => {
-            // Only trigger if no questions AND not completed AND not already triggered in this session
             if (
                 !isCompleted &&
                 allQuestions.length === 0 &&
@@ -104,9 +134,6 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                 hasTriggeredRef.current = true;
 
                 try {
-                    console.log(
-                        `[ContentDetail] Triggering webhook for item: ${currentItem.id}`,
-                    );
                     const fullData = currentItem.fullData as any;
 
                     await fetch(
@@ -121,7 +148,6 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                         },
                     );
 
-                    // Start polling after a short delay
                     setTimeout(refreshContent, 3000);
                 } catch (error) {
                     console.error("Error triggering webhook:", error);
@@ -143,17 +169,12 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
         if (qProcess?.completed === true && !generatedData && !isRefreshing) {
             const fetchGenerated = async () => {
                 try {
-                    console.log(
-                        `[ContentDetail] Fetching existing generated content for: ${currentItem.id}`,
-                    );
                     const data = await educationService.getGeneratedContent(
                         currentItem.id,
                     );
                     setGeneratedData(data);
                 } catch (error) {
                     console.error("Error fetching generated content:", error);
-                    // No mostramos toast de error aquí para no molestar si el registro aún no existe
-                    // pero el flag está en true (posible desincronización base de datos)
                 }
             };
             fetchGenerated();
@@ -178,7 +199,7 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
         }
     };
 
-    const handleBack = () => {
+    const handleBackBtn = () => {
         if (currentStep > 0) {
             setDirection(-1);
             setCurrentStep((prev) => prev - 1);
@@ -188,15 +209,34 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
     // Render Analysis Cards
     const renderAnalysis = () => {
         const data = (generatedData?.question_process_generated ||
-            currentItem.fullData) as any;
+            currentItem.fullData) as GeneratedContent["question_process_generated"];
         if (!data) return null;
 
+        const containerVariants = {
+            hidden: { opacity: 0 },
+            visible: {
+                opacity: 1,
+                transition: {
+                    staggerChildren: 0.15,
+                },
+            },
+        };
+
+        const itemVariants = {
+            hidden: { y: 20, opacity: 0 },
+            visible: { y: 0, opacity: 1 },
+        };
+
         return (
-            <div className="max-w-4xl mx-auto space-y-8 pb-12">
+            <motion.div
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                className="max-w-4xl mx-auto space-y-8 pb-12"
+            >
                 {/* Header Card */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    variants={itemVariants}
                     className="bg-white rounded-[2.5rem] p-8 md:p-12 border border-slate-100 shadow-2xl shadow-blue-500/5 relative overflow-hidden"
                 >
                     <div className="absolute top-0 right-0 p-8 opacity-5">
@@ -221,9 +261,7 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {/* Key insights */}
                     <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.1 }}
+                        variants={itemVariants}
                         className="bg-white rounded-4xl p-8 border border-slate-100 shadow-xl shadow-blue-500/5 space-y-6"
                     >
                         <div className="flex items-center gap-3 text-blue-600">
@@ -234,7 +272,10 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                         </div>
                         <div className="space-y-4">
                             {(data.key_insights || []).map(
-                                (insight: any, i: number) => (
+                                (
+                                    insight: { icon?: string; text: string },
+                                    i: number,
+                                ) => (
                                     <div
                                         key={i}
                                         className="flex gap-4 p-4 bg-slate-50/50 rounded-2xl border border-slate-100/50 group hover:bg-white hover:shadow-md transition-all"
@@ -253,9 +294,7 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
 
                     {/* Strategic Alignment */}
                     <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.2 }}
+                        variants={itemVariants}
                         className="bg-navy-900 rounded-4xl p-8 text-white shadow-xl shadow-navy-900/10 space-y-6 relative overflow-hidden"
                     >
                         <div className="absolute -bottom-8 -right-8 opacity-10">
@@ -290,9 +329,7 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
 
                 {/* Action Plan */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
+                    variants={itemVariants}
                     className="bg-white rounded-4xl p-8 md:p-10 border border-slate-100 shadow-xl shadow-blue-500/5 space-y-8"
                 >
                     <div className="flex items-center justify-between">
@@ -309,7 +346,14 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
 
                     <div className="grid grid-cols-1 gap-4">
                         {(data.action_plan || []).map(
-                            (step: any, i: number) => (
+                            (
+                                step: {
+                                    task: string;
+                                    impact: string;
+                                    time: string;
+                                },
+                                i: number,
+                            ) => (
                                 <div
                                     key={i}
                                     className="flex items-center gap-6 p-6 bg-slate-50/50 rounded-2xl group hover:bg-emerald-50/30 transition-all border border-transparent hover:border-emerald-100"
@@ -343,7 +387,7 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                         )}
                     </div>
                 </motion.div>
-            </div>
+            </motion.div>
         );
     };
 
@@ -388,22 +432,41 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                 {isCompleted ? (
                     renderAnalysis()
                 ) : allQuestions.length > 0 ? (
-                    <div className="max-w-xl mx-auto space-y-6">
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">
-                                <span>Progreso</span>
-                                <span className="text-blue-600">
-                                    {currentStep + 1} / {allQuestions.length}
-                                </span>
+                    <div className="max-w-xl mx-auto space-y-10">
+                        {/* Improved Progress Header */}
+                        <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="space-y-1">
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-blue-600">
+                                        Protocolo de Análisis
+                                    </span>
+                                    <h4 className="font-bold text-navy-950">
+                                        Etapa {currentStep + 1} de{" "}
+                                        {allQuestions.length}
+                                    </h4>
+                                </div>
+                                <div className="text-right">
+                                    <span className="text-2xl font-black text-navy-300">
+                                        {Math.round(
+                                            ((currentStep + 1) /
+                                                allQuestions.length) *
+                                                100,
+                                        )}
+                                        %
+                                    </span>
+                                </div>
                             </div>
-                            <div className="h-1 w-full bg-white rounded-full overflow-hidden border border-slate-100/50">
+                            <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200/50">
                                 <motion.div
-                                    className="h-full bg-blue-600 transition-all"
+                                    className="h-full bg-linear-to-r from-blue-600 to-indigo-500 transition-all rounded-full"
                                     initial={{ width: 0 }}
                                     animate={{
                                         width: `${((currentStep + 1) / allQuestions.length) * 100}%`,
                                     }}
-                                    transition={{ duration: 0.5 }}
+                                    transition={{
+                                        duration: 0.8,
+                                        ease: "circOut",
+                                    }}
                                 />
                             </div>
                         </div>
@@ -412,18 +475,35 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                             <AnimatePresence mode="wait" custom={direction}>
                                 <motion.div
                                     key={currentStep}
+                                    initial={{
+                                        x: direction > 0 ? 20 : -20,
+                                        opacity: 0,
+                                    }}
+                                    animate={{ x: 0, opacity: 1 }}
+                                    exit={{
+                                        x: direction > 0 ? -20 : 20,
+                                        opacity: 0,
+                                    }}
+                                    transition={{
+                                        type: "spring",
+                                        damping: 25,
+                                        stiffness: 200,
+                                    }}
                                     className="w-full"
-                                    layout
                                 >
-                                    <div className="bg-white rounded-4xl p-8 md:p-12 border border-slate-100 shadow-xl shadow-blue-500/5 space-y-8">
-                                        <div className="space-y-2">
-                                            <span className="text-[9px] font-black text-blue-600 uppercase tracking-[0.2em]">
-                                                {
-                                                    allQuestions[currentStep]
-                                                        .blockTitle
-                                                }
-                                            </span>
-                                            <h4 className="text-2xl font-bold text-navy-900 leading-tight">
+                                    <div className="bg-white rounded-4xl p-8 md:p-12 border border-slate-100 shadow-2xl shadow-blue-500/5 space-y-10 border-t-8 border-t-blue-600">
+                                        <div className="space-y-4">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-2 h-2 rounded-full bg-blue-600" />
+                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                                    {
+                                                        allQuestions[
+                                                            currentStep
+                                                        ].blockTitle
+                                                    }
+                                                </span>
+                                            </div>
+                                            <h4 className="text-3xl font-bold text-navy-900 leading-tight tracking-tight">
                                                 {
                                                     allQuestions[currentStep]
                                                         .question
@@ -431,25 +511,26 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                             </h4>
                                         </div>
 
-                                        {/* Input Section - Robust rendering */}
-                                        <div className="flex-1 min-h-[220px] py-4 flex flex-col">
-                                            {/* Debug Label */}
-                                            <div className="mb-2 text-[10px] text-blue-500/40 font-black uppercase tracking-widest">
-                                                Modo:{" "}
-                                                {allQuestions[currentStep]
-                                                    .type || "desconocido"}
-                                            </div>
-
-                                            {allQuestions[currentStep].options
-                                                ?.length > 0 ? (
-                                                <div className="grid grid-cols-1 gap-3">
+                                        {/* Input Section */}
+                                        <div className="flex-1 min-h-[200px] flex flex-col justify-center">
+                                            {allQuestions[currentStep]
+                                                .options &&
+                                            allQuestions[currentStep].options!
+                                                .length > 0 ? (
+                                                <div className="grid grid-cols-1 gap-4">
                                                     {(
                                                         allQuestions[
                                                             currentStep
                                                         ].options || []
                                                     ).map((opt: string) => (
-                                                        <button
+                                                        <motion.button
                                                             key={opt}
+                                                            whileHover={{
+                                                                x: 5,
+                                                            }}
+                                                            whileTap={{
+                                                                scale: 0.98,
+                                                            }}
                                                             onClick={() =>
                                                                 setAnswers({
                                                                     ...answers,
@@ -461,27 +542,48 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                                                 })
                                                             }
                                                             className={clsx(
-                                                                "w-full p-4 border-2 rounded-2xl text-left font-bold text-sm transition-all",
+                                                                "w-full p-5 border-2 rounded-2xl text-left font-bold transition-all flex items-center justify-between group",
                                                                 answers[
                                                                     allQuestions[
                                                                         currentStep
                                                                     ].id ||
                                                                         `q-${currentStep}`
                                                                 ] === opt
-                                                                    ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-200"
-                                                                    : "bg-slate-50 border-slate-200 text-navy-900 hover:border-blue-300",
+                                                                    ? "bg-blue-600 text-white border-blue-600 shadow-xl shadow-blue-500/20"
+                                                                    : "bg-slate-50 border-slate-100 text-navy-900 hover:border-blue-300 hover:bg-white",
                                                             )}
                                                         >
-                                                            {opt}
-                                                        </button>
+                                                            <span className="text-lg">
+                                                                {opt}
+                                                            </span>
+                                                            <CheckCircle2
+                                                                className={clsx(
+                                                                    "w-6 h-6 transition-all",
+                                                                    answers[
+                                                                        allQuestions[
+                                                                            currentStep
+                                                                        ].id ||
+                                                                            `q-${currentStep}`
+                                                                    ] === opt
+                                                                        ? "opacity-100"
+                                                                        : "opacity-0 group-hover:opacity-20",
+                                                                )}
+                                                            />
+                                                        </motion.button>
                                                     ))}
                                                 </div>
                                             ) : allQuestions[currentStep]
                                                   .type === "boolean" ? (
-                                                <div className="grid grid-cols-2 gap-4">
+                                                <div className="grid grid-cols-2 gap-6">
                                                     {["Sí", "No"].map((opt) => (
-                                                        <button
+                                                        <motion.button
                                                             key={opt}
+                                                            whileHover={{
+                                                                y: -5,
+                                                            }}
+                                                            whileTap={{
+                                                                scale: 0.95,
+                                                            }}
                                                             onClick={() =>
                                                                 setAnswers({
                                                                     ...answers,
@@ -493,25 +595,25 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                                                 })
                                                             }
                                                             className={clsx(
-                                                                "p-8 border-2 rounded-3xl font-black text-xl transition-all",
+                                                                "p-10 border-2 rounded-4xl font-black text-3xl transition-all shadow-sm",
                                                                 answers[
                                                                     allQuestions[
                                                                         currentStep
                                                                     ].id ||
                                                                         `q-${currentStep}`
                                                                 ] === opt
-                                                                    ? "bg-blue-600 text-white border-blue-600 shadow-xl shadow-blue-200"
-                                                                    : "bg-slate-50 border-slate-200 text-navy-900 hover:border-blue-300",
+                                                                    ? "bg-blue-600 text-white border-blue-600 shadow-2xl shadow-blue-500/30"
+                                                                    : "bg-slate-50 border-slate-100 text-navy-900 hover:border-blue-300 hover:bg-white",
                                                             )}
                                                         >
                                                             {opt}
-                                                        </button>
+                                                        </motion.button>
                                                     ))}
                                                 </div>
                                             ) : (
                                                 <textarea
-                                                    placeholder="Escribe tu respuesta aquí..."
-                                                    className="w-full flex-1 p-6 bg-white border-2 border-slate-300 rounded-4xl text-navy-900 text-base font-medium focus:border-blue-600 focus:ring-4 focus:ring-blue-100 outline-none transition-all resize-none shadow-sm min-h-[160px]"
+                                                    placeholder="Describe tu respuesta técnica aquí..."
+                                                    className="w-full flex-1 p-8 bg-slate-50 border-2 border-slate-100 rounded-4xl text-navy-900 text-lg font-medium focus:border-blue-600 focus:bg-white outline-none transition-all resize-none shadow-inner min-h-[180px]"
                                                     value={
                                                         answers[
                                                             allQuestions[
@@ -534,40 +636,57 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                             )}
                                         </div>
 
-                                        <div className="flex items-center justify-between pt-4">
+                                        <div className="flex items-center justify-between pt-6 border-t border-slate-100">
                                             <button
-                                                onClick={handleBack}
+                                                onClick={handleBackBtn}
                                                 disabled={currentStep === 0}
-                                                className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-navy-900 disabled:opacity-0"
+                                                className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-400 hover:text-navy-900 disabled:opacity-0 transition-colors"
                                             >
-                                                <ArrowLeft className="w-4 h-4" />
+                                                <ArrowLeft className="w-5 h-5" />
                                                 Atrás
                                             </button>
 
-                                            <button
+                                            <motion.button
+                                                whileHover={{ scale: 1.02 }}
+                                                whileTap={{ scale: 0.98 }}
                                                 onClick={() =>
                                                     handleNext(
                                                         allQuestions.length,
                                                     )
                                                 }
-                                                disabled={isSubmitting}
-                                                className="px-8 py-4 bg-navy-900 text-white rounded-2xl font-bold text-[10px] uppercase tracking-widest shadow-xl shadow-navy-900/10 hover:bg-blue-600 hover:-translate-y-1 transition-all active:scale-95 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                disabled={
+                                                    isSubmitting ||
+                                                    (allQuestions[currentStep]
+                                                        .type !== "text" &&
+                                                        !answers[
+                                                            allQuestions[
+                                                                currentStep
+                                                            ].id ||
+                                                                `q-${currentStep}`
+                                                        ])
+                                                }
+                                                className={clsx(
+                                                    "px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl transition-all flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed",
+                                                    isSubmitting
+                                                        ? "bg-slate-100 text-slate-400"
+                                                        : "bg-navy-900 text-white shadow-navy-900/20 hover:bg-blue-600",
+                                                )}
                                             >
                                                 {isSubmitting ? (
                                                     <>
-                                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                                        Guardando...
+                                                        <Loader2 className="w-5 h-5 animate-spin" />{" "}
+                                                        Procesando...
                                                     </>
                                                 ) : (
                                                     <>
                                                         {currentStep ===
                                                         allQuestions.length - 1
-                                                            ? "Finalizar"
-                                                            : "Siguiente"}
-                                                        <ChevronRight className="w-4 h-4" />
+                                                            ? "Finalizar Protocolo"
+                                                            : "Continuar"}
+                                                        <ChevronRight className="w-5 h-5" />
                                                     </>
                                                 )}
-                                            </button>
+                                            </motion.button>
                                         </div>
                                     </div>
                                 </motion.div>
@@ -577,19 +696,33 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                 ) : (
                     <div className="flex flex-col items-center justify-center py-32 space-y-8">
                         <div className="relative">
-                            <div className="w-20 h-20 bg-blue-50 rounded-[2rem] flex items-center justify-center border border-blue-100">
-                                <Zap className="w-10 h-10 text-blue-600 animate-pulse" />
+                            <div className="w-24 h-24 bg-white rounded-[2.5rem] flex items-center justify-center border border-slate-100 shadow-xl">
+                                <Zap className="w-12 h-12 text-blue-600 animate-pulse" />
                             </div>
-                            <div className="absolute -inset-4 bg-blue-500/10 blur-2xl rounded-full -z-10 animate-pulse"></div>
+                            <div className="absolute -inset-4 bg-blue-500/10 blur-3xl rounded-full -z-10 animate-pulse"></div>
                         </div>
-                        <div className="text-center space-y-3">
-                            <h3 className="text-2xl font-black text-navy-900 font-display">
+                        <div className="text-center space-y-4">
+                            <h3 className="text-3xl font-black text-navy-950 font-display tracking-tight">
                                 Sincronizando Inteligencia...
                             </h3>
-                            <p className="text-slate-400 text-sm font-medium max-w-xs mx-auto">
+                            <p className="text-slate-500 text-lg font-medium max-w-sm mx-auto leading-relaxed">
                                 Estamos extrayendo los horizontes estratégicos
                                 de este recurso para tu arquitectura.
                             </p>
+                            <div className="flex justify-center gap-1">
+                                {[0, 1, 2].map((i) => (
+                                    <motion.div
+                                        key={i}
+                                        animate={{ opacity: [0.2, 1, 0.2] }}
+                                        transition={{
+                                            duration: 1.5,
+                                            repeat: Infinity,
+                                            delay: i * 0.2,
+                                        }}
+                                        className="w-2 h-2 rounded-full bg-blue-600"
+                                    />
+                                ))}
+                            </div>
                         </div>
                     </div>
                 )}

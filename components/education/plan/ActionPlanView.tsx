@@ -132,18 +132,63 @@ export default function ActionPlanView() {
     );
 }
 
+import { motion, AnimatePresence } from "framer-motion";
+
 function TaskItem({ text }: { text: string }) {
-    const [checked, setChecked] = useState(false); // Mock state for visual
+    const [checked, setChecked] = useState(false);
 
     return (
-        <div className="group flex items-center gap-4 bg-white p-4 rounded-xl border border-slate-100 hover:border-blue-200 hover:shadow-md transition-all cursor-pointer">
-            <div className="w-6 h-6 rounded-full border-2 border-slate-200 group-hover:border-blue-500 flex items-center justify-center transition-colors">
-                {/* interactions would go here */}
+        <motion.div
+            whileHover={{ x: 4 }}
+            onClick={() => setChecked(!checked)}
+            className={clsx(
+                "group flex items-center gap-4 bg-white p-5 rounded-2xl border transition-all cursor-pointer",
+                checked
+                    ? "border-emerald-100 bg-emerald-50/20 shadow-sm"
+                    : "border-slate-100 shadow-sm shadow-slate-200/50 hover:border-blue-200 hover:shadow-md",
+            )}
+        >
+            <div
+                className={clsx(
+                    "w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-300",
+                    checked
+                        ? "bg-emerald-500 border-emerald-500 shadow-lg shadow-emerald-500/20"
+                        : "border-slate-200 group-hover:border-blue-500",
+                )}
+            >
+                <AnimatePresence>
+                    {checked && (
+                        <motion.div
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0, opacity: 0 }}
+                        >
+                            <CheckCircle2 className="w-4 h-4 text-white" />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
-            <span className="text-slate-700 font-medium group-hover:text-navy-900">
+            <span
+                className={clsx(
+                    "flex-1 font-medium transition-all duration-300",
+                    checked
+                        ? "text-slate-400 line-through decoration-emerald-500/30"
+                        : "text-slate-700 font-bold",
+                )}
+            >
                 {text}
             </span>
-        </div>
+            <div
+                className={clsx(
+                    "text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full transition-all",
+                    checked
+                        ? "bg-emerald-100 text-emerald-600 opacity-100"
+                        : "bg-slate-50 text-slate-400 opacity-0 group-hover:opacity-100",
+                )}
+            >
+                {checked ? "Completado" : "Pendiente"}
+            </div>
+        </motion.div>
     );
 }
 

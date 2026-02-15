@@ -7,9 +7,11 @@ import {
     ArrowRight,
     X,
     MousePointer2,
+    CloudUpload,
 } from "lucide-react";
 import { useState } from "react";
 import clsx from "clsx";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 
 interface IngestInputProps {
     onIngest?: (data: {
@@ -30,9 +32,9 @@ export default function IngestInput({
     const [text, setText] = useState("");
     const [document, setDocument] = useState<File | null>(null);
     const [image, setImage] = useState<File | null>(null);
+    const [isDragging, setIsDragging] = useState(false);
 
     const handleTypeSelect = (type: InputType) => {
-        // Reset all inputs when changing type
         setText("");
         setDocument(null);
         setImage(null);
@@ -41,8 +43,6 @@ export default function IngestInput({
 
     const handleIngest = () => {
         const textToProcess = text.trim();
-
-        // Prevent double submission
         if (isProcessing) return;
         if (!textToProcess && !document && !image) return;
 
@@ -52,7 +52,6 @@ export default function IngestInput({
             image,
         });
 
-        // Reset all
         setText("");
         setDocument(null);
         setImage(null);
@@ -66,339 +65,351 @@ export default function IngestInput({
         return false;
     };
 
+    const cardVariants: Variants = {
+        initial: { y: 20, opacity: 0 },
+        animate: (i: number) => ({
+            y: 0,
+            opacity: 1,
+            transition: { delay: i * 0.1, duration: 0.4, ease: "easeOut" },
+        }),
+        hover: { y: -5, transition: { duration: 0.2 } },
+    };
+
     return (
-        <div className="w-full flex flex-col gap-6">
-            {/* Type Selector - Card Style */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Text Option */}
-                <button
-                    onClick={() => handleTypeSelect("text")}
-                    className={clsx(
-                        "relative p-6 rounded-2xl border-2 transition-all duration-300 text-left group",
-                        selectedType === "text"
-                            ? "border-purple-500 bg-purple-50 shadow-lg scale-105"
-                            : "border-slate-200 bg-white hover:border-purple-300 hover:shadow-md",
-                    )}
-                >
-                    <div className="flex items-start gap-4">
+        <div className="w-full flex flex-col gap-8">
+            {/* Type Selector */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                {[
+                    {
+                        id: "text",
+                        label: "Texto",
+                        sub: "Contenido directo",
+                        icon: Type,
+                        color: "purple",
+                    },
+                    {
+                        id: "document",
+                        label: "Documento",
+                        sub: "PDF, Word, TXT",
+                        icon: FileText,
+                        color: "blue",
+                    },
+                    {
+                        id: "image",
+                        label: "Imagen",
+                        sub: "JPG, PNG, WebP",
+                        icon: ImageIcon,
+                        color: "emerald",
+                    },
+                ].map((item, i) => (
+                    <motion.button
+                        key={item.id}
+                        custom={i}
+                        variants={cardVariants}
+                        initial="initial"
+                        animate="animate"
+                        whileHover="hover"
+                        onClick={() => handleTypeSelect(item.id as InputType)}
+                        className={clsx(
+                            "relative p-6 rounded-4xl border-2 transition-all duration-300 text-left group overflow-hidden",
+                            selectedType === item.id
+                                ? `border-${item.color}-500 bg-${item.color}-50/50 shadow-2xl shadow-${item.color}-500/10`
+                                : "border-slate-100 bg-white hover:border-slate-200 hover:shadow-xl hover:shadow-slate-200/50",
+                        )}
+                    >
+                        {/* Background Decoration */}
                         <div
                             className={clsx(
-                                "p-3 rounded-xl transition-colors",
-                                selectedType === "text"
-                                    ? "bg-purple-500 text-white"
-                                    : "bg-slate-100 text-slate-600 group-hover:bg-purple-100 group-hover:text-purple-600",
+                                "absolute -right-4 -bottom-4 w-24 h-24 rounded-full blur-3xl opacity-0 group-hover:opacity-20 transition-opacity",
+                                `bg-${item.color}-500`,
                             )}
-                        >
-                            <Type className="w-6 h-6" />
-                        </div>
-                        <div className="flex-1">
-                            <h3 className="font-bold text-lg text-navy-900 mb-1">
-                                Texto
-                            </h3>
-                            <p className="text-sm text-slate-500">
-                                Escribe o pega contenido directamente
-                            </p>
-                        </div>
-                    </div>
-                    {selectedType === "text" && (
-                        <div className="absolute top-2 right-2">
-                            <div className="w-3 h-3 bg-purple-500 rounded-full animate-pulse"></div>
-                        </div>
-                    )}
-                </button>
+                        />
 
-                {/* Document Option */}
-                <button
-                    onClick={() => handleTypeSelect("document")}
-                    className={clsx(
-                        "relative p-6 rounded-2xl border-2 transition-all duration-300 text-left group",
-                        selectedType === "document"
-                            ? "border-blue-500 bg-blue-50 shadow-lg scale-105"
-                            : "border-slate-200 bg-white hover:border-blue-300 hover:shadow-md",
-                    )}
-                >
-                    <div className="flex items-start gap-4">
-                        <div
-                            className={clsx(
-                                "p-3 rounded-xl transition-colors",
-                                selectedType === "document"
-                                    ? "bg-blue-500 text-white"
-                                    : "bg-slate-100 text-slate-600 group-hover:bg-blue-100 group-hover:text-blue-600",
-                            )}
-                        >
-                            <FileText className="w-6 h-6" />
+                        <div className="flex items-center gap-5 relative z-10">
+                            <div
+                                className={clsx(
+                                    "p-4 rounded-2xl transition-all duration-500 shadow-sm",
+                                    selectedType === item.id
+                                        ? `bg-${item.color}-600 text-white shadow-${item.color}-500/40`
+                                        : "bg-slate-50 text-slate-500 group-hover:bg-white group-hover:shadow-md",
+                                )}
+                            >
+                                <item.icon className="w-6 h-6" />
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="font-display font-bold text-lg text-navy-950 mb-0.5">
+                                    {item.label}
+                                </h3>
+                                <p className="text-xs font-medium text-slate-400">
+                                    {item.sub}
+                                </p>
+                            </div>
                         </div>
-                        <div className="flex-1">
-                            <h3 className="font-bold text-lg text-navy-900 mb-1">
-                                Documento
-                            </h3>
-                            <p className="text-sm text-slate-500">
-                                PDF, Word, TXT
-                            </p>
-                        </div>
-                    </div>
-                    {selectedType === "document" && (
-                        <div className="absolute top-2 right-2">
-                            <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
-                        </div>
-                    )}
-                </button>
 
-                {/* Image Option */}
-                <button
-                    onClick={() => handleTypeSelect("image")}
-                    className={clsx(
-                        "relative p-6 rounded-2xl border-2 transition-all duration-300 text-left group",
-                        selectedType === "image"
-                            ? "border-green-500 bg-green-50 shadow-lg scale-105"
-                            : "border-slate-200 bg-white hover:border-green-300 hover:shadow-md",
-                    )}
-                >
-                    <div className="flex items-start gap-4">
-                        <div
-                            className={clsx(
-                                "p-3 rounded-xl transition-colors",
-                                selectedType === "image"
-                                    ? "bg-green-500 text-white"
-                                    : "bg-slate-100 text-slate-600 group-hover:bg-green-100 group-hover:text-green-600",
-                            )}
-                        >
-                            <ImageIcon className="w-6 h-6" />
-                        </div>
-                        <div className="flex-1">
-                            <h3 className="font-bold text-lg text-navy-900 mb-1">
-                                Imagen
-                            </h3>
-                            <p className="text-sm text-slate-500">
-                                JPG, PNG, WebP
-                            </p>
-                        </div>
-                    </div>
-                    {selectedType === "image" && (
-                        <div className="absolute top-2 right-2">
-                            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                        </div>
-                    )}
-                </button>
+                        {selectedType === item.id && (
+                            <motion.div
+                                layoutId="indicator"
+                                className={clsx(
+                                    "absolute top-4 right-4 w-2 h-2 rounded-full",
+                                    `bg-${item.color}-500`,
+                                )}
+                            />
+                        )}
+                    </motion.button>
+                ))}
             </div>
 
-            {/* Input Area - Shows based on selected type */}
-            {selectedType && (
-                <div
-                    className={clsx(
-                        "bg-white rounded-2xl border-2 p-6 transition-all duration-500 animate-fade-in",
-                        selectedType === "text" &&
-                            "border-purple-200 bg-purple-50/30",
-                        selectedType === "document" &&
-                            "border-blue-200 bg-blue-50/30",
-                        selectedType === "image" &&
-                            "border-green-200 bg-green-50/30",
-                    )}
-                >
-                    {/* Text Input */}
-                    {selectedType === "text" && (
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <label className="text-sm font-bold text-navy-900 flex items-center gap-2">
-                                    <Type className="w-4 h-4 text-purple-500" />
-                                    Ingresa tu contenido
-                                </label>
-                                <button
-                                    onClick={() => handleTypeSelect(null)}
-                                    className="text-xs text-slate-500 hover:text-red-500 transition-colors flex items-center gap-1"
+            {/* Input Area */}
+            <AnimatePresence mode="wait">
+                {selectedType && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: -20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: -20 }}
+                        transition={{
+                            type: "spring",
+                            damping: 25,
+                            stiffness: 200,
+                        }}
+                        className={clsx(
+                            "bg-white/80 backdrop-blur-xl rounded-[2.5rem] border-2 p-8 shadow-2xl relative overflow-hidden",
+                            selectedType === "text" &&
+                                "border-purple-100 shadow-purple-500/5",
+                            selectedType === "document" &&
+                                "border-blue-100 shadow-blue-500/5",
+                            selectedType === "image" &&
+                                "border-emerald-100 shadow-emerald-500/5",
+                        )}
+                    >
+                        <div className="flex items-center justify-between mb-6">
+                            <label className="text-xs font-black uppercase tracking-widest text-navy-950 flex items-center gap-3">
+                                <span
+                                    className={clsx(
+                                        "p-2 rounded-lg",
+                                        selectedType === "text" &&
+                                            "bg-purple-100 text-purple-600",
+                                        selectedType === "document" &&
+                                            "bg-blue-100 text-blue-600",
+                                        selectedType === "image" &&
+                                            "bg-emerald-100 text-emerald-600",
+                                    )}
                                 >
-                                    <X className="w-3.5 h-3.5" />
-                                    Cancelar
-                                </button>
-                            </div>
-                            <textarea
-                                value={text}
-                                onChange={(e) => setText(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter" && e.ctrlKey) {
-                                        handleIngest();
+                                    {selectedType === "text" && (
+                                        <Type className="w-4 h-4" />
+                                    )}
+                                    {selectedType === "document" && (
+                                        <FileText className="w-4 h-4" />
+                                    )}
+                                    {selectedType === "image" && (
+                                        <ImageIcon className="w-4 h-4" />
+                                    )}
+                                </span>
+                                Ingestar{" "}
+                                {selectedType === "text"
+                                    ? "Contenido"
+                                    : selectedType === "document"
+                                      ? "Documento"
+                                      : "Imagen"}
+                            </label>
+                            <button
+                                onClick={() => handleTypeSelect(null)}
+                                className="p-2 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-full transition-all"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        {/* Text Content */}
+                        {selectedType === "text" && (
+                            <div className="space-y-4">
+                                <textarea
+                                    value={text}
+                                    onChange={(e) => setText(e.target.value)}
+                                    placeholder="Escribe o pega el contenido aquí... (Control + Enter para enviar)"
+                                    onKeyDown={(e) =>
+                                        e.key === "Enter" &&
+                                        e.ctrlKey &&
+                                        handleIngest()
                                     }
-                                }}
-                                placeholder="Escribe o pega tu texto aquí... (Ctrl+Enter para procesar)"
-                                className="w-full bg-white border-2 border-purple-200 rounded-xl px-4 py-3 text-navy-900 placeholder:text-slate-400 focus:outline-none focus:border-purple-500 resize-none min-h-[120px] text-[15px] leading-relaxed"
-                                rows={5}
-                                autoFocus
-                            />
-                            <div className="text-xs text-slate-500 italic">
-                                {text.trim().length} caracteres
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Document Input */}
-                    {selectedType === "document" && (
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <label className="text-sm font-bold text-navy-900 flex items-center gap-2">
-                                    <FileText className="w-4 h-4 text-blue-500" />
-                                    Selecciona tu documento
-                                </label>
-                                <button
-                                    onClick={() => handleTypeSelect(null)}
-                                    className="text-xs text-slate-500 hover:text-red-500 transition-colors flex items-center gap-1"
-                                >
-                                    <X className="w-3.5 h-3.5" />
-                                    Cancelar
-                                </button>
-                            </div>
-
-                            {!document ? (
-                                <label
-                                    htmlFor="doc-upload"
-                                    className="block w-full border-2 border-dashed border-blue-300 rounded-xl p-8 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all group"
-                                >
-                                    <FileText className="w-12 h-12 mx-auto text-blue-400 group-hover:text-blue-600 mb-3" />
-                                    <p className="text-sm font-bold text-navy-900 mb-1">
-                                        Haz clic para seleccionar
-                                    </p>
-                                    <p className="text-xs text-slate-500">
-                                        Formatos: PDF, DOC, DOCX, TXT
-                                    </p>
-                                    <input
-                                        id="doc-upload"
-                                        type="file"
-                                        accept=".pdf,.doc,.docx,.txt"
-                                        onChange={(e) =>
-                                            setDocument(
-                                                e.target.files?.[0] || null,
-                                            )
-                                        }
-                                        className="hidden"
-                                    />
-                                </label>
-                            ) : (
-                                <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-blue-500 rounded-lg">
-                                            <FileText className="w-5 h-5 text-white" />
-                                        </div>
-                                        <div>
-                                            <p className="font-bold text-navy-900 text-sm">
-                                                {document.name}
-                                            </p>
-                                            <p className="text-xs text-slate-500">
-                                                {(document.size / 1024).toFixed(
-                                                    2,
-                                                )}{" "}
-                                                KB
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <button
-                                        onClick={() => setDocument(null)}
-                                        className="p-2 hover:bg-red-100 rounded-lg transition-colors group"
-                                    >
-                                        <X className="w-5 h-5 text-slate-400 group-hover:text-red-500" />
-                                    </button>
+                                    className="w-full bg-slate-50/50 border-2 border-slate-100 rounded-3xl p-6 text-navy-900 placeholder:text-slate-400 focus:outline-none focus:border-purple-400 focus:bg-white transition-all min-h-[180px] font-medium leading-relaxed shadow-inner"
+                                    autoFocus
+                                />
+                                <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">
+                                    <span>
+                                        Contador: {text.length} caracteres
+                                    </span>
+                                    <span>
+                                        Ctrl + Enter para procesar rápidamente
+                                    </span>
                                 </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Image Input */}
-                    {selectedType === "image" && (
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <label className="text-sm font-bold text-navy-900 flex items-center gap-2">
-                                    <ImageIcon className="w-4 h-4 text-green-500" />
-                                    Selecciona tu imagen
-                                </label>
-                                <button
-                                    onClick={() => handleTypeSelect(null)}
-                                    className="text-xs text-slate-500 hover:text-red-500 transition-colors flex items-center gap-1"
-                                >
-                                    <X className="w-3.5 h-3.5" />
-                                    Cancelar
-                                </button>
                             </div>
+                        )}
 
-                            {!image ? (
-                                <label
-                                    htmlFor="image-upload"
-                                    className="block w-full border-2 border-dashed border-green-300 rounded-xl p-8 text-center cursor-pointer hover:border-green-500 hover:bg-green-50 transition-all group"
-                                >
-                                    <ImageIcon className="w-12 h-12 mx-auto text-green-400 group-hover:text-green-600 mb-3" />
-                                    <p className="text-sm font-bold text-navy-900 mb-1">
-                                        Haz clic para seleccionar
-                                    </p>
-                                    <p className="text-xs text-slate-500">
-                                        Formatos: JPG, PNG, WebP, GIF
-                                    </p>
-                                    <input
-                                        id="image-upload"
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={(e) =>
-                                            setImage(
-                                                e.target.files?.[0] || null,
+                        {/* File Upload (Document or Image) */}
+                        {(selectedType === "document" ||
+                            selectedType === "image") && (
+                            <div className="space-y-4">
+                                {!document && !image ? (
+                                    <label
+                                        onDragOver={(e) => {
+                                            e.preventDefault();
+                                            setIsDragging(true);
+                                        }}
+                                        onDragLeave={() => setIsDragging(false)}
+                                        onDrop={(e) => {
+                                            e.preventDefault();
+                                            setIsDragging(false);
+                                            const file =
+                                                e.dataTransfer.files[0];
+                                            if (
+                                                selectedType === "document" &&
+                                                file
                                             )
-                                        }
-                                        className="hidden"
-                                    />
-                                </label>
-                            ) : (
-                                <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4 flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-green-500 rounded-lg">
-                                            <ImageIcon className="w-5 h-5 text-white" />
-                                        </div>
-                                        <div>
-                                            <p className="font-bold text-navy-900 text-sm">
-                                                {image.name}
-                                            </p>
-                                            <p className="text-xs text-slate-500">
-                                                {(image.size / 1024).toFixed(2)}{" "}
-                                                KB
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <button
-                                        onClick={() => setImage(null)}
-                                        className="p-2 hover:bg-red-100 rounded-lg transition-colors group"
+                                                setDocument(file);
+                                            if (
+                                                selectedType === "image" &&
+                                                file
+                                            )
+                                                setImage(file);
+                                        }}
+                                        className={clsx(
+                                            "flex flex-col items-center justify-center w-full min-h-[220px] border-3 border-dashed rounded-3xl cursor-pointer transition-all gap-4 group",
+                                            isDragging
+                                                ? "border-blue-500 bg-blue-50/50 scale-[0.99]"
+                                                : "border-slate-100 bg-slate-50/30 hover:bg-white hover:border-slate-200",
+                                        )}
                                     >
-                                        <X className="w-5 h-5 text-slate-400 group-hover:text-red-500" />
-                                    </button>
-                                </div>
-                            )}
+                                        <div
+                                            className={clsx(
+                                                "p-5 rounded-4xl transition-all duration-500",
+                                                isDragging
+                                                    ? "bg-blue-600 text-white shadow-xl"
+                                                    : "bg-white text-slate-400 group-hover:text-navy-950 shadow-sm",
+                                            )}
+                                        >
+                                            <CloudUpload className="w-10 h-10" />
+                                        </div>
+                                        <div className="text-center">
+                                            <p className="font-bold text-navy-950">
+                                                Selecciona o arrastra tu archivo
+                                            </p>
+                                            <p className="text-xs font-medium text-slate-400 mt-1">
+                                                {selectedType === "document"
+                                                    ? "PDF, DOCX, TXT hasta 10MB"
+                                                    : "JPG, PNG, WEBP hasta 5MB"}
+                                            </p>
+                                        </div>
+                                        <input
+                                            type="file"
+                                            className="hidden"
+                                            accept={
+                                                selectedType === "document"
+                                                    ? ".pdf,.doc,.docx,.txt"
+                                                    : "image/*"
+                                            }
+                                            onChange={(e) => {
+                                                const file =
+                                                    e.target.files?.[0] || null;
+                                                if (selectedType === "document")
+                                                    setDocument(file);
+                                                else setImage(file);
+                                            }}
+                                        />
+                                    </label>
+                                ) : (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.9 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        className="bg-slate-50 border-2 border-slate-100 rounded-3xl p-6 flex items-center justify-between"
+                                    >
+                                        <div className="flex items-center gap-5">
+                                            <div
+                                                className={clsx(
+                                                    "p-4 rounded-2xl text-white shadow-lg",
+                                                    selectedType === "document"
+                                                        ? "bg-blue-600 shadow-blue-500/30"
+                                                        : "bg-emerald-600 shadow-emerald-500/30",
+                                                )}
+                                            >
+                                                {selectedType === "document" ? (
+                                                    <FileText className="w-6 h-6" />
+                                                ) : (
+                                                    <ImageIcon className="w-6 h-6" />
+                                                )}
+                                            </div>
+                                            <div>
+                                                <p className="font-bold text-navy-950 truncate max-w-[200px] md:max-w-md">
+                                                    {(document || image)?.name}
+                                                </p>
+                                                <p className="text-xs font-medium text-slate-400">
+                                                    {(
+                                                        ((document || image)
+                                                            ?.size || 0) /
+                                                        1024 /
+                                                        1024
+                                                    ).toFixed(2)}{" "}
+                                                    MB • Listo para procesar
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => {
+                                                setDocument(null);
+                                                setImage(null);
+                                            }}
+                                            className="p-3 hover:bg-red-50 text-slate-300 hover:text-red-500 rounded-2xl transition-all"
+                                        >
+                                            <X className="w-6 h-6" />
+                                        </button>
+                                    </motion.div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Action Footer */}
+                        <div className="mt-8 flex justify-end">
+                            <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={handleIngest}
+                                disabled={!hasInput() || isProcessing}
+                                className={clsx(
+                                    "flex items-center gap-3 px-10 py-4 rounded-2xl font-bold text-sm transition-all shadow-xl",
+                                    hasInput()
+                                        ? selectedType === "text"
+                                            ? "bg-purple-600 text-white shadow-purple-500/25 hover:bg-purple-700"
+                                            : selectedType === "document"
+                                              ? "bg-blue-600 text-white shadow-blue-500/25 hover:bg-blue-700"
+                                              : "bg-emerald-600 text-white shadow-emerald-500/25 hover:bg-emerald-700"
+                                        : "bg-slate-100 text-slate-400 cursor-not-allowed",
+                                )}
+                            >
+                                <span>
+                                    {isProcessing
+                                        ? "Procesando..."
+                                        : "Ingestar Recurso"}
+                                </span>
+                                <ArrowRight className="w-5 h-5" />
+                            </motion.button>
                         </div>
-                    )}
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
-                    {/* Submit Button */}
-                    <div className="mt-6 flex justify-end">
-                        <button
-                            onClick={handleIngest}
-                            disabled={!hasInput() || isProcessing}
-                            className={clsx(
-                                "flex items-center gap-2 px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 shadow-lg",
-                                hasInput()
-                                    ? selectedType === "text"
-                                        ? "bg-purple-500 text-white hover:bg-purple-600 hover:scale-105 active:scale-95"
-                                        : selectedType === "document"
-                                          ? "bg-blue-500 text-white hover:bg-blue-600 hover:scale-105 active:scale-95"
-                                          : "bg-green-500 text-white hover:bg-green-600 hover:scale-105 active:scale-95"
-                                    : "bg-slate-200 text-slate-400 cursor-not-allowed opacity-50",
-                            )}
-                        >
-                            <span>Procesar Recurso</span>
-                            <ArrowRight className="w-4 h-4" />
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {/* Help Text */}
+            {/* Hint */}
             {!selectedType && (
-                <div className="text-center py-4">
-                    <p className="text-sm text-slate-500 italic flex items-center justify-center gap-2">
-                        <MousePointer2 className="w-4 h-4 text-slate-400" />
-                        Selecciona el tipo de recurso que deseas procesar
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex items-center justify-center gap-3 py-4"
+                >
+                    <div className="w-8 h-px bg-slate-100" />
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                        <MousePointer2 className="w-4 h-4" />
+                        Selecciona una fuente cognitiva
                     </p>
-                </div>
+                    <div className="w-8 h-px bg-slate-100" />
+                </motion.div>
             )}
         </div>
     );

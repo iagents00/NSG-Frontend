@@ -29,7 +29,22 @@ export interface EducationContent {
     summary?: string;
     createdAt: string;
     updatedAt?: string;
-    fullData?: unknown;
+    fullData?: Record<string, any>;
+    question_process?: {
+        completed: boolean;
+        question_blocks: QuestionBlock[];
+    };
+}
+
+interface QuestionBlock {
+    block: string;
+    intent: string;
+    questions: Array<{
+        id: string;
+        question: string;
+        type: string;
+        options?: string[];
+    }>;
 }
 
 export interface UserContext {
