@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import ContentLibrary from "@/components/education/library/ContentLibrary";
-import ActionPlanView from "@/components/education/plan/ActionPlanView";
 import DiagnosticForm from "@/components/education/diagnostic/DiagnosticForm";
 import ProposalView from "@/components/education/diagnostic/ProposalView";
 import { GraduationCap, BookOpen, Layers, Zap, LucideIcon } from "lucide-react";
@@ -10,7 +9,7 @@ import clsx from "clsx";
 import StrategyWidget from "@/components/education/onboarding/StrategyWidget";
 import { educationService } from "@/lib/education";
 
-type EducationView = "onboarding" | "library" | "plans" | "diagnostic";
+type EducationView = "onboarding" | "library" | "diagnostic";
 
 export default function IEducationPage() {
     const [currentView, setCurrentView] = useState<EducationView>("library"); // Changed default to library
@@ -49,12 +48,10 @@ export default function IEducationPage() {
     }, []);
 
     // Navigation for Demo Purposes (Removed 'Estrategia' from main views, moved to button action)
-    const NAV_ITEMS: { id: EducationView; label: string; icon: LucideIcon }[] =
-        [
-            { id: "library", label: "Biblioteca", icon: BookOpen },
-            { id: "plans", label: "Mis Planes", icon: Layers },
-            { id: "diagnostic", label: "Diagnóstico IA", icon: Zap },
-        ];
+    const NAV_ITEMS: { id: EducationView; label: string; icon: LucideIcon }[] = [
+        { id: "library", label: "Biblioteca", icon: BookOpen },
+        { id: "diagnostic", label: "Diagnóstico IA", icon: Zap },
+    ];
 
     const handleOpenStrategy = () => {
         setIsStrategyOpen(true);
@@ -126,12 +123,7 @@ export default function IEducationPage() {
                         <ContentLibrary />
                     </div>
                 )}
-                {/* Defaulting Plans as main view when user lands (home) */}
-                {currentView === "plans" && (
-                    <div className="h-full">
-                        <ActionPlanView />
-                    </div>
-                )}
+
                 {currentView === "diagnostic" && (
                     <div className="h-full bg-slate-50/50 rounded-4xl border border-white/50 shadow-inner p-8">
                         <div className="mb-4 flex gap-4">
