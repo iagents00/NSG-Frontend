@@ -182,7 +182,7 @@ export default function IngestInput({
                         )}
                     >
                         <div className="flex items-center justify-between mb-6">
-                            <label className="text-xs font-black uppercase tracking-widest text-navy-950 flex items-center gap-3">
+                            <label className="text-xs font-bold uppercase tracking-widest text-navy-950 flex items-center gap-3 font-display">
                                 <span
                                     className={clsx(
                                         "p-2 rounded-lg",
@@ -231,7 +231,7 @@ export default function IngestInput({
                                         e.ctrlKey &&
                                         handleIngest()
                                     }
-                                    className="w-full bg-slate-50/50 border-2 border-slate-100 rounded-3xl p-6 text-navy-900 placeholder:text-slate-400 focus:outline-none focus:border-purple-400 focus:bg-white transition-all min-h-[180px] font-medium leading-relaxed shadow-inner"
+                                    className="w-full bg-slate-50/50 border border-slate-200/60 rounded-3xl p-6 text-navy-900 placeholder:text-slate-400 focus:outline-none focus:border-purple-400 focus:bg-white focus:ring-4 focus:ring-purple-500/5 transition-all min-h-[180px] font-medium leading-relaxed shadow-inner"
                                     autoFocus
                                 />
                                 <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">
@@ -404,7 +404,7 @@ export default function IngestInput({
                     className="flex items-center justify-center gap-3 py-4"
                 >
                     <div className="w-8 h-px bg-slate-100" />
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 font-display">
                         <MousePointer2 className="w-4 h-4" />
                         Selecciona una fuente cognitiva
                     </p>

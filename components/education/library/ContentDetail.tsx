@@ -282,7 +282,7 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                             <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200">
                                 <Brain className="w-6 h-6 text-white" />
                             </div>
-                            <div className="text-2xl md:text-3xl font-black text-navy-900 tracking-tight prose prose-p:my-0 prose-strong:text-navy-900">
+                            <div className="text-2xl md:text-3xl font-display font-bold text-navy-900 tracking-tight prose prose-p:my-0 prose-strong:text-navy-900">
                                 <ReactMarkdown>Análisis Estratégico</ReactMarkdown>
                             </div>
                         </div>
@@ -445,7 +445,7 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                             <ArrowLeft className="w-5 h-5" />
                         </button>
                         <div>
-                            <div className="font-bold text-navy-900 leading-none prose prose-p:my-0 prose-strong:text-navy-900">
+                            <div className="font-display font-bold text-navy-900 leading-none prose prose-p:my-0 prose-strong:text-navy-900">
                                 <ReactMarkdown>
                                     {generatedData?.question_process_generated
                                         ?.title ||
@@ -479,16 +479,16 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                         <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
                             <div className="flex items-center justify-between mb-4">
                                 <div className="space-y-1">
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-blue-600">
+                                    <span className="text-[10px] font-bold uppercase tracking-widest text-blue-600">
                                         Protocolo de Análisis
                                     </span>
-                                    <h4 className="font-bold text-navy-950">
+                                    <h4 className="font-display font-bold text-navy-950">
                                         Etapa {currentStep + 1} de{" "}
                                         {allQuestions.length}
                                     </h4>
                                 </div>
                                 <div className="text-right">
-                                    <span className="text-2xl font-black text-navy-300">
+                                    <span className="text-2xl font-display font-bold text-navy-200">
                                         {Math.round(
                                             ((currentStep + 1) /
                                                 allQuestions.length) *
@@ -500,7 +500,7 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                             </div>
                             <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200/50">
                                 <motion.div
-                                    className="h-full bg-linear-to-r from-blue-600 to-indigo-500 transition-all rounded-full"
+                                    className="h-full bg-linear-to-r from-blue-600 to-blue-400 rounded-full shadow-[0_0_12px_rgba(37,99,235,0.4)]"
                                     initial={{ width: 0 }}
                                     animate={{
                                         width: `${((currentStep + 1) / allQuestions.length) * 100}%`,
@@ -533,11 +533,12 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                     }}
                                     className="w-full"
                                 >
-                                    <div className="bg-white rounded-4xl p-6 md:p-8 border border-slate-100 shadow-2xl shadow-blue-500/5 space-y-8 border-t-8 border-t-blue-600">
+                                    <div className="bg-white/90 backdrop-blur-xl rounded-4xl p-6 md:p-8 border border-slate-200/60 shadow-sovereign space-y-8 relative overflow-hidden">
+                                        <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-blue-600/20 via-blue-600 to-blue-600/20" />
                                         <div className="space-y-4">
                                             <div className="flex items-center gap-2">
-                                                <div className="w-2 h-2 rounded-full bg-blue-600" />
-                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                                <div className="w-2 h-2 rounded-full bg-blue-600 shadow-[0_0_10px_rgba(37,99,235,0.5)]" />
+                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                                                     {
                                                         allQuestions[
                                                             currentStep
@@ -545,7 +546,7 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                                     }
                                                 </span>
                                             </div>
-                                            <h4 className="text-2xl font-bold text-navy-900 leading-tight tracking-tight">
+                                            <h4 className="text-2xl font-display font-bold text-navy-900 leading-tight tracking-tight">
                                                 {
                                                     allQuestions[currentStep]
                                                         .question
@@ -584,15 +585,15 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                                                 })
                                                             }
                                                             className={clsx(
-                                                                "w-full p-5 border-2 rounded-2xl text-left font-bold transition-all flex items-center justify-between group",
+                                                                "w-full p-5 border rounded-2xl text-left font-bold transition-all flex items-center justify-between group",
                                                                 answers[
                                                                     allQuestions[
                                                                         currentStep
                                                                     ].id ||
                                                                         `q-${currentStep}`
                                                                 ] === opt
-                                                                    ? "bg-blue-600 text-white border-blue-600 shadow-xl shadow-blue-500/20"
-                                                                    : "bg-slate-50 border-slate-100 text-navy-900 hover:border-blue-300 hover:bg-white",
+                                                                    ? "bg-navy-900 text-white border-navy-900 shadow-xl shadow-navy-900/10"
+                                                                    : "bg-slate-50/50 border-slate-200/60 text-navy-900 hover:border-blue-400 hover:bg-white hover:shadow-lg hover:shadow-blue-500/5",
                                                             )}
                                                         >
                                                             <span className="text-base">
@@ -637,15 +638,15 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                                                 })
                                                             }
                                                             className={clsx(
-                                                                "p-6 border-2 rounded-4xl font-black text-xl transition-all shadow-sm",
+                                                                "p-6 border rounded-4xl font-bold text-xl transition-all shadow-sm",
                                                                 answers[
                                                                     allQuestions[
                                                                         currentStep
                                                                     ].id ||
                                                                         `q-${currentStep}`
                                                                 ] === opt
-                                                                    ? "bg-blue-600 text-white border-blue-600 shadow-2xl shadow-blue-500/30"
-                                                                    : "bg-slate-50 border-slate-100 text-navy-900 hover:border-blue-300 hover:bg-white",
+                                                                    ? "bg-navy-900 text-white border-navy-900 shadow-xl shadow-navy-900/10"
+                                                                    : "bg-slate-50/50 border-slate-200/60 text-navy-900 hover:border-blue-400 hover:bg-white hover:shadow-lg hover:shadow-blue-500/5",
                                                             )}
                                                         >
                                                             {opt}
@@ -655,7 +656,7 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                             ) : (
                                                 <textarea
                                                     placeholder="Describe tu respuesta técnica aquí..."
-                                                    className="w-full flex-1 p-6 bg-slate-50 border-2 border-slate-100 rounded-4xl text-navy-900 text-base font-medium focus:border-blue-600 focus:bg-white outline-none transition-all resize-none shadow-inner min-h-[150px]"
+                                                    className="w-full flex-1 p-6 bg-slate-50/50 border border-slate-200/60 rounded-4xl text-navy-900 text-base font-medium focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/5 outline-none transition-all resize-none shadow-inner min-h-[150px]"
                                                     value={
                                                         answers[
                                                             allQuestions[
@@ -682,7 +683,7 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                             <button
                                                 onClick={handleBackBtn}
                                                 disabled={currentStep === 0}
-                                                className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-400 hover:text-navy-900 disabled:opacity-0 transition-colors"
+                                                className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-navy-900 disabled:opacity-0 transition-colors"
                                             >
                                                 <ArrowLeft className="w-5 h-5" />
                                                 Atrás
@@ -708,10 +709,10 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                                         ])
                                                 }
                                                 className={clsx(
-                                                    "px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl transition-all flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed",
+                                                    "px-10 py-5 rounded-2xl font-bold text-xs uppercase tracking-widest shadow-xl transition-all flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed",
                                                     isSubmitting
                                                         ? "bg-slate-100 text-slate-400"
-                                                        : "bg-navy-900 text-white shadow-navy-900/20 hover:bg-blue-600",
+                                                        : "bg-navy-900 text-white hover:bg-blue-600 hover:-translate-y-0.5 active:translate-y-0",
                                                 )}
                                             >
                                                 {isSubmitting ? (
