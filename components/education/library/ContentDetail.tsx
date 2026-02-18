@@ -273,7 +273,9 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                 <Brain className="w-6 h-6 text-white" />
                             </div>
                             <div className="text-2xl md:text-3xl font-black text-navy-900 tracking-tight prose prose-p:my-0 prose-strong:text-navy-900">
-                                <ReactMarkdown>Análisis Estratégico</ReactMarkdown>
+                                <ReactMarkdown>
+                                    Análisis Estratégico
+                                </ReactMarkdown>
                             </div>
                         </div>
                         <div className="text-slate-500 text-lg font-medium leading-relaxed max-w-2xl prose prose-p:my-0 prose-strong:text-slate-700">
@@ -311,7 +313,9 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                             {insight.icon || "💡"}
                                         </span>
                                         <div className="text-sm font-medium text-slate-700 leading-relaxed prose prose-p:my-0 prose-strong:text-slate-900">
-                                            <ReactMarkdown>{insight.text}</ReactMarkdown>
+                                            <ReactMarkdown>
+                                                {insight.text}
+                                            </ReactMarkdown>
                                         </div>
                                     </div>
                                 ),
@@ -340,7 +344,8 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                 </span>
                                 <div className="text-sm leading-relaxed text-slate-200 prose prose-p:my-0 prose-strong:text-white prose-invert">
                                     <ReactMarkdown>
-                                        {data.strategic_analysis?.alignment || ''}
+                                        {data.strategic_analysis?.alignment ||
+                                            ""}
                                     </ReactMarkdown>
                                 </div>
                             </div>
@@ -350,7 +355,8 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                 </span>
                                 <div className="text-sm leading-relaxed text-slate-200 prose prose-p:my-0 prose-strong:text-white prose-invert">
                                     <ReactMarkdown>
-                                        {data.strategic_analysis?.friction_bypass || ''}
+                                        {data.strategic_analysis
+                                            ?.friction_bypass || ""}
                                     </ReactMarkdown>
                                 </div>
                             </div>
@@ -394,7 +400,9 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                     </div>
                                     <div className="flex-1">
                                         <div className="font-bold text-navy-900 prose prose-p:my-0 prose-strong:text-navy-900">
-                                            <ReactMarkdown>{step.task}</ReactMarkdown>
+                                            <ReactMarkdown>
+                                                {step.task}
+                                            </ReactMarkdown>
                                         </div>
                                         <div className="flex items-center gap-4 mt-1">
                                             <span
@@ -464,284 +472,258 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                 {isCompleted ? (
                     renderAnalysis()
                 ) : allQuestions.length > 0 ? (
-                    <div className="max-w-xl mx-auto space-y-10">
-                        {/* Improved Progress Header */}
-                        <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="space-y-1">
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-blue-600">
-                                        Protocolo de Análisis
-                                    </span>
-                                    <h4 className="font-bold text-navy-950">
-                                        Etapa {currentStep + 1} de{" "}
-                                        {allQuestions.length}
-                                    </h4>
-                                </div>
-                                <div className="text-right">
-                                    <span className="text-2xl font-black text-navy-300">
-                                        {Math.round(
-                                            ((currentStep + 1) /
-                                                allQuestions.length) *
-                                                100,
-                                        )}
-                                        %
-                                    </span>
-                                </div>
-                            </div>
-                            <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200/50">
+                    <div className="max-w-3xl mx-auto space-y-4">
+                        {/* Minimal Progress Bar */}
+                        <div className="flex items-center gap-4">
+                            <div className="flex-1 h-1 bg-slate-100 rounded-full overflow-hidden">
                                 <motion.div
-                                    className="h-full bg-linear-to-r from-blue-600 to-indigo-500 transition-all rounded-full"
+                                    className="h-full bg-blue-600 rounded-full"
                                     initial={{ width: 0 }}
                                     animate={{
                                         width: `${((currentStep + 1) / allQuestions.length) * 100}%`,
                                     }}
                                     transition={{
-                                        duration: 0.8,
-                                        ease: "circOut",
+                                        duration: 0.6,
+                                        ease: "easeOut",
                                     }}
                                 />
                             </div>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest shrink-0">
+                                {currentStep + 1}/{allQuestions.length}
+                            </span>
                         </div>
 
-                        <div className="relative pt-4 min-h-[400px]">
-                            <AnimatePresence mode="wait" custom={direction}>
-                                <motion.div
-                                    key={currentStep}
-                                    initial={{
-                                        x: direction > 0 ? 20 : -20,
-                                        opacity: 0,
-                                    }}
-                                    animate={{ x: 0, opacity: 1 }}
-                                    exit={{
-                                        x: direction > 0 ? -20 : 20,
-                                        opacity: 0,
-                                    }}
-                                    transition={{
-                                        type: "spring",
-                                        damping: 25,
-                                        stiffness: 200,
-                                    }}
-                                    className="w-full"
-                                >
-                                    <div className="bg-white rounded-4xl p-8 md:p-12 border border-slate-100 shadow-2xl shadow-blue-500/5 space-y-10 border-t-8 border-t-blue-600">
-                                        <div className="space-y-4">
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-2 h-2 rounded-full bg-blue-600" />
-                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                                    {
-                                                        allQuestions[
-                                                            currentStep
-                                                        ].blockTitle
-                                                    }
-                                                </span>
-                                            </div>
-                                            <h4 className="text-3xl font-bold text-navy-900 leading-tight tracking-tight">
+                        {/* Question Card */}
+                        <AnimatePresence mode="wait" custom={direction}>
+                            <motion.div
+                                key={currentStep}
+                                initial={{
+                                    x: direction > 0 ? 16 : -16,
+                                    opacity: 0,
+                                }}
+                                animate={{ x: 0, opacity: 1 }}
+                                exit={{
+                                    x: direction > 0 ? -16 : 16,
+                                    opacity: 0,
+                                }}
+                                transition={{
+                                    type: "spring",
+                                    damping: 30,
+                                    stiffness: 300,
+                                }}
+                                className="w-full"
+                            >
+                                <div className="bg-white rounded-2xl p-5 md:p-6 border border-slate-100 shadow-sm space-y-5">
+                                    {/* Block Label + Question */}
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                                                 {
                                                     allQuestions[currentStep]
-                                                        .question
+                                                        .blockTitle
                                                 }
-                                            </h4>
+                                            </span>
                                         </div>
+                                        <h4 className="text-base md:text-lg font-bold text-navy-900 leading-snug">
+                                            {allQuestions[currentStep].question}
+                                        </h4>
+                                    </div>
 
-                                        {/* Input Section */}
-                                        <div className="flex-1 min-h-[200px] flex flex-col justify-center">
-                                            {allQuestions[currentStep]
-                                                .options &&
-                                            allQuestions[currentStep].options!
-                                                .length > 0 ? (
-                                                <div className="grid grid-cols-1 gap-4">
-                                                    {(
+                                    {/* Input Section */}
+                                    <div className="space-y-2">
+                                        {allQuestions[currentStep].options &&
+                                        allQuestions[currentStep].options!
+                                            .length > 0 ? (
+                                            <div className="space-y-2">
+                                                {(
+                                                    allQuestions[currentStep]
+                                                        .options || []
+                                                ).map((opt: string) => (
+                                                    <motion.button
+                                                        key={opt}
+                                                        whileHover={{
+                                                            x: 4,
+                                                        }}
+                                                        whileTap={{
+                                                            scale: 0.99,
+                                                        }}
+                                                        onClick={() =>
+                                                            setAnswers({
+                                                                ...answers,
+                                                                [allQuestions[
+                                                                    currentStep
+                                                                ].id ||
+                                                                `q-${currentStep}`]:
+                                                                    opt,
+                                                            })
+                                                        }
+                                                        className={clsx(
+                                                            "w-full p-4 rounded-xl text-left font-medium transition-all flex items-center justify-between group border",
+                                                            answers[
+                                                                allQuestions[
+                                                                    currentStep
+                                                                ].id ||
+                                                                    `q-${currentStep}`
+                                                            ] === opt
+                                                                ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-500/15"
+                                                                : "bg-slate-50/50 border-slate-100 text-navy-900 hover:border-blue-200 hover:bg-white hover:shadow-sm",
+                                                        )}
+                                                    >
+                                                        <span className="text-sm">
+                                                            {opt}
+                                                        </span>
+                                                        <CheckCircle2
+                                                            className={clsx(
+                                                                "w-4 h-4 transition-all shrink-0",
+                                                                answers[
+                                                                    allQuestions[
+                                                                        currentStep
+                                                                    ].id ||
+                                                                        `q-${currentStep}`
+                                                                ] === opt
+                                                                    ? "opacity-100"
+                                                                    : "opacity-0 group-hover:opacity-20",
+                                                            )}
+                                                        />
+                                                    </motion.button>
+                                                ))}
+                                            </div>
+                                        ) : allQuestions[currentStep].type ===
+                                          "boolean" ? (
+                                            <div className="grid grid-cols-2 gap-3">
+                                                {["Sí", "No"].map((opt) => (
+                                                    <motion.button
+                                                        key={opt}
+                                                        whileHover={{
+                                                            y: -2,
+                                                        }}
+                                                        whileTap={{
+                                                            scale: 0.97,
+                                                        }}
+                                                        onClick={() =>
+                                                            setAnswers({
+                                                                ...answers,
+                                                                [allQuestions[
+                                                                    currentStep
+                                                                ].id ||
+                                                                `q-${currentStep}`]:
+                                                                    opt,
+                                                            })
+                                                        }
+                                                        className={clsx(
+                                                            "p-5 border rounded-2xl font-bold text-lg transition-all",
+                                                            answers[
+                                                                allQuestions[
+                                                                    currentStep
+                                                                ].id ||
+                                                                    `q-${currentStep}`
+                                                            ] === opt
+                                                                ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-500/15"
+                                                                : "bg-slate-50/50 border-slate-100 text-navy-900 hover:border-blue-200 hover:bg-white",
+                                                        )}
+                                                    >
+                                                        {opt}
+                                                    </motion.button>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <textarea
+                                                placeholder="Describe tu respuesta aquí..."
+                                                className="w-full p-4 bg-slate-50/50 border border-slate-100 rounded-xl text-navy-900 text-sm font-medium focus:border-blue-400 focus:bg-white outline-none transition-all resize-none min-h-[100px] md:min-h-[120px] placeholder:text-slate-400"
+                                                value={
+                                                    answers[
                                                         allQuestions[
                                                             currentStep
-                                                        ].options || []
-                                                    ).map((opt: string) => (
-                                                        <motion.button
-                                                            key={opt}
-                                                            whileHover={{
-                                                                x: 5,
-                                                            }}
-                                                            whileTap={{
-                                                                scale: 0.98,
-                                                            }}
-                                                            onClick={() =>
-                                                                setAnswers({
-                                                                    ...answers,
-                                                                    [allQuestions[
-                                                                        currentStep
-                                                                    ].id ||
-                                                                    `q-${currentStep}`]:
-                                                                        opt,
-                                                                })
-                                                            }
-                                                            className={clsx(
-                                                                "w-full p-5 border-2 rounded-2xl text-left font-bold transition-all flex items-center justify-between group",
-                                                                answers[
-                                                                    allQuestions[
-                                                                        currentStep
-                                                                    ].id ||
-                                                                        `q-${currentStep}`
-                                                                ] === opt
-                                                                    ? "bg-blue-600 text-white border-blue-600 shadow-xl shadow-blue-500/20"
-                                                                    : "bg-slate-50 border-slate-100 text-navy-900 hover:border-blue-300 hover:bg-white",
-                                                            )}
-                                                        >
-                                                            <span className="text-lg">
-                                                                {opt}
-                                                            </span>
-                                                            <CheckCircle2
-                                                                className={clsx(
-                                                                    "w-6 h-6 transition-all",
-                                                                    answers[
-                                                                        allQuestions[
-                                                                            currentStep
-                                                                        ].id ||
-                                                                            `q-${currentStep}`
-                                                                    ] === opt
-                                                                        ? "opacity-100"
-                                                                        : "opacity-0 group-hover:opacity-20",
-                                                                )}
-                                                            />
-                                                        </motion.button>
-                                                    ))}
-                                                </div>
-                                            ) : allQuestions[currentStep]
-                                                  .type === "boolean" ? (
-                                                <div className="grid grid-cols-2 gap-6">
-                                                    {["Sí", "No"].map((opt) => (
-                                                        <motion.button
-                                                            key={opt}
-                                                            whileHover={{
-                                                                y: -5,
-                                                            }}
-                                                            whileTap={{
-                                                                scale: 0.95,
-                                                            }}
-                                                            onClick={() =>
-                                                                setAnswers({
-                                                                    ...answers,
-                                                                    [allQuestions[
-                                                                        currentStep
-                                                                    ].id ||
-                                                                    `q-${currentStep}`]:
-                                                                        opt,
-                                                                })
-                                                            }
-                                                            className={clsx(
-                                                                "p-10 border-2 rounded-4xl font-black text-3xl transition-all shadow-sm",
-                                                                answers[
-                                                                    allQuestions[
-                                                                        currentStep
-                                                                    ].id ||
-                                                                        `q-${currentStep}`
-                                                                ] === opt
-                                                                    ? "bg-blue-600 text-white border-blue-600 shadow-2xl shadow-blue-500/30"
-                                                                    : "bg-slate-50 border-slate-100 text-navy-900 hover:border-blue-300 hover:bg-white",
-                                                            )}
-                                                        >
-                                                            {opt}
-                                                        </motion.button>
-                                                    ))}
-                                                </div>
-                                            ) : (
-                                                <textarea
-                                                    placeholder="Describe tu respuesta técnica aquí..."
-                                                    className="w-full flex-1 p-8 bg-slate-50 border-2 border-slate-100 rounded-4xl text-navy-900 text-lg font-medium focus:border-blue-600 focus:bg-white outline-none transition-all resize-none shadow-inner min-h-[180px]"
-                                                    value={
-                                                        answers[
-                                                            allQuestions[
-                                                                currentStep
-                                                            ].id ||
-                                                                `q-${currentStep}`
-                                                        ] || ""
-                                                    }
-                                                    onChange={(e) =>
-                                                        setAnswers({
-                                                            ...answers,
-                                                            [allQuestions[
-                                                                currentStep
-                                                            ].id ||
-                                                            `q-${currentStep}`]:
-                                                                e.target.value,
-                                                        })
-                                                    }
-                                                />
-                                            )}
-                                        </div>
-
-                                        <div className="flex items-center justify-between pt-6 border-t border-slate-100">
-                                            <button
-                                                onClick={handleBackBtn}
-                                                disabled={currentStep === 0}
-                                                className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-400 hover:text-navy-900 disabled:opacity-0 transition-colors"
-                                            >
-                                                <ArrowLeft className="w-5 h-5" />
-                                                Atrás
-                                            </button>
-
-                                            <motion.button
-                                                whileHover={{ scale: 1.02 }}
-                                                whileTap={{ scale: 0.98 }}
-                                                onClick={() =>
-                                                    handleNext(
-                                                        allQuestions.length,
-                                                    )
+                                                        ].id ||
+                                                            `q-${currentStep}`
+                                                    ] || ""
                                                 }
-                                                disabled={
-                                                    isSubmitting ||
-                                                    (allQuestions[currentStep]
-                                                        .type !== "text" &&
-                                                        !answers[
-                                                            allQuestions[
-                                                                currentStep
-                                                            ].id ||
-                                                                `q-${currentStep}`
-                                                        ])
+                                                onChange={(e) =>
+                                                    setAnswers({
+                                                        ...answers,
+                                                        [allQuestions[
+                                                            currentStep
+                                                        ].id ||
+                                                        `q-${currentStep}`]:
+                                                            e.target.value,
+                                                    })
                                                 }
-                                                className={clsx(
-                                                    "px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl transition-all flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed",
-                                                    isSubmitting
-                                                        ? "bg-slate-100 text-slate-400"
-                                                        : "bg-navy-900 text-white shadow-navy-900/20 hover:bg-blue-600",
-                                                )}
-                                            >
-                                                {isSubmitting ? (
-                                                    <>
-                                                        <Loader2 className="w-5 h-5 animate-spin" />{" "}
-                                                        Procesando...
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        {currentStep ===
-                                                        allQuestions.length - 1
-                                                            ? "Finalizar Protocolo"
-                                                            : "Continuar"}
-                                                        <ChevronRight className="w-5 h-5" />
-                                                    </>
-                                                )}
-                                            </motion.button>
-                                        </div>
+                                            />
+                                        )}
                                     </div>
-                                </motion.div>
-                            </AnimatePresence>
-                        </div>
+
+                                    {/* Navigation */}
+                                    <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+                                        <button
+                                            onClick={handleBackBtn}
+                                            disabled={currentStep === 0}
+                                            className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-navy-900 disabled:opacity-0 transition-colors"
+                                        >
+                                            <ArrowLeft className="w-4 h-4" />
+                                            Atrás
+                                        </button>
+
+                                        <motion.button
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
+                                            onClick={() =>
+                                                handleNext(allQuestions.length)
+                                            }
+                                            disabled={
+                                                isSubmitting ||
+                                                (allQuestions[currentStep]
+                                                    .type !== "text" &&
+                                                    !answers[
+                                                        allQuestions[
+                                                            currentStep
+                                                        ].id ||
+                                                            `q-${currentStep}`
+                                                    ])
+                                            }
+                                            className={clsx(
+                                                "px-5 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed",
+                                                isSubmitting
+                                                    ? "bg-slate-100 text-slate-400"
+                                                    : "bg-blue-600 text-white hover:bg-blue-700 shadow-sm shadow-blue-600/20",
+                                            )}
+                                        >
+                                            {isSubmitting ? (
+                                                <>
+                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                    Procesando...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    {currentStep ===
+                                                    allQuestions.length - 1
+                                                        ? "Finalizar"
+                                                        : "Continuar"}
+                                                    <ChevronRight className="w-4 h-4" />
+                                                </>
+                                            )}
+                                        </motion.button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </AnimatePresence>
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center justify-center py-32 space-y-8">
+                    <div className="flex flex-col items-center justify-center py-20 space-y-6">
                         <div className="relative">
-                            <div className="w-24 h-24 bg-white rounded-[2.5rem] flex items-center justify-center border border-slate-100 shadow-xl">
-                                <Zap className="w-12 h-12 text-blue-600 animate-pulse" />
+                            <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center border border-slate-100 shadow-sm">
+                                <Zap className="w-7 h-7 text-blue-600 animate-pulse" />
                             </div>
-                            <div className="absolute -inset-4 bg-blue-500/10 blur-3xl rounded-full -z-10 animate-pulse"></div>
                         </div>
-                        <div className="text-center space-y-4">
-                            <h3 className="text-3xl font-black text-navy-950 font-display tracking-tight">
+                        <div className="text-center space-y-2">
+                            <h3 className="text-lg font-bold text-navy-950 tracking-tight">
                                 Sincronizando Inteligencia...
                             </h3>
-                            <p className="text-slate-500 text-lg font-medium max-w-sm mx-auto leading-relaxed">
-                                Estamos extrayendo los horizontes estratégicos
-                                de este recurso para tu arquitectura.
+                            <p className="text-slate-400 text-sm font-medium max-w-xs mx-auto leading-relaxed">
+                                Extrayendo los horizontes estratégicos de este
+                                recurso.
                             </p>
-                            <div className="flex justify-center gap-1">
+                            <div className="flex justify-center gap-1 pt-2">
                                 {[0, 1, 2].map((i) => (
                                     <motion.div
                                         key={i}
@@ -751,7 +733,7 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                             repeat: Infinity,
                                             delay: i * 0.2,
                                         }}
-                                        className="w-2 h-2 rounded-full bg-blue-600"
+                                        className="w-1.5 h-1.5 rounded-full bg-blue-600"
                                     />
                                 ))}
                             </div>
