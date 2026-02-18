@@ -64,6 +64,7 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
     const [generatedData, setGeneratedData] = useState<GeneratedContent | null>(
         null,
     );
+    const [initialCheckDone, setInitialCheckDone] = useState(false);
     const hasTriggeredRef = useRef<boolean>(false);
 
     const qProcess =
@@ -97,6 +98,12 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
         }
     }, [currentItem.id]);
 
+    // Initial Sync on mount
+    useEffect(() => {
+        setInitialCheckDone(false);
+        refreshContent().finally(() => setInitialCheckDone(true));
+    }, [refreshContent]);
+
     const handleFinishAnswers = async () => {
         try {
             setIsSubmitting(true);
@@ -126,6 +133,8 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
     // Webhook Trigger Logic
     useEffect(() => {
         const triggerWebhook = async () => {
+            if (!initialCheckDone) return; // CRITICAL: Wait for data sync before triggering generation
+
             if (
                 !isCompleted &&
                 allQuestions.length === 0 &&
@@ -187,6 +196,7 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
         currentItem.fullData,
         refreshContent,
         showToast,
+        initialCheckDone,
     ]);
 
     // Fetch generated content if already completed
@@ -464,7 +474,7 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                 {isCompleted ? (
                     renderAnalysis()
                 ) : allQuestions.length > 0 ? (
-                    <div className="max-w-xl mx-auto space-y-10">
+                    <div className="max-w-3xl mx-auto space-y-6">
                         {/* Improved Progress Header */}
                         <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
                             <div className="flex items-center justify-between mb-4">
@@ -523,7 +533,7 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                     }}
                                     className="w-full"
                                 >
-                                    <div className="bg-white rounded-4xl p-8 md:p-12 border border-slate-100 shadow-2xl shadow-blue-500/5 space-y-10 border-t-8 border-t-blue-600">
+                                    <div className="bg-white rounded-4xl p-6 md:p-8 border border-slate-100 shadow-2xl shadow-blue-500/5 space-y-8 border-t-8 border-t-blue-600">
                                         <div className="space-y-4">
                                             <div className="flex items-center gap-2">
                                                 <div className="w-2 h-2 rounded-full bg-blue-600" />
@@ -535,7 +545,7 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                                     }
                                                 </span>
                                             </div>
-                                            <h4 className="text-3xl font-bold text-navy-900 leading-tight tracking-tight">
+                                            <h4 className="text-2xl font-bold text-navy-900 leading-tight tracking-tight">
                                                 {
                                                     allQuestions[currentStep]
                                                         .question
@@ -585,7 +595,7 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                                                     : "bg-slate-50 border-slate-100 text-navy-900 hover:border-blue-300 hover:bg-white",
                                                             )}
                                                         >
-                                                            <span className="text-lg">
+                                                            <span className="text-base">
                                                                 {opt}
                                                             </span>
                                                             <CheckCircle2
@@ -627,7 +637,7 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                                                 })
                                                             }
                                                             className={clsx(
-                                                                "p-10 border-2 rounded-4xl font-black text-3xl transition-all shadow-sm",
+                                                                "p-6 border-2 rounded-4xl font-black text-xl transition-all shadow-sm",
                                                                 answers[
                                                                     allQuestions[
                                                                         currentStep
@@ -645,7 +655,7 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                             ) : (
                                                 <textarea
                                                     placeholder="Describe tu respuesta técnica aquí..."
-                                                    className="w-full flex-1 p-8 bg-slate-50 border-2 border-slate-100 rounded-4xl text-navy-900 text-lg font-medium focus:border-blue-600 focus:bg-white outline-none transition-all resize-none shadow-inner min-h-[180px]"
+                                                    className="w-full flex-1 p-6 bg-slate-50 border-2 border-slate-100 rounded-4xl text-navy-900 text-base font-medium focus:border-blue-600 focus:bg-white outline-none transition-all resize-none shadow-inner min-h-[150px]"
                                                     value={
                                                         answers[
                                                             allQuestions[
@@ -735,11 +745,12 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                         </div>
                         <div className="text-center space-y-4">
                             <h3 className="text-3xl font-black text-navy-950 font-display tracking-tight">
-                                Sincronizando Inteligencia...
+                                {!initialCheckDone ? "Sincronizando Recurso..." : "Generando Protocolo..."}
                             </h3>
                             <p className="text-slate-500 text-lg font-medium max-w-sm mx-auto leading-relaxed">
-                                Estamos extrayendo los horizontes estratégicos
-                                de este recurso para tu arquitectura.
+                                {!initialCheckDone 
+                                    ? "Consultando el estado actual de tu inteligencia estratégica."
+                                    : "Estamos extrayendo los horizontes estratégicos de este recurso para tu arquitectura."}
                             </p>
                             <div className="flex justify-center gap-1">
                                 {[0, 1, 2].map((i) => (

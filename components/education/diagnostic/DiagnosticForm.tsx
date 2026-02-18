@@ -15,7 +15,7 @@ export default function DiagnosticForm({ onComplete }: { onComplete?: () => void
     };
 
     return (
-        <div className="w-full max-w-2xl mx-auto py-6 md:py-12">
+        <div className="w-full max-w-3xl mx-auto py-6 md:py-12">
             {/* Progress Header */}
             <div className="flex items-center justify-between mb-8">
                 <div>
