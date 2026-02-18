@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles, ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 
 export default function DiagnosticForm({ onComplete }: { onComplete?: () => void }) {
     const [step, setStep] = useState(1);

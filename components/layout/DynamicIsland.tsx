@@ -24,7 +24,11 @@ interface DynamicIslandProps {
         mode: "pulse" | "compare" | "fusion" | "deep",
     ) => void;
     isThinking?: boolean;
+    isDeep?: boolean;
+    setIsDeep?: (isDeep: boolean) => void;
 }
+
+import BrandAtom from "@/components/ui/BrandAtom";
 
 export default function DynamicIsland({
     currentMode,
@@ -34,6 +38,8 @@ export default function DynamicIsland({
     intelligenceMode = "pulse",
     setIntelligenceMode,
     isThinking = false,
+    isDeep = false,
+    setIsDeep,
 }: DynamicIslandProps) {
     const { currentRole } = useAppStore();
     const containerRef = useRef<HTMLDivElement>(null);
@@ -62,7 +68,6 @@ export default function DynamicIsland({
             className="relative z-50 flex flex-col items-center justify-start pt-2 xs:pt-4 gap-3 xs:gap-4 md:gap-6 w-full"
             ref={containerRef}
         >
-            {/* 1. System Status Indicator (Apple Pro Label) */}
             {/* 1. System Status Indicator (Apple Pro Label) */}
             <button
                 onClick={() =>

@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, Sparkles, ArrowRight } from "lucide-react";
+import { BookOpen, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function EmptyLibrary() {
@@ -24,21 +24,7 @@ export default function EmptyLibrary() {
                 <div className="relative w-24 h-24 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl shadow-blue-500/10 border border-slate-100 ring-1 ring-slate-100">
                     <BookOpen className="w-10 h-10 text-blue-600" />
 
-                    {/* Floating Sparkles */}
-                    <motion.div
-                        animate={{
-                            y: [0, -10, 0],
-                            opacity: [0.5, 1, 0.5],
-                        }}
-                        transition={{
-                            duration: 3,
-                            repeat: Infinity,
-                            ease: "easeInOut",
-                        }}
-                        className="absolute -top-2 -right-2 bg-amber-50 p-2 rounded-xl border border-amber-100 shadow-sm"
-                    >
-                        <Sparkles className="w-4 h-4 text-amber-500" />
-                    </motion.div>
+                    {/* Decorative element removed */}
                 </div>
             </motion.div>
 

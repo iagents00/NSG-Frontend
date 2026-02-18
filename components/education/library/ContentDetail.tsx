@@ -3,7 +3,6 @@
 import { EducationContent } from "@/types/education";
 import {
     ArrowLeft,
-    Sparkles,
     Brain,
     Loader2,
     Target,
@@ -19,6 +18,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { educationService } from "@/lib/education";
 import clsx from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
+import ReactMarkdown from "react-markdown";
 
 interface ContentDetailProps {
     item: EducationContent;
@@ -136,7 +136,7 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                 try {
                     const fullData = currentItem.fullData as any;
 
-                    await fetch(
+                    const res = await fetch(
                         `/api/nsg-education/content/${currentItem.id}/questions`,
                         {
                             method: "POST",
@@ -147,6 +147,30 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                             }),
                         },
                     );
+
+                    if (res.ok) {
+                        const responseText = await res.text();
+                        let raw;
+                        try {
+                            raw = responseText ? JSON.parse(responseText) : {};
+                        } catch {
+                            raw = {};
+                        }
+
+                        // Normalize n8n array response [ { ... } ]
+                        const data = Array.isArray(raw) ? raw[0] : raw;
+
+                        if (data && data.question_process) {
+                            setCurrentItem((prev) => ({
+                                ...prev,
+                                question_process: data.question_process,
+                            }));
+                            showToast(
+                                "Protocolo de preguntas generado",
+                                "success",
+                            );
+                        }
+                    }
 
                     setTimeout(refreshContent, 3000);
                 } catch (error) {
@@ -162,6 +186,7 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
         currentItem.id,
         currentItem.fullData,
         refreshContent,
+        showToast,
     ]);
 
     // Fetch generated content if already completed
@@ -245,16 +270,18 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                     <div className="relative z-10 space-y-4">
                         <div className="flex items-center gap-3">
                             <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200">
-                                <Sparkles className="w-6 h-6 text-white" />
+                                <Brain className="w-6 h-6 text-white" />
                             </div>
-                            <h3 className="text-2xl md:text-3xl font-black text-navy-900 tracking-tight">
-                                Análisis Estratégico
-                            </h3>
+                            <div className="text-2xl md:text-3xl font-black text-navy-900 tracking-tight prose prose-p:my-0 prose-strong:text-navy-900">
+                                <ReactMarkdown>Análisis Estratégico</ReactMarkdown>
+                            </div>
                         </div>
-                        <p className="text-slate-500 text-lg font-medium leading-relaxed max-w-2xl">
-                            {data.summary ||
-                                "He procesado este recurso bajo tu arquitectura de pensamiento. Aquí tienes el horizonte de ejecución."}
-                        </p>
+                        <div className="text-slate-500 text-lg font-medium leading-relaxed max-w-2xl prose prose-p:my-0 prose-strong:text-slate-700">
+                            <ReactMarkdown>
+                                {data.summary ||
+                                    "He procesado este recurso bajo tu arquitectura de pensamiento. Aquí tienes el horizonte de ejecución."}
+                            </ReactMarkdown>
+                        </div>
                     </div>
                 </motion.div>
 
@@ -266,9 +293,9 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                     >
                         <div className="flex items-center gap-3 text-blue-600">
                             <Lightbulb className="w-6 h-6" />
-                            <h4 className="font-bold text-lg uppercase tracking-wider">
-                                Key Insights
-                            </h4>
+                            <div className="font-bold text-lg uppercase tracking-wider prose prose-p:my-0 prose-strong:text-blue-600">
+                                <ReactMarkdown>Key Insights</ReactMarkdown>
+                            </div>
                         </div>
                         <div className="space-y-4">
                             {(data.key_insights || []).map(
@@ -283,9 +310,9 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                         <span className="text-xl shrink-0">
                                             {insight.icon || "💡"}
                                         </span>
-                                        <p className="text-sm font-medium text-slate-700 leading-relaxed">
-                                            {insight.text}
-                                        </p>
+                                        <div className="text-sm font-medium text-slate-700 leading-relaxed prose prose-p:my-0 prose-strong:text-slate-900">
+                                            <ReactMarkdown>{insight.text}</ReactMarkdown>
+                                        </div>
                                     </div>
                                 ),
                             )}
@@ -302,26 +329,30 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                         </div>
                         <div className="flex items-center gap-3 text-blue-400 relative z-10">
                             <Target className="w-6 h-6" />
-                            <h4 className="font-bold text-lg uppercase tracking-wider">
-                                Alineación
-                            </h4>
+                            <div className="font-bold text-lg uppercase tracking-wider prose prose-p:my-0 prose-strong:text-blue-400">
+                                <ReactMarkdown>Alineación</ReactMarkdown>
+                            </div>
                         </div>
                         <div className="space-y-6 relative z-10">
                             <div className="space-y-2">
                                 <span className="text-[10px] font-black uppercase tracking-widest text-blue-400">
                                     Objetivo
                                 </span>
-                                <p className="text-sm leading-relaxed text-slate-200">
-                                    {data.strategic_analysis?.alignment}
-                                </p>
+                                <div className="text-sm leading-relaxed text-slate-200 prose prose-p:my-0 prose-strong:text-white prose-invert">
+                                    <ReactMarkdown>
+                                        {data.strategic_analysis?.alignment || ''}
+                                    </ReactMarkdown>
+                                </div>
                             </div>
                             <div className="space-y-2">
                                 <span className="text-[10px] font-black uppercase tracking-widest text-blue-400">
                                     Bypass de Fricción
                                 </span>
-                                <p className="text-sm leading-relaxed text-slate-200">
-                                    {data.strategic_analysis?.friction_bypass}
-                                </p>
+                                <div className="text-sm leading-relaxed text-slate-200 prose prose-p:my-0 prose-strong:text-white prose-invert">
+                                    <ReactMarkdown>
+                                        {data.strategic_analysis?.friction_bypass || ''}
+                                    </ReactMarkdown>
+                                </div>
                             </div>
                         </div>
                     </motion.div>
@@ -335,9 +366,9 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3 text-emerald-600">
                             <ListChecks className="w-6 h-6" />
-                            <h4 className="font-bold text-lg uppercase tracking-wider">
-                                Plan de Acción
-                            </h4>
+                            <div className="font-bold text-lg uppercase tracking-wider prose prose-p:my-0 prose-strong:text-emerald-600">
+                                <ReactMarkdown>Plan de Acción</ReactMarkdown>
+                            </div>
                         </div>
                         <span className="text-[10px] font-black bg-emerald-50 text-emerald-600 px-4 py-1.5 rounded-full uppercase">
                             Próximos Pasos
@@ -362,9 +393,9 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                         {i + 1}
                                     </div>
                                     <div className="flex-1">
-                                        <p className="font-bold text-navy-900">
-                                            {step.task}
-                                        </p>
+                                        <div className="font-bold text-navy-900 prose prose-p:my-0 prose-strong:text-navy-900">
+                                            <ReactMarkdown>{step.task}</ReactMarkdown>
+                                        </div>
                                         <div className="flex items-center gap-4 mt-1">
                                             <span
                                                 className={clsx(
@@ -404,15 +435,16 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                             <ArrowLeft className="w-5 h-5" />
                         </button>
                         <div>
-                            <h2 className="font-bold text-navy-900 leading-none">
-                                {generatedData?.question_process_generated
-                                    ?.title ||
-                                    currentItem.title ||
-                                    (currentItem.fullData as any)?.title ||
-                                    "Recurso de Inteligencia"}
-                            </h2>
+                            <div className="font-bold text-navy-900 leading-none prose prose-p:my-0 prose-strong:text-navy-900">
+                                <ReactMarkdown>
+                                    {generatedData?.question_process_generated
+                                        ?.title ||
+                                        currentItem.title ||
+                                        (currentItem.fullData as any)?.title ||
+                                        "Recurso de Inteligencia"}
+                                </ReactMarkdown>
+                            </div>
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 flex items-center gap-1.5">
-                                <Sparkles className="w-3 h-3 text-blue-500" />
                                 {isCompleted
                                     ? "Análisis Estratégico Finalizado"
                                     : "Agente de Inteligencia Estratégica"}

@@ -47,6 +47,7 @@ export interface ChatPayload {
         url: string; // URL pública o Base64
         type: string; // 'application/pdf', 'audio/ogg'
     }>;
+    isDeep?: boolean;
 }
 
 const MessageItem = React.memo(
@@ -780,6 +781,7 @@ export default function ChatInterface() {
         "pulse" | "compare" | "fusion" | "deep"
     >("pulse");
     const [isModeOpen, setIsModeOpen] = useState(false);
+    const [isDeep, setIsDeep] = useState(false);
     const [isHydrating, setIsHydrating] = useState(false);
 
     // Enforce 'Standard' mode on initial entry & Init Session
@@ -1214,11 +1216,12 @@ Tu obstáculo declarado es la 'Ambigüedad' con Duke y el 'Scroll' personal. Amb
             const payload: ChatPayload = {
                 chatId: effectiveSessionId,
                 userId: userId,
-                field: field,
+                field: field.toLowerCase(),
                 message: finalMessage,
                 mode: intelligenceMode as "pulse" | "compare" | "fusion",
                 aiModel: aiModel,
                 attachments: [],
+                isDeep: isDeep,
             };
 
             if (attachment) {
@@ -1832,6 +1835,8 @@ Tu obstáculo declarado es la 'Ambigüedad' con Duke y el 'Scroll' personal. Amb
                             intelligenceMode={intelligenceMode}
                             setIntelligenceMode={setIntelligenceMode}
                             isThinking={isLoading}
+                            isDeep={isDeep}
+                            setIsDeep={setIsDeep}
                         />
                     </div>
                 </div>
@@ -1903,6 +1908,46 @@ Tu obstáculo declarado es la 'Ambigüedad' con Duke y el 'Scroll' personal. Amb
                                 onSubmit={handleSubmit}
                                 className="relative group"
                             >
+                                {/* DEEP MODE TOGGLE - CENTERED NOTCH */}
+                                <div className="absolute -top-5 left-1/2 -translate-x-1/2 z-20">
+                                    <motion.button
+                                        layout
+                                        type="button"
+                                        onClick={() => setIsDeep(!isDeep)}
+                                        whileTap={{ scale: 0.96 }}
+                                        className={clsx(
+                                            "flex items-center h-[34px] rounded-full transition-all duration-300 border shadow-[0_4px_12px_rgba(0,0,0,0.05)] select-none overflow-hidden relative backdrop-blur-md",
+                                            isDeep
+                                                ? "gap-1.5 pl-2 pr-3.5 bg-blue-50/90 border-blue-200 ring-4 ring-white" // Active
+                                                : "gap-0 px-2.5 bg-white/90 border-slate-200 hover:bg-white hover:border-slate-300 ring-4 ring-white" // Inactive
+                                        )}
+                                    >
+                                        <motion.div 
+                                            layout="position"
+                                            className="relative w-4 h-4 flex-shrink-0"
+                                        >
+                                             <BrandAtom 
+                                                className={clsx("w-full h-full transition-transform duration-300", isDeep ? "scale-110 rotate-180" : "scale-100 opacity-60 grayscale group-hover:grayscale-0 group-hover:opacity-100")} 
+                                                variant="colored"
+                                            />
+                                        </motion.div>
+                                        
+                                        <AnimatePresence>
+                                            {isDeep && (
+                                                <motion.span
+                                                    initial={{ opacity: 0, width: 0 }}
+                                                    animate={{ opacity: 1, width: "auto" }}
+                                                    exit={{ opacity: 0, width: 0 }}
+                                                    transition={{ duration: 0.2 }}
+                                                    className="text-[12px] font-bold leading-none pt-0.5 text-blue-700 whitespace-nowrap"
+                                                >
+                                                    Deep
+                                                </motion.span>
+                                            )}
+                                        </AnimatePresence>
+                                    </motion.button>
+                                </div>
+
                                 <div className="relative flex flex-col bg-white rounded-[28px] shadow-[0_4px_20px_rgba(0,0,0,0.08)] focus-within:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-shadow duration-300">
                                     {/* Attachment Preview */}
                                     {attachment && (
@@ -1982,9 +2027,6 @@ Tu obstáculo declarado es la 'Ambigüedad' con Duke y el 'Scroll' personal. Amb
                                             >
                                                 <Mic className="w-5 h-5" />
                                             </button>
-
-                                            {/* SEPARATOR */}
-                                            <div className="w-px h-5 bg-slate-200 mx-1" />
 
                                             {/* INTELLIGENCE MODE SELECTOR (Pro-Futuristic) */}
                                             <div className="relative">
