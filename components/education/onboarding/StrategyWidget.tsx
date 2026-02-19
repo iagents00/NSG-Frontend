@@ -240,7 +240,7 @@ export default function StrategyWidget({
                         "A) Visual (Esquema/Diagrama)",
                         "B) Auditivo (Podcast)",
                         "C) Texto (Documento)",
-                        "D) Cinestésico (Ejercicio)",
+                        "D) Prácticas (Ejercicio)",
                         "E) Otro",
                     ],
                 });

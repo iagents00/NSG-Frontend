@@ -1,0 +1,642 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Check,
+  Plus,
+  Zap,
+  Target,
+  BrainCircuit,
+  MessageCircle,
+  TrendingUp,
+  Clock,
+  ChevronRight,
+  BookOpen,
+  Award,
+  Search,
+  X,
+  Calendar,
+  Filter,
+  ArrowUpRight,
+  MoreHorizontal,
+  Activity,
+  Smartphone,
+  Command,
+  ChevronLeft,
+  Maximize2
+} from 'lucide-react';
+
+// --- SISTEMA DE DISEÑO ULTRA-PREMIUM ---
+
+const cn = (...classes) => classes.filter(Boolean).join(' ');
+
+// Constantes de Diseño "Apple Glass" Refinado
+const GLASS_BASE = "bg-white/80 backdrop-blur-2xl border border-white/60 shadow-[0_4px_20px_rgb(0,0,0,0.03)]";
+const GLASS_PANEL = ${GLASS_BASE} rounded-[1.8rem];
+const GLASS_DRAWER = "bg-white/95 backdrop-blur-3xl border-l border-white/50 shadow-[-20px_0_50px_rgba(0,0,0,0.05)]";
+const BTN_PRIMARY = "bg-[#007AFF] hover:bg-[#0062CC] text-white shadow-[0_4px_14px_0_rgba(0,122,255,0.3)] transition-all duration-300 rounded-2xl font-medium tracking-wide active:scale-95";
+const INPUT_GLASS = "bg-slate-50/50 hover:bg-slate-100/80 focus:bg-white border-transparent focus:border-blue-500/30 focus:ring-4 focus:ring-blue-500/10 transition-all duration-300 rounded-xl outline-none";
+
+// Checkbox estilo "Sky Crystal" (Dopamina Visual)
+const CHECKBOX_BASE = "min-w-[26px] h-[26px] rounded-full flex items-center justify-center transition-all duration-500 shadow-sm border border-slate-200";
+const CHECKBOX_UNCHECKED = "bg-white/50 hover:bg-white hover:border-cyan-300 hover:shadow-[0_0_10px_rgba(103,232,249,0.3)]";
+const CHECKBOX_CHECKED = "bg-gradient-to-tr from-cyan-400 to-blue-500 border-transparent text-white shadow-[0_0_20px_rgba(6,182,212,0.6)] scale-110 rotate-[360deg]";
+
+// --- DATOS MOCKUP ---
+
+const INITIAL_TASKS = [
+  { 
+    id: 1, 
+    title: "Definir OKRs Q3 Estratégicos", 
+    description: "Alinear métricas clave con el equipo directivo.",
+    impact: "Alto", 
+    score: 9.5,
+    area: "Estrategia", 
+    completed: false, 
+    date: "2023-10-24",
+    agentState: "waiting_evidence", 
+    agentLog: [
+      { time: "09:00 AM", event: "Detectado por análisis de calendario" },
+      { time: "10:30 AM", event: "Ping enviado vía Telegram" },
+      { time: "10:35 AM", event: "Usuario confirmó inicio" }
+    ]
+  },
+  { 
+    id: 2, 
+    title: "Revisión de Arquitectura Backend", 
+    description: "Auditar los endpoints de mayor latencia.",
+    impact: "Alto", 
+    score: 8.2,
+    area: "Tech", 
+    completed: false, 
+    date: "2023-10-24",
+    agentState: "pinged",
+    agentLog: [
+      { time: "11:00 AM", event: "Sugerido basado en bloqueo técnico previo" }
+    ]
+  },
+  { 
+    id: 3, 
+    title: "Responder correos de inversores", 
+    description: "Enviar reporte mensual de crecimiento.",
+    impact: "Medio", 
+    score: 6.5,
+    area: "Admin", 
+    completed: true, 
+    date: "2023-10-23",
+    agentState: "verified",
+    agentLog: []
+  },
+  { 
+    id: 4, 
+    title: "Análisis de competencia trimestral", 
+    description: "Revisar lanzamientos de producto de Q2.",
+    impact: "Medio", 
+    score: 5.0,
+    area: "Marketing", 
+    completed: false, 
+    date: "2023-10-25",
+    agentState: "detected",
+    agentLog: []
+  },
+];
+
+const INITIAL_DAYS = [
+  { day: 'L', date: 23, active: false },
+  { day: 'M', date: 24, active: true },
+  { day: 'X', date: 25, active: false },
+  { day: 'J', date: 26, active: false },
+  { day: 'V', date: 27, active: false },
+  { day: 'S', date: 28, active: false },
+  { day: 'D', date: 29, active: false },
+];
+
+// --- COMPONENTES AUXILIARES ---
+
+const ImpactBadge = ({ level }) => {
+  const colors = {
+    Alto: "bg-blue-50 text-blue-600 border-blue-100",
+    Medio: "bg-slate-50 text-slate-500 border-slate-100",
+    Bajo: "bg-slate-50 text-slate-400 border-slate-100"
+  };
+  return (
+    <span className={cn("px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md border shadow-sm", colors[level] || colors.Bajo)}>
+      {level}
+    </span>
+  );
+};
+
+const PrioritySelector = ({ current, onChange }) => {
+  const options = ['Bajo', 'Medio', 'Alto'];
+  
+  return (
+    <div className="flex bg-slate-100/80 p-1 rounded-xl">
+      {options.map((opt) => {
+        const isActive = current === opt;
+        return (
+          <button
+            key={opt}
+            onClick={() => onChange(opt)}
+            className={cn(
+              "flex-1 py-2 text-xs font-bold uppercase tracking-wide rounded-lg transition-all duration-300",
+              isActive 
+                ? "bg-white text-blue-600 shadow-sm scale-[1.02]" 
+                : "text-slate-400 hover:text-slate-600"
+            )}
+          >
+            {opt}
+          </button>
+        );
+      })}
+    </div>
+  );
+};
+
+const AgentStatusPill = ({ state }) => {
+  const states = {
+    detected: { icon: BrainCircuit, label: "Detectado", color: "text-slate-400" },
+    pinged: { icon: MessageCircle, label: "Notificado", color: "text-blue-500" },
+    waiting_evidence: { icon: Clock, label: "Esperando", color: "text-amber-500" },
+    verified: { icon: Check, label: "Verificado", color: "text-emerald-500" },
+  };
+  const config = states[state] || states.detected;
+  const Icon = config.icon;
+
+  return (
+    <div className={cn("flex items-center gap-1 text-[11px] font-medium", config.color)}>
+      <Icon className="w-3.5 h-3.5" />
+      {config.label}
+    </div>
+  );
+};
+
+// --- COMPONENTE PRINCIPAL ---
+
+export default function FocusOSPro() {
+  const [tasks, setTasks] = useState(INITIAL_TASKS);
+  const [days, setDays] = useState(INITIAL_DAYS);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filter, setFilter] = useState("all"); 
+
+  // Cálculo de Progreso Diario
+  const stats = useMemo(() => {
+    const total = tasks.length;
+    const completed = tasks.filter(t => t.completed).length;
+    const progress = total === 0 ? 0 : (completed / total) * 100;
+    return { progress, total, completed };
+  }, [tasks]);
+
+  const filteredTasks = useMemo(() => {
+    return tasks
+      .filter(t => {
+        if (filter === 'high') return t.impact === 'Alto';
+        if (filter === 'active') return !t.completed;
+        return true;
+      })
+      .filter(t => t.title.toLowerCase().includes(searchQuery.toLowerCase()))
+      .sort((a, b) => (b.completed ? -1 : 1) * (b.score - a.score));
+  }, [tasks, filter, searchQuery]);
+
+  const handleToggleTask = (e, id) => {
+    e.stopPropagation();
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
+  };
+
+  const handleTitleChange = (id, newTitle) => {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, title: newTitle } : t));
+  };
+
+  const handleDescriptionChange = (id, newDesc) => {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, description: newDesc } : t));
+  };
+
+  const handleImpactChange = (newImpact) => {
+    // Simular cambio de score basado en impacto
+    const newScore = newImpact === 'Alto' ? 9.0 : newImpact === 'Medio' ? 6.0 : 3.0;
+    setSelectedTask(prev => ({ ...prev, impact: newImpact, score: newScore }));
+    
+    // Actualizar también en la lista principal
+    setTasks(prev => prev.map(t => t.id === selectedTask.id ? { ...t, impact: newImpact, score: newScore } : t));
+  };
+
+  const handleSelectDay = (index) => {
+    setDays(prev => prev.map((d, i) => ({ ...d, active: i === index })));
+  };
+
+  const handleAddTask = () => {
+    const newTask = {
+      id: Date.now(),
+      title: "Nueva Acción",
+      description: "Añade una descripción breve...",
+      impact: "Medio",
+      score: 5,
+      area: "General",
+      completed: false,
+      date: "2023-10-24",
+      agentState: "detected",
+      agentLog: [{ time: "Ahora", event: "Creado manualmente por usuario" }]
+    };
+    setTasks([newTask, ...tasks]);
+    setSelectedTask(newTask);
+  };
+
+  return (
+    <div className="min-h-screen bg-[#F2F2F7] text-[#1D1D1F] font-sans selection:bg-cyan-100 selection:text-cyan-900 overflow-x-hidden">
+      
+      {/* Fondo Ambiental Sutil (Aurora) */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-20%] left-[20%] w-[70%] h-[70%] bg-blue-100/30 rounded-full blur-[120px]" />
+        <div className="absolute top-[10%] right-[-10%] w-[50%] h-[50%] bg-cyan-100/30 rounded-full blur-[100px]" />
+      </div>
+
+      {/* STICKY TOP BAR */}
+      <nav className="sticky top-0 z-40 w-full px-6 py-4 backdrop-blur-xl bg-[#F2F2F7]/80 border-b border-white/40 shadow-sm transition-all duration-300">
+        <div className="max-w-5xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-black rounded-xl flex items-center justify-center text-white shadow-lg">
+              <Activity className="w-5 h-5" />
+            </div>
+            <span className="font-semibold text-lg tracking-tight text-[#1D1D1F]">FocusOS</span>
+          </div>
+
+          <div className="flex-1 max-w-sm mx-8 hidden md:block group">
+            <div className="relative transform transition-all duration-300 group-focus-within:scale-105">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-[#007AFF] transition-colors" />
+              <input 
+                type="text" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Buscar..." 
+                className="w-full bg-white/70 hover:bg-white border border-slate-200/50 focus:border-[#007AFF]/30 rounded-xl py-2 pl-10 pr-10 text-sm outline-none transition-all shadow-sm focus:shadow-lg focus:ring-4 focus:ring-[#007AFF]/10"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+             <button onClick={handleAddTask} className={cn(BTN_PRIMARY, "w-8 h-8 md:w-auto md:px-4 md:py-2 text-sm flex items-center justify-center gap-2 shadow-lg hover:shadow-blue-500/25 rounded-full md:rounded-2xl")}>
+               <Plus className="w-5 h-5 md:w-4 md:h-4" />
+               <span className="hidden md:inline">Quick Add</span>
+             </button>
+          </div>
+        </div>
+      </nav>
+
+      <main className="relative z-10 max-w-5xl mx-auto px-6 py-8">
+        
+        {/* FULL WIDTH PROGRESS BAR (MOMENTUM) */}
+        <div className="mb-12 w-full">
+            <div className={cn(GLASS_PANEL, "p-8 relative overflow-hidden w-full shadow-[0_10px_40px_-10px_rgba(0,122,255,0.15)]")}>
+              {/* Brillito de fondo */}
+              <div className="absolute -top-24 -right-24 w-64 h-64 bg-gradient-to-br from-cyan-300/20 to-blue-500/20 rounded-full blur-3xl" />
+              
+              <div className="flex justify-between items-end mb-5 relative z-10">
+                <div>
+                  <h2 className="text-2xl font-bold tracking-tight text-[#1D1D1F] mb-1 flex items-center gap-2">
+                    Progreso Diario
+                  </h2>
+                  <p className="text-[#86868B] font-medium text-sm">Tu momentum se construye acción a acción.</p>
+                </div>
+                <div className="flex items-baseline gap-1">
+                   <span className="text-4xl font-bold text-[#1D1D1F] tracking-tighter">{Math.round(stats.progress)}</span>
+                   <span className="text-lg font-medium text-[#86868B]">%</span>
+                </div>
+              </div>
+
+              <div className="h-5 w-full bg-[#E5E5EA]/70 rounded-full overflow-hidden p-[3px] shadow-inner relative z-10">
+                <motion.div
+                  layout
+                  className="h-full bg-gradient-to-r from-cyan-400 via-[#007AFF] to-[#5856D6] rounded-full shadow-[0_0_20px_rgba(0,122,255,0.3)] relative"
+                  initial={{ width: 0 }}
+                  animate={{ width: ${stats.progress}% }}
+                  transition={{ type: "spring", stiffness: 35, damping: 15 }}
+                >
+                  <div className="absolute inset-0 w-full h-full bg-white/25 animate-[shimmer_2.5s_infinite]" style={{backgroundImage: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.5),transparent)'}} />
+                </motion.div>
+              </div>
+            </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          
+          {/* LEFT: MAIN TASK LIST */}
+          <div className="lg:col-span-8 space-y-8">
+            
+            {/* Header: Lista de Acción Inteligente */}
+            <div className="flex items-center justify-between">
+              <h3 className="text-2xl font-bold text-[#1D1D1F] tracking-tight">
+                Lista de Acción Inteligente
+              </h3>
+              
+              {/* Calendar Strip Mini */}
+              <div className="flex gap-1">
+                {days.slice(0, 5).map((d, i) => (
+                  <button 
+                    key={i}
+                    onClick={() => handleSelectDay(i)}
+                    className={cn(
+                      "w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-all",
+                      d.active 
+                        ? "bg-[#1D1D1F] text-white shadow-md scale-110" 
+                        : "text-[#86868B] hover:bg-white hover:text-black"
+                    )}
+                  >
+                    {d.date}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Filters */}
+            <div className="flex gap-2 pb-2">
+                {['all', 'high', 'active'].map(f => (
+                  <button
+                    key={f}
+                    onClick={() => setFilter(f)}
+                    className={cn(
+                      "px-4 py-1.5 rounded-full text-[13px] font-medium transition-all capitalize border",
+                      filter === f 
+                        ? "bg-white border-blue-200 text-blue-600 shadow-sm" 
+                        : "bg-transparent border-transparent text-[#86868B] hover:bg-white/50"
+                    )}
+                  >
+                    {f === 'all' ? 'Todas' : f === 'high' ? 'Alto Impacto' : 'Activas'}
+                  </button>
+                ))}
+            </div>
+
+            {/* Tasks List */}
+            <motion.div layout className="space-y-4 pb-24">
+              <AnimatePresence mode='popLayout'>
+                {filteredTasks.map((task) => (
+                  <motion.div
+                    layoutId={task-${task.id}}
+                    key={task.id}
+                    onClick={() => setSelectedTask(task)}
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className={cn(
+                      GLASS_PANEL, 
+                      "p-5 cursor-pointer group transition-all duration-300 hover:scale-[1.01] hover:shadow-lg border-l-0 relative overflow-hidden",
+                      task.completed ? "opacity-60 grayscale-[0.3]" : ""
+                    )}
+                  >
+                    <div className="flex items-start gap-5 relative z-10">
+                      
+                      {/* Checkbox Sky Crystal */}
+                      <button
+                        onClick={(e) => handleToggleTask(e, task.id)}
+                        className={cn(
+                          CHECKBOX_BASE,
+                          task.completed ? CHECKBOX_CHECKED : CHECKBOX_UNCHECKED
+                        )}
+                      >
+                        <Check className={cn("w-3.5 h-3.5 stroke-[3.5] drop-shadow-md", task.completed ? "opacity-100" : "opacity-0")} />
+                      </button>
+
+                      <div className="flex-1 min-w-0 pt-0.5">
+                        
+                        {/* Inline Editable Title & Description */}
+                        <div className="mb-3 space-y-1">
+                          <input 
+                            type="text"
+                            value={task.title}
+                            onClick={(e) => e.stopPropagation()} 
+                            onChange={(e) => handleTitleChange(task.id, e.target.value)}
+                            className={cn(
+                              "text-[17px] font-semibold bg-transparent border-none outline-none w-full p-0 m-0 focus:ring-0 truncate transition-colors font-display tracking-tight",
+                              task.completed ? "text-[#86868B] line-through decoration-slate-300" : "text-[#1D1D1F] placeholder:text-slate-300"
+                            )}
+                          />
+                          <input 
+                            type="text"
+                            value={task.description}
+                            onClick={(e) => e.stopPropagation()} 
+                            onChange={(e) => handleDescriptionChange(task.id, e.target.value)}
+                            className={cn(
+                              "text-[14px] bg-transparent border-none outline-none w-full p-0 m-0 focus:ring-0 truncate transition-colors",
+                              task.completed ? "text-slate-300" : "text-[#86868B] placeholder:text-slate-300"
+                            )}
+                          />
+                        </div>
+                        
+                        {/* Meta Data Row */}
+                        <div className="flex items-center gap-4 flex-wrap">
+                           {!task.completed && (
+                            <div className="flex items-center gap-1.5 pr-3 border-r border-slate-200/60">
+                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Score</span>
+                              <span className="text-xs font-bold text-[#007AFF]">{task.score}</span>
+                            </div>
+                           )}
+
+                           <div className="flex items-center gap-2">
+                             <ImpactBadge level={task.impact} />
+                             <span className="text-xs text-[#86868B] font-medium px-2">{task.area}</span>
+                           </div>
+
+                           <div className="ml-auto flex items-center gap-2">
+                              {!task.completed && <AgentStatusPill state={task.agentState} />}
+                              {/* Botón de Expansión Explícito */}
+                              <div className="p-1 rounded-full text-slate-300 group-hover:bg-slate-100 group-hover:text-blue-500 transition-colors">
+                                <ArrowUpRight className="w-4 h-4" />
+                              </div>
+                           </div>
+                        </div>
+
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
+          </div>
+
+          {/* RIGHT: WIDGETS */}
+          <div className="lg:col-span-4 space-y-6">
+            
+            {/* Education Widget */}
+            <div className={cn(GLASS_PANEL, "p-6 relative overflow-hidden group cursor-pointer hover:shadow-xl transition-all duration-500 bg-[#1D1D1F] border-transparent")}>
+              <div className="absolute top-[-50%] right-[-50%] w-full h-full bg-gradient-to-b from-[#007AFF] to-transparent opacity-20 blur-3xl rounded-full" />
+              
+              <div className="relative z-10 text-white">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="p-2 bg-white/10 rounded-xl backdrop-blur-md border border-white/10">
+                    <Award className="w-5 h-5 text-yellow-400" />
+                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 border border-white/10 px-3 py-1 rounded-full">Nivel 4</span>
+                </div>
+                
+                <h3 className="text-xl font-bold mb-2 leading-tight tracking-tight">Productividad Cuántica</h3>
+                <p className="text-sm text-slate-400 mb-6 leading-relaxed">Prioriza tareas basándote en impacto vs. esfuerzo.</p>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between text-xs font-medium text-slate-300">
+                    <span>Progreso</span>
+                    <span>75%</span>
+                  </div>
+                  <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full bg-[#0A84FF] w-3/4 shadow-[0_0_15px_rgba(10,132,255,0.6)]" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Suggestions */}
+            <div className={cn(GLASS_PANEL, "p-6 bg-white/60")}>
+              <h4 className="text-sm font-semibold text-[#1D1D1F] mb-4 flex items-center gap-2">
+                <BrainCircuit className="w-4 h-4 text-[#5856D6]" />
+                Sugerencias
+              </h4>
+              <ul className="space-y-3">
+                <li className="flex gap-3 items-start p-3 bg-white/60 hover:bg-white rounded-2xl transition-all cursor-pointer shadow-sm border border-transparent hover:border-slate-100">
+                  <div className="mt-0.5 min-w-[16px]"><TrendingUp className="w-4 h-4 text-[#5856D6]" /></div>
+                  <p className="text-xs text-[#1D1D1F] leading-relaxed">
+                    Revisar las <span className="font-semibold text-[#5856D6]">métricas de retención</span> hoy.
+                  </p>
+                </li>
+                 <li className="flex gap-3 items-start p-3 bg-white/60 hover:bg-white rounded-2xl transition-all cursor-pointer shadow-sm border border-transparent hover:border-slate-100">
+                  <div className="mt-0.5 min-w-[16px]"><Calendar className="w-4 h-4 text-[#007AFF]" /></div>
+                  <p className="text-xs text-[#1D1D1F] leading-relaxed">
+                    <span className="font-semibold text-[#007AFF]">Deep Work</span> sugerido: 2pm - 4pm.
+                  </p>
+                </li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+      </main>
+
+      {/* ACTION DRAWER (COMPLETE ACTIVITY DETAIL) */}
+      <AnimatePresence>
+        {selectedTask && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-[#323232]/20 backdrop-blur-sm z-50"
+              onClick={() => setSelectedTask(null)}
+            />
+            <motion.div
+              layoutId={drawer-${selectedTask.id}}
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className={cn("fixed top-0 right-0 h-full w-full max-w-xl z-50 p-8 flex flex-col shadow-2xl overflow-hidden", GLASS_DRAWER)}
+            >
+              {/* Drawer Header */}
+              <div className="flex items-center justify-between mb-8 shrink-0">
+                <div className="flex items-center gap-2">
+                   <Maximize2 className="w-4 h-4 text-[#007AFF]" />
+                   <span className="text-xs font-bold uppercase tracking-wider text-[#007AFF]">Actividad Completa</span>
+                </div>
+                <button onClick={() => setSelectedTask(null)} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              {/* Drawer Content */}
+              <div className="flex-1 overflow-y-auto pr-2 space-y-8 custom-scrollbar">
+                
+                {/* Title & Desc */}
+                <div className="space-y-4">
+                  <textarea 
+                    value={selectedTask.title} 
+                    onChange={(e) => setSelectedTask({...selectedTask, title: e.target.value})}
+                    className="text-3xl font-bold text-[#1D1D1F] bg-transparent outline-none w-full placeholder:text-slate-300 resize-none h-auto overflow-hidden leading-tight"
+                    placeholder="Nombre de la acción..."
+                    rows={2}
+                  />
+                   <input 
+                    type="text"
+                    value={selectedTask.description}
+                    onChange={(e) => setSelectedTask({...selectedTask, description: e.target.value})}
+                    className="text-lg text-[#86868B] bg-transparent outline-none w-full placeholder:text-slate-300"
+                    placeholder="Añadir descripción..."
+                  />
+                </div>
+
+                {/* Priority & Properties Grid */}
+                <div className="bg-white/50 rounded-2xl p-5 border border-white/60 space-y-5">
+                   
+                   {/* Priority Selector (Interactive) */}
+                   <div className="space-y-2">
+                      <label className="text-xs font-bold text-[#86868B] uppercase tracking-wide">Nivel de Impacto</label>
+                      <PrioritySelector 
+                        current={selectedTask.impact} 
+                        onChange={handleImpactChange} 
+                      />
+                   </div>
+
+                   <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-[#86868B] uppercase tracking-wide">Área</label>
+                        <div className="relative">
+                           <Target className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                           <input 
+                            value={selectedTask.area}
+                            onChange={(e) => setSelectedTask({...selectedTask, area: e.target.value})}
+                            className={cn(INPUT_GLASS, "w-full py-2.5 pl-9 text-sm font-medium text-[#1D1D1F]")} 
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-[#86868B] uppercase tracking-wide">Fecha Límite</label>
+                        <div className="relative">
+                           <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                           <input 
+                            value={selectedTask.date}
+                            onChange={(e) => setSelectedTask({...selectedTask, date: e.target.value})}
+                            className={cn(INPUT_GLASS, "w-full py-2.5 pl-9 text-sm font-medium text-[#1D1D1F]")} 
+                          />
+                        </div>
+                      </div>
+                   </div>
+                </div>
+
+                {/* Agent Activity Timeline */}
+                <div className="bg-[#F5F5F7] rounded-3xl p-6 border border-white/50">
+                  <h4 className="text-sm font-semibold text-[#1D1D1F] mb-6 flex items-center gap-2">
+                    <BrainCircuit className="w-4 h-4 text-[#007AFF]" />
+                    Actividad del Agente
+                  </h4>
+                  
+                  <div className="relative pl-4 space-y-8 border-l-2 border-[#E5E5EA] ml-1">
+                    {selectedTask.agentLog.map((log, idx) => (
+                      <div key={idx} className="relative">
+                        <div className="absolute -left-[21px] top-1.5 w-3 h-3 bg-white border-[3px] border-[#007AFF] rounded-full shadow-sm" />
+                        <p className="text-[11px] text-[#86868B] font-mono mb-1">{log.time}</p>
+                        <p className="text-sm text-[#1D1D1F] font-medium">{log.event}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Notes */}
+                <div className="space-y-2 pb-6">
+                  <label className="text-xs font-bold text-[#86868B] uppercase tracking-wide">Notas Personales</label>
+                  <textarea 
+                    className={cn(INPUT_GLASS, "w-full p-5 min-h-[150px] text-[15px] text-[#1D1D1F] resize-none leading-relaxed bg-white/60")}
+                    placeholder="Escribe tus notas aquí..."
+                  />
+                </div>
+
+              </div>
+
+              <div className="pt-6 border-t border-slate-100 flex justify-end mt-auto shrink-0">
+                 <button 
+                   onClick={() => setSelectedTask(null)}
+                   className={cn(BTN_PRIMARY, "px-10 py-3.5 w-full md:w-auto shadow-xl text-lg rounded-2xl")}
+                  >
+                   Guardar Cambios
+                 </button>
+              </div>
+
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+    </div>
+  );
+}
