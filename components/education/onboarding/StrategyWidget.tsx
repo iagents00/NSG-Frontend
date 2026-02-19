@@ -58,7 +58,7 @@ export default function StrategyWidget({
             id: "1",
             role: "system",
             content:
-                "Bienvenido. Para configurar su experiencia diplomática, requerimos calibrar sus vectores de aprendizaje:",
+                "¡Hola! Vamos a personalizar tu experiencia de aprendizaje con unas preguntas rápidas:",
             type: "text",
         },
     ]);
@@ -131,13 +131,13 @@ export default function StrategyWidget({
                             id: "q1",
                             role: "system",
                             content:
-                                "1/5 — Formato de Inteligencia (Output). ¿Qué tipo de entregable prefiere recibir?",
+                                "1/5 — Formato Preferido. ¿Cómo prefieres recibir la información?",
                             type: "options",
                             options: [
-                                "A) Protocolo de Acción (3–5 pasos)",
-                                "B) Resumen Ejecutivo",
-                                "C) Guía Estructurada",
-                                "D) Guión (Discurso/Venta)",
+                                "A) Plan de acción paso a paso",
+                                "B) Resumen corto y directo",
+                                "C) Guía completa y detallada",
+                                "D) Guión para presentar o vender",
                                 "E) Otro (Especificar/🎙️)",
                             ],
                         },
@@ -156,7 +156,7 @@ export default function StrategyWidget({
                     id: "completed",
                     role: "system",
                     content:
-                        "Configuración de Protocolo completada. ¿Desea recalibrar los parámetros?",
+                        "Tu configuración ya está lista. ¿Quieres ajustar algo?",
                     type: "confirmation",
                 },
             ]);
@@ -212,7 +212,7 @@ export default function StrategyWidget({
                         id: Date.now().toString(),
                         role: "system",
                         content:
-                            "Entendido. Por favor describa su preferencia (Escriba o use el micrófono 🎙️).",
+                            "Entendido. Escribe tu preferencia (o usa el micrófono 🎙️).",
                         type: "text",
                     },
                 ]);
@@ -234,13 +234,13 @@ export default function StrategyWidget({
                     id: Date.now().toString(),
                     role: "system",
                     content:
-                        "2/5 — Vector de Asimilación. ¿Cuál es su método óptimo de absorción de información?",
+                        "2/5 — Estilo de Aprendizaje. ¿Cómo aprendes mejor?",
                     type: "options",
                     options: [
-                        "A) Visual (Esquema/Diagrama)",
-                        "B) Auditivo (Podcast)",
-                        "C) Texto (Documento)",
-                        "D) Prácticas (Ejercicio)",
+                        "A) Viendo (imágenes, esquemas, videos)",
+                        "B) Escuchando (podcasts, audios)",
+                        "C) Leyendo (textos, documentos)",
+                        "D) Practicando (ejercicios, casos reales)",
                         "E) Otro",
                     ],
                 });
@@ -252,13 +252,13 @@ export default function StrategyWidget({
                     id: Date.now().toString(),
                     role: "system",
                     content:
-                        "3/5 — Profundidad y Ritmo. Indique el nivel de detalle requerido por defecto.",
+                        "3/5 — Tiempo y Detalle. ¿Cuánto tiempo quieres dedicar a cada tema?",
                     type: "options",
                     options: [
-                        "A) Flash Brief (1–2 min)",
-                        "B) Operativo (5 min)",
-                        "C) Deep Dive (10–15 min)",
-                        "D) Dinámico",
+                        "A) Rapidito (1–2 minutos, solo lo esencial)",
+                        "B) Normal (5 minutos, buen resumen)",
+                        "C) A fondo (10–15 minutos, bien detallado)",
+                        "D) Flexible (depende del tema)",
                         "E) Otro",
                     ],
                 });
@@ -270,13 +270,13 @@ export default function StrategyWidget({
                     id: Date.now().toString(),
                     role: "system",
                     content:
-                        "4/5 — Contexto de Aplicación. ¿Dónde se implementará este conocimiento principalmente?",
+                        "4/5 — Área de Aplicación. ¿En qué área vas a usar lo que aprendas?",
                     type: "options",
                     options: [
-                        "A) Negociación/Ventas",
-                        "B) Gestión Operativa",
-                        "C) Desarrollo Personal",
-                        "D) Académico/Certificación",
+                        "A) Ventas y negociación",
+                        "B) Gestión de equipos o proyectos",
+                        "C) Crecimiento personal",
+                        "D) Estudios o certificaciones",
                         "E) Otro",
                     ],
                 });
@@ -288,13 +288,13 @@ export default function StrategyWidget({
                     id: Date.now().toString(),
                     role: "system",
                     content:
-                        "5/5 — Calibración de Perfil. Seleccione su fortaleza principal:",
+                        "5/5 — Tu Perfil. ¿Cuál es tu mayor fortaleza?",
                     type: "options",
                     options: [
-                        "A) Enfoque y Ejecución",
-                        "B) Influencia y Comunicación",
-                        "C) Visión Estratégica",
-                        "D) Sistemas y Orden",
+                        "A) Soy enfocado y ejecuto rápido",
+                        "B) Soy bueno comunicando e influyendo",
+                        "C) Tengo buena visión a largo plazo",
+                        "D) Soy organizado y metódico",
                         "E) Otro",
                     ],
                 });
@@ -305,13 +305,13 @@ export default function StrategyWidget({
                 systemResponse.push({
                     id: Date.now().toString(),
                     role: "system",
-                    content: "Identifique su principal fricción operativa:",
+                    content: "¿Cuál es tu mayor reto al aprender algo nuevo?",
                     type: "options",
                     options: [
-                        "Dispersión (Cambio de foco)",
-                        "Iniciativa (Cuesta arrancar)",
-                        "Estructura (Falta de orden)",
-                        "Aplicación (Teoría vs Práctica)",
+                        "Me distraigo fácilmente",
+                        "Me cuesta empezar",
+                        "Me falta organización",
+                        "Entiendo la teoría pero no la aplico",
                         "Otro",
                     ],
                 });
@@ -322,18 +322,18 @@ export default function StrategyWidget({
                 systemResponse.push({
                     id: Date.now().toString(),
                     role: "system",
-                    title: "Análisis de Perfil Avanzado",
+                    title: "Personalización Extra",
                     content:
-                        "Para optimizar la estrategia basada en sus ciclos vitales, ¿autoriza el uso de su fecha de nacimiento?",
+                        "Para personalizar aún más tu experiencia, ¿te gustaría compartir tu fecha de nacimiento?",
                     type: "options",
-                    options: ["Autorizar", "Omitir"],
+                    options: ["Sí, adelante", "Prefiero no"],
                 });
             }
             // Numerology Yes -> Ask Date OR No -> Finish
             else if (currentStep === 6) {
                 const wantsNumerology = text
                     .toLowerCase()
-                    .includes("autorizar");
+                    .includes("sí");
                 setAnswers((prev) => ({
                     ...prev,
                     numerology: wantsNumerology,
@@ -344,7 +344,7 @@ export default function StrategyWidget({
                     systemResponse.push({
                         id: Date.now().toString(),
                         role: "system",
-                        content: "Ingrese su fecha (DD/MM/AAAA):",
+                        content: "Escribe tu fecha de nacimiento (DD/MM/AAAA):",
                         type: "text",
                     });
                 } else {
@@ -353,7 +353,7 @@ export default function StrategyWidget({
                         id: Date.now().toString(),
                         role: "system",
                         content:
-                            "Configuración registrada. ¿Confirmar generación de protocolo?",
+                            "¡Perfecto! Todo listo. ¿Confirmamos tu configuración?",
                         type: "confirmation",
                     });
                 }
@@ -366,7 +366,7 @@ export default function StrategyWidget({
                     id: Date.now().toString(),
                     role: "system",
                     content:
-                        "Configuración registrada. ¿Confirmar generación de protocolo?",
+                        "¡Perfecto! Todo listo. ¿Confirmamos tu configuración?",
                     type: "confirmation",
                 });
             }
@@ -475,7 +475,7 @@ export default function StrategyWidget({
             {
                 id: "1",
                 role: "system",
-                content: "Reiniciando sistema de calibración...",
+                content: "Reiniciando configuración...",
                 type: "text",
             },
         ]);
@@ -487,13 +487,13 @@ export default function StrategyWidget({
                     id: "q1",
                     role: "system",
                     content:
-                        "1/5 — Formato de Inteligencia (Output). ¿Qué tipo de entregable prefiere recibir?",
+                        "1/5 — Formato Preferido. ¿Cómo prefieres recibir la información?",
                     type: "options",
                     options: [
-                        "A) Protocolo de Acción (3–5 pasos)",
-                        "B) Resumen Ejecutivo",
-                        "C) Guía Estructurada",
-                        "D) Guión (Discurso/Venta)",
+                        "A) Plan de acción paso a paso",
+                        "B) Resumen corto y directo",
+                        "C) Guía completa y detallada",
+                        "D) Guión para presentar o vender",
                         "E) Otro (Especificar/🎙️)",
                     ],
                 },

@@ -433,9 +433,9 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
     };
 
     return (
-        <div className="flex flex-col min-h-full bg-slate-50/50">
+        <div className="flex flex-col h-full bg-slate-50/50 overflow-hidden">
             {/* Header */}
-            <header className="bg-white/80 backdrop-blur-md border-b border-slate-100 p-4 sticky top-0 z-50">
+            <header className="bg-white/80 backdrop-blur-md border-b border-slate-100 p-3 sm:p-4 z-50 shrink-0">
                 <div className="max-w-full mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <button
@@ -470,25 +470,31 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                 </div>
             </header>
 
-            <main className="flex-1 p-4 md:p-8">
+            <main className="flex-1 flex flex-col p-3 sm:p-4 md:p-6 overflow-hidden">
                 {isCompleted ? (
                     renderAnalysis()
                 ) : allQuestions.length > 0 ? (
-                    <div className="max-w-3xl mx-auto space-y-6">
-                        {/* Improved Progress Header */}
-                        <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="space-y-1">
-                                    <span className="text-[10px] font-bold uppercase tracking-widest text-blue-600">
+                    <div className="w-full max-w-3xl mx-auto flex flex-col flex-1 overflow-hidden" style={{ gap: 'clamp(0.5rem, 1.2dvh, 0.75rem)' }}>
+                        {/* Progress Header — Dark Glass */}
+                        <div 
+                            className="rounded-2xl shrink-0 border border-white/10 backdrop-blur-xl"
+                            style={{ 
+                                padding: 'clamp(0.6rem, 1.5dvh, 1.25rem) clamp(0.75rem, 2dvw, 1.5rem)',
+                                background: 'linear-gradient(135deg, rgba(15,23,42,0.95), rgba(30,41,59,0.9))',
+                            }}
+                        >
+                            <div className="flex items-center justify-between" style={{ marginBottom: 'clamp(0.375rem, 1dvh, 0.75rem)' }}>
+                                <div>
+                                    <span className="font-semibold uppercase tracking-[0.15em] text-cyan-400/80" style={{ fontSize: 'clamp(0.5rem, 1.1dvh, 0.625rem)' }}>
                                         Protocolo de Análisis
                                     </span>
-                                    <h4 className="font-display font-bold text-navy-950">
+                                    <h4 className="font-display font-bold text-white/90" style={{ fontSize: 'clamp(0.75rem, 1.8dvh, 1rem)' }}>
                                         Etapa {currentStep + 1} de{" "}
                                         {allQuestions.length}
                                     </h4>
                                 </div>
                                 <div className="text-right">
-                                    <span className="text-2xl font-display font-bold text-navy-200">
+                                    <span className="font-display font-bold text-white" style={{ fontSize: 'clamp(1rem, 2.8dvh, 1.5rem)' }}>
                                         {Math.round(
                                             ((currentStep + 1) /
                                                 allQuestions.length) *
@@ -498,9 +504,10 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                     </span>
                                 </div>
                             </div>
-                            <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200/50">
+                            <div className="w-full rounded-full overflow-hidden" style={{ height: 'clamp(3px, 0.6dvh, 6px)', background: 'rgba(255,255,255,0.08)' }}>
                                 <motion.div
-                                    className="h-full bg-linear-to-r from-blue-600 to-blue-400 rounded-full shadow-[0_0_12px_rgba(37,99,235,0.4)]"
+                                    className="h-full rounded-full"
+                                    style={{ background: 'linear-gradient(90deg, #06b6d4, #3b82f6, #8b5cf6)', boxShadow: '0 0 20px rgba(6,182,212,0.4)' }}
                                     initial={{ width: 0 }}
                                     animate={{
                                         width: `${((currentStep + 1) / allQuestions.length) * 100}%`,
@@ -513,32 +520,46 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                             </div>
                         </div>
 
-                        <div className="relative pt-4 min-h-[400px]">
+                        {/* Question Card */}
+                        <div className="relative flex-1 flex flex-col overflow-hidden" style={{ paddingTop: 'clamp(0.125rem, 0.3dvh, 0.25rem)' }}>
                             <AnimatePresence mode="wait" custom={direction}>
                                 <motion.div
                                     key={currentStep}
                                     initial={{
-                                        x: direction > 0 ? 20 : -20,
+                                        x: direction > 0 ? 30 : -30,
                                         opacity: 0,
+                                        scale: 0.98,
                                     }}
-                                    animate={{ x: 0, opacity: 1 }}
+                                    animate={{ x: 0, opacity: 1, scale: 1 }}
                                     exit={{
-                                        x: direction > 0 ? -20 : 20,
+                                        x: direction > 0 ? -30 : 30,
                                         opacity: 0,
+                                        scale: 0.98,
                                     }}
                                     transition={{
                                         type: "spring",
-                                        damping: 25,
-                                        stiffness: 200,
+                                        damping: 28,
+                                        stiffness: 220,
                                     }}
-                                    className="w-full"
+                                    className="w-full flex-1 flex flex-col"
                                 >
-                                    <div className="bg-white/90 backdrop-blur-xl rounded-4xl p-6 md:p-8 border border-slate-200/60 shadow-sovereign space-y-8 relative overflow-hidden">
-                                        <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-blue-600/20 via-blue-600 to-blue-600/20" />
-                                        <div className="space-y-4">
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-2 h-2 rounded-full bg-blue-600 shadow-[0_0_10px_rgba(37,99,235,0.5)]" />
-                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                    <div
+                                        className="rounded-2xl border border-white/[0.08] backdrop-blur-xl flex flex-col relative overflow-hidden flex-1"
+                                        style={{ 
+                                            padding: 'clamp(0.75rem, 2dvh, 1.5rem) clamp(0.875rem, 2.5dvw, 1.75rem)', 
+                                            gap: 'clamp(0.5rem, 1.5dvh, 1.25rem)',
+                                            background: 'linear-gradient(160deg, rgba(15,23,42,0.97), rgba(20,30,48,0.95), rgba(15,23,42,0.97))',
+                                            boxShadow: '0 0 0 1px rgba(6,182,212,0.06), 0 25px 50px -12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)',
+                                        }}
+                                    >
+                                        {/* Top accent line */}
+                                        <div className="absolute top-0 left-0 w-full" style={{ height: '2px', background: 'linear-gradient(90deg, transparent, rgba(6,182,212,0.5), rgba(59,130,246,0.5), transparent)' }} />
+                                        
+                                        {/* Question header */}
+                                        <div className="shrink-0" style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(0.25rem, 0.7dvh, 0.5rem)' }}>
+                                            <div className="flex items-center" style={{ gap: 'clamp(0.375rem, 0.8dvh, 0.5rem)' }}>
+                                                <div className="rounded-full" style={{ width: 'clamp(5px, 0.8dvh, 7px)', height: 'clamp(5px, 0.8dvh, 7px)', background: '#06b6d4', boxShadow: '0 0 12px rgba(6,182,212,0.6)' }} />
+                                                <span className="font-semibold text-cyan-400/70 uppercase tracking-[0.15em]" style={{ fontSize: 'clamp(0.5rem, 1.1dvh, 0.625rem)' }}>
                                                     {
                                                         allQuestions[
                                                             currentStep
@@ -546,7 +567,7 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                                     }
                                                 </span>
                                             </div>
-                                            <h4 className="text-2xl font-display font-bold text-navy-900 leading-tight tracking-tight">
+                                            <h4 className="font-display font-bold text-white/95 leading-snug" style={{ fontSize: 'clamp(0.875rem, 2.2dvh, 1.25rem)' }}>
                                                 {
                                                     allQuestions[currentStep]
                                                         .question
@@ -555,21 +576,22 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                         </div>
 
                                         {/* Input Section */}
-                                        <div className="flex-1 min-h-[200px] flex flex-col justify-center">
+                                        <div className="flex-1 flex flex-col justify-center overflow-y-auto">
                                             {allQuestions[currentStep]
                                                 .options &&
                                             allQuestions[currentStep].options!
                                                 .length > 0 ? (
-                                                <div className="grid grid-cols-1 gap-4">
+                                                <div className="grid grid-cols-1" style={{ gap: 'clamp(0.375rem, 0.9dvh, 0.75rem)' }}>
                                                     {(
                                                         allQuestions[
                                                             currentStep
                                                         ].options || []
-                                                    ).map((opt: string) => (
+                                                    ).map((opt: string, idx: number) => (
                                                         <motion.button
                                                             key={opt}
                                                             whileHover={{
-                                                                x: 5,
+                                                                x: 4,
+                                                                transition: { duration: 0.2 },
                                                             }}
                                                             whileTap={{
                                                                 scale: 0.98,
@@ -585,47 +607,83 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                                                 })
                                                             }
                                                             className={clsx(
-                                                                "w-full p-5 border rounded-2xl text-left font-bold transition-all flex items-center justify-between group",
+                                                                "w-full rounded-xl text-left font-medium transition-all flex items-center justify-between group border",
                                                                 answers[
                                                                     allQuestions[
                                                                         currentStep
                                                                     ].id ||
                                                                         `q-${currentStep}`
                                                                 ] === opt
-                                                                    ? "bg-navy-900 text-white border-navy-900 shadow-xl shadow-navy-900/10"
-                                                                    : "bg-slate-50/50 border-slate-200/60 text-navy-900 hover:border-blue-400 hover:bg-white hover:shadow-lg hover:shadow-blue-500/5",
+                                                                    ? "border-cyan-500/50 text-white"
+                                                                    : "border-white/[0.06] text-white/70 hover:text-white hover:border-white/15",
                                                             )}
+                                                            style={{ 
+                                                                padding: 'clamp(0.5rem, 1.4dvh, 1rem) clamp(0.75rem, 1.5dvw, 1.25rem)',
+                                                                background: answers[
+                                                                    allQuestions[currentStep].id || `q-${currentStep}`
+                                                                ] === opt 
+                                                                    ? 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(59,130,246,0.12))'
+                                                                    : 'rgba(255,255,255,0.03)',
+                                                                boxShadow: answers[
+                                                                    allQuestions[currentStep].id || `q-${currentStep}`
+                                                                ] === opt 
+                                                                    ? '0 0 20px rgba(6,182,212,0.15), inset 0 1px 0 rgba(255,255,255,0.08)'
+                                                                    : 'inset 0 1px 0 rgba(255,255,255,0.03)',
+                                                            }}
                                                         >
-                                                            <span className="text-base">
-                                                                {opt}
-                                                            </span>
+                                                            <div className="flex items-center" style={{ gap: 'clamp(0.5rem, 1dvh, 0.75rem)' }}>
+                                                                <span 
+                                                                    className={clsx(
+                                                                        "font-mono font-bold shrink-0 flex items-center justify-center rounded-lg",
+                                                                        answers[allQuestions[currentStep].id || `q-${currentStep}`] === opt
+                                                                            ? "text-cyan-300"
+                                                                            : "text-white/30"
+                                                                    )}
+                                                                    style={{ 
+                                                                        fontSize: 'clamp(0.563rem, 1.2dvh, 0.75rem)',
+                                                                        width: 'clamp(1.25rem, 3dvh, 1.75rem)', 
+                                                                        height: 'clamp(1.25rem, 3dvh, 1.75rem)',
+                                                                        background: answers[allQuestions[currentStep].id || `q-${currentStep}`] === opt
+                                                                            ? 'rgba(6,182,212,0.15)'
+                                                                            : 'rgba(255,255,255,0.05)',
+                                                                        border: `1px solid ${answers[allQuestions[currentStep].id || `q-${currentStep}`] === opt ? 'rgba(6,182,212,0.3)' : 'rgba(255,255,255,0.08)'}`,
+                                                                    }}
+                                                                >
+                                                                    {String.fromCharCode(65 + idx)}
+                                                                </span>
+                                                                <span style={{ fontSize: 'clamp(0.75rem, 1.7dvh, 0.938rem)' }}>
+                                                                    {opt}
+                                                                </span>
+                                                            </div>
                                                             <CheckCircle2
                                                                 className={clsx(
-                                                                    "w-6 h-6 transition-all",
+                                                                    "shrink-0 ml-2 transition-all",
                                                                     answers[
                                                                         allQuestions[
                                                                             currentStep
                                                                         ].id ||
                                                                             `q-${currentStep}`
                                                                     ] === opt
-                                                                        ? "opacity-100"
-                                                                        : "opacity-0 group-hover:opacity-20",
+                                                                        ? "opacity-100 text-cyan-400"
+                                                                        : "opacity-0 group-hover:opacity-20 text-white/40",
                                                                 )}
+                                                                style={{ width: 'clamp(0.875rem, 2dvh, 1.25rem)', height: 'clamp(0.875rem, 2dvh, 1.25rem)' }}
                                                             />
                                                         </motion.button>
                                                     ))}
                                                 </div>
                                             ) : allQuestions[currentStep]
                                                   .type === "boolean" ? (
-                                                <div className="grid grid-cols-2 gap-6">
+                                                <div className="grid grid-cols-2" style={{ gap: 'clamp(0.5rem, 1.2dvh, 1rem)' }}>
                                                     {["Sí", "No"].map((opt) => (
                                                         <motion.button
                                                             key={opt}
                                                             whileHover={{
-                                                                y: -5,
+                                                                y: -3,
+                                                                transition: { duration: 0.2 },
                                                             }}
                                                             whileTap={{
-                                                                scale: 0.95,
+                                                                scale: 0.96,
                                                             }}
                                                             onClick={() =>
                                                                 setAnswers({
@@ -638,16 +696,30 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                                                 })
                                                             }
                                                             className={clsx(
-                                                                "p-6 border rounded-4xl font-bold text-xl transition-all shadow-sm",
+                                                                "border rounded-xl font-bold transition-all text-center",
                                                                 answers[
                                                                     allQuestions[
                                                                         currentStep
                                                                     ].id ||
                                                                         `q-${currentStep}`
                                                                 ] === opt
-                                                                    ? "bg-navy-900 text-white border-navy-900 shadow-xl shadow-navy-900/10"
-                                                                    : "bg-slate-50/50 border-slate-200/60 text-navy-900 hover:border-blue-400 hover:bg-white hover:shadow-lg hover:shadow-blue-500/5",
+                                                                    ? "border-cyan-500/50 text-white"
+                                                                    : "border-white/[0.06] text-white/60 hover:text-white hover:border-white/15",
                                                             )}
+                                                            style={{ 
+                                                                padding: 'clamp(0.75rem, 2.5dvh, 1.5rem)', 
+                                                                fontSize: 'clamp(0.938rem, 2.2dvh, 1.125rem)',
+                                                                background: answers[
+                                                                    allQuestions[currentStep].id || `q-${currentStep}`
+                                                                ] === opt 
+                                                                    ? 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(59,130,246,0.12))'
+                                                                    : 'rgba(255,255,255,0.03)',
+                                                                boxShadow: answers[
+                                                                    allQuestions[currentStep].id || `q-${currentStep}`
+                                                                ] === opt 
+                                                                    ? '0 0 20px rgba(6,182,212,0.15), inset 0 1px 0 rgba(255,255,255,0.08)'
+                                                                    : 'inset 0 1px 0 rgba(255,255,255,0.03)',
+                                                            }}
                                                         >
                                                             {opt}
                                                         </motion.button>
@@ -655,8 +727,16 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                                 </div>
                                             ) : (
                                                 <textarea
-                                                    placeholder="Describe tu respuesta técnica aquí..."
-                                                    className="w-full flex-1 p-6 bg-slate-50/50 border border-slate-200/60 rounded-4xl text-navy-900 text-base font-medium focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/5 outline-none transition-all resize-none shadow-inner min-h-[150px]"
+                                                    placeholder="Describe tu respuesta aquí..."
+                                                    className="w-full flex-1 rounded-xl text-white/90 font-medium outline-none transition-all resize-none placeholder:text-white/25"
+                                                    style={{ 
+                                                        padding: 'clamp(0.625rem, 1.5dvh, 1rem)', 
+                                                        fontSize: 'clamp(0.75rem, 1.6dvh, 0.875rem)', 
+                                                        minHeight: 'clamp(60px, 15dvh, 150px)',
+                                                        background: 'rgba(255,255,255,0.04)',
+                                                        border: '1px solid rgba(255,255,255,0.08)',
+                                                        boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.2)',
+                                                    }}
                                                     value={
                                                         answers[
                                                             allQuestions[
@@ -679,19 +759,21 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                             )}
                                         </div>
 
-                                        <div className="flex items-center justify-between pt-6 border-t border-slate-100">
+                                        {/* Navigation */}
+                                        <div className="flex items-center justify-between shrink-0" style={{ paddingTop: 'clamp(0.5rem, 1dvh, 1rem)', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
                                             <button
                                                 onClick={handleBackBtn}
                                                 disabled={currentStep === 0}
-                                                className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-navy-900 disabled:opacity-0 transition-colors"
+                                                className="flex items-center font-semibold uppercase tracking-[0.15em] text-white/30 hover:text-white/60 disabled:opacity-0 transition-colors"
+                                                style={{ gap: 'clamp(0.25rem, 0.5dvh, 0.5rem)', fontSize: 'clamp(0.563rem, 1.1dvh, 0.688rem)' }}
                                             >
-                                                <ArrowLeft className="w-5 h-5" />
+                                                <ArrowLeft style={{ width: 'clamp(0.75rem, 1.8dvh, 1rem)', height: 'clamp(0.75rem, 1.8dvh, 1rem)' }} />
                                                 Atrás
                                             </button>
 
                                             <motion.button
-                                                whileHover={{ scale: 1.02 }}
-                                                whileTap={{ scale: 0.98 }}
+                                                whileHover={{ scale: 1.03, y: -1 }}
+                                                whileTap={{ scale: 0.97 }}
                                                 onClick={() =>
                                                     handleNext(
                                                         allQuestions.length,
@@ -708,25 +790,27 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                                                 `q-${currentStep}`
                                                         ])
                                                 }
-                                                className={clsx(
-                                                    "px-10 py-5 rounded-2xl font-bold text-xs uppercase tracking-widest shadow-xl transition-all flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed",
-                                                    isSubmitting
-                                                        ? "bg-slate-100 text-slate-400"
-                                                        : "bg-navy-900 text-white hover:bg-blue-600 hover:-translate-y-0.5 active:translate-y-0",
-                                                )}
+                                                className="rounded-xl font-bold uppercase tracking-[0.12em] transition-all flex items-center disabled:opacity-40 disabled:cursor-not-allowed text-white"
+                                                style={{ 
+                                                    padding: 'clamp(0.5rem, 1.3dvh, 0.875rem) clamp(1rem, 2.5dvw, 1.75rem)', 
+                                                    fontSize: 'clamp(0.563rem, 1.1dvh, 0.688rem)', 
+                                                    gap: 'clamp(0.375rem, 0.7dvh, 0.5rem)',
+                                                    background: 'linear-gradient(135deg, #06b6d4, #3b82f6)',
+                                                    boxShadow: '0 0 20px rgba(6,182,212,0.25), 0 4px 12px rgba(0,0,0,0.3)',
+                                                }}
                                             >
                                                 {isSubmitting ? (
                                                     <>
-                                                        <Loader2 className="w-5 h-5 animate-spin" />{" "}
+                                                        <Loader2 className="animate-spin" style={{ width: 'clamp(0.75rem, 1.8dvh, 1rem)', height: 'clamp(0.75rem, 1.8dvh, 1rem)' }} />{" "}
                                                         Procesando...
                                                     </>
                                                 ) : (
                                                     <>
                                                         {currentStep ===
                                                         allQuestions.length - 1
-                                                            ? "Finalizar Protocolo"
+                                                            ? "Finalizar"
                                                             : "Continuar"}
-                                                        <ChevronRight className="w-5 h-5" />
+                                                        <ChevronRight style={{ width: 'clamp(0.75rem, 1.8dvh, 1rem)', height: 'clamp(0.75rem, 1.8dvh, 1rem)' }} />
                                                     </>
                                                 )}
                                             </motion.button>

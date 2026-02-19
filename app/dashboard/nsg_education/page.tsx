@@ -67,9 +67,10 @@ export default function IEducationPage() {
             {/* Top Navigation Bar */}
             <div
                 className={clsx(
-                    "sticky top-0 z-[60] flex flex-col sm:flex-row items-stretch sm:items-center justify-between bg-white rounded-2xl p-2 px-4 shadow-sm border border-slate-100 shrink-0 gap-2 sm:gap-0 transition-all duration-500",
+                    "z-[60] flex flex-col sm:flex-row items-stretch sm:items-center justify-between bg-white rounded-2xl p-2 px-4 shadow-sm border border-slate-100 shrink-0 gap-2 sm:gap-0 transition-all duration-500",
                     !isStrategyCompleted &&
                         "opacity-50 pointer-events-none grayscale",
+                    isStrategyOpen && !isStrategyMinimized && "hidden",
                 )}
             >
                 <div className="flex items-center gap-1 overflow-x-auto no-scrollbar pb-1 sm:pb-0 -mx-2 px-2 sm:mx-0 sm:px-0">
