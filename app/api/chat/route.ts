@@ -86,21 +86,22 @@ export async function POST(req: Request) {
     const response = await fetch(targetUrl, fetchOptions);
 
     // 4. Handle Final Response
-    if (!response.ok) {
-      const text = await response.text();
-      console.warn(`[N8N Proxy] received ${response.status} from ${targetUrl}:`, text.substring(0, 100));
+    // 4. Handle Response safely (Read once)
+    const responseText = await response.text();
 
+    if (!response.ok) {
+      console.warn(`[N8N Proxy] received ${response.status} from ${targetUrl}:`, responseText.substring(0, 100));
       return NextResponse.json({
         error: "N8N Workflow Error",
         status: response.status,
-        details: text || "Check N8N execution logs.",
+        details: responseText || "Check N8N execution logs.",
         targetUrl: targetUrl
       }, { status: response.status });
     }
 
-    // 5. Smart Parsing (Following best practices)
+    // 5. Smart Parsing
     try {
-      let data = await response.json();
+      let data = JSON.parse(responseText);
 
       // Normalization: Handle n8n array wrapper [ { ... } ]
       if (Array.isArray(data) && data.length > 0) {
@@ -115,9 +116,13 @@ export async function POST(req: Request) {
       return NextResponse.json(data);
     } catch (e) {
       // Fallback if response is not JSON
-      const responseText = await response.text();
       console.log("[N8N Proxy] Non-JSON response received:", responseText.substring(0, 50));
-      return NextResponse.json({ message: responseText });
+      // Return the raw text wrapped in a JSON object so the client can handle it
+      return NextResponse.json({ 
+        message: responseText,
+        // If it's a string response, we might want to hint it's raw text
+        type: 'text'
+      });
     }
 
   } catch (error) {

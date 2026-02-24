@@ -138,7 +138,7 @@ function HUDItem({ icon, label, value, isActive, delay = 0 }: HUDItemProps) {
                     "w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border transition-all duration-500 shadow-sm",
                     isActive
                         ? "bg-white border-blue-100 text-blue-600 shadow-blue-500/10 ring-2 ring-blue-500/5"
-                        : "bg-slate-50 border-slate-100 text-slate- 300",
+                        : "bg-slate-50 border-slate-100 text-slate-300",
                 )}
             >
                 {icon}

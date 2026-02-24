@@ -8,8 +8,8 @@ export default function ProposalView() {
         <div className="flex flex-col h-full overflow-hidden">
             {/* Header */}
             <div className="flex items-center justify-between mb-4 md:mb-8 px-4 md:px-6">
-                 <h2 className="text-xl md:text-2xl font-display font-bold text-navy-900">Tu Propuesta Estratégica</h2>
-                 <button className="flex items-center gap-2 text-sm font-bold text-navy-900 bg-white border border-slate-200 px-4 py-2 rounded-xl hover:bg-slate-50 transition-colors">
+                 <h2 className="text-xl md:text-2xl font-display font-semibold tracking-tight text-navy-900">Tu Propuesta Estratégica</h2>
+                 <button className="flex items-center gap-2 text-sm font-semibold tracking-tight text-navy-900 bg-white border border-slate-200 px-4 py-2 rounded-xl hover:bg-slate-50 transition-colors">
                     <Download className="w-4 h-4" /> Exportar PDF
                  </button>
             </div>
@@ -72,7 +72,7 @@ function ColumnCard({ title, icon, color, children }: ColumnCardProps) {
                 <div className="p-2 bg-white rounded-lg shadow-sm border border-slate-100">
                     {icon}
                 </div>
-                <h3 className="font-bold text-navy-900">{title}</h3>
+                <h3 className="font-semibold tracking-tight text-navy-900">{title}</h3>
             </div>
             <div className="flex-1">
                 {children}
@@ -128,7 +128,7 @@ function RoadmapItem({ day, focus, task }: RoadmapItemProps) {
         <div className="relative pl-4 border-l-2 border-slate-100">
             <div className="absolute -left-[5px] top-0 w-2.5 h-2.5 bg-white border-2 border-emerald-500 rounded-full" />
             <div className="mb-1 flex items-baseline gap-2">
-                <span className="text-xl font-display font-bold text-navy-900">Day {day}</span>
+                <span className="text-xl font-display font-semibold tracking-tight text-navy-900">Day {day}</span>
                 <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">{focus}</span>
             </div>
             <p className="text-xs text-slate-500">{task}</p>

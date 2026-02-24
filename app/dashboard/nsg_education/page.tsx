@@ -2,15 +2,14 @@
 
 import { useState, useEffect } from "react";
 import ContentLibrary from "@/components/education/library/ContentLibrary";
-import ActionPlanView from "@/components/education/plan/ActionPlanView";
 import DiagnosticForm from "@/components/education/diagnostic/DiagnosticForm";
 import ProposalView from "@/components/education/diagnostic/ProposalView";
-import { GraduationCap, BookOpen, Layers, Zap, LucideIcon } from "lucide-react";
+import { GraduationCap, BookOpen, Layers, Zap, LucideIcon, Search } from "lucide-react";
 import clsx from "clsx";
 import StrategyWidget from "@/components/education/onboarding/StrategyWidget";
 import { educationService } from "@/lib/education";
 
-type EducationView = "onboarding" | "library" | "plans" | "diagnostic";
+type EducationView = "onboarding" | "library" | "diagnostic";
 
 export default function IEducationPage() {
     const [currentView, setCurrentView] = useState<EducationView>("library"); // Changed default to library
@@ -49,12 +48,10 @@ export default function IEducationPage() {
     }, []);
 
     // Navigation for Demo Purposes (Removed 'Estrategia' from main views, moved to button action)
-    const NAV_ITEMS: { id: EducationView; label: string; icon: LucideIcon }[] =
-        [
-            { id: "library", label: "Biblioteca", icon: BookOpen },
-            { id: "plans", label: "Mis Planes", icon: Layers },
-            { id: "diagnostic", label: "Diagnóstico IA", icon: Zap },
-        ];
+    const NAV_ITEMS: { id: EducationView; label: string; icon: LucideIcon }[] = [
+        { id: "library", label: "Biblioteca", icon: BookOpen },
+        { id: "diagnostic", label: "Diagnóstico IA", icon: Search },
+    ];
 
     const handleOpenStrategy = () => {
         setIsStrategyOpen(true);
@@ -70,9 +67,10 @@ export default function IEducationPage() {
             {/* Top Navigation Bar */}
             <div
                 className={clsx(
-                    "sticky top-0 z-[60] flex flex-col sm:flex-row items-stretch sm:items-center justify-between bg-white rounded-2xl p-2 px-4 shadow-sm border border-slate-100 shrink-0 gap-2 sm:gap-0 transition-all duration-500",
+                    "z-[60] flex flex-col sm:flex-row items-stretch sm:items-center justify-between bg-white rounded-2xl p-2 px-4 shadow-sm border border-slate-100 shrink-0 gap-2 sm:gap-0 transition-all duration-500",
                     !isStrategyCompleted &&
                         "opacity-50 pointer-events-none grayscale",
+                    isStrategyOpen && !isStrategyMinimized && "hidden",
                 )}
             >
                 <div className="flex items-center gap-1 overflow-x-auto no-scrollbar pb-1 sm:pb-0 -mx-2 px-2 sm:mx-0 sm:px-0">
@@ -82,7 +80,7 @@ export default function IEducationPage() {
                             disabled={!isStrategyCompleted}
                             onClick={() => setCurrentView(item.id)}
                             className={clsx(
-                                "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all",
+                                "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold tracking-tight transition-all",
                                 currentView === item.id
                                     ? "bg-navy-900 text-white shadow-md shadow-navy-900/20"
                                     : "text-slate-500 hover:bg-slate-50 hover:text-navy-900",
@@ -97,9 +95,9 @@ export default function IEducationPage() {
                     <button
                         onClick={handleOpenStrategy}
                         className={clsx(
-                            "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ml-2",
+                            "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold tracking-tight transition-all ml-2",
                             isStrategyOpen && !isStrategyMinimized
-                                ? "bg-amber-100 text-amber-700"
+                                ? "bg-navy-900 text-white shadow-md shadow-navy-900/20"
                                 : "text-slate-500 hover:bg-slate-50 hover:text-navy-900",
                         )}
                     >
@@ -108,7 +106,7 @@ export default function IEducationPage() {
                     </button>
                 </div>
 
-                <div className="text-xs font-bold text-slate-400 uppercase tracking-widest hidden sm:block">
+                <div className="text-xs font-semibold text-slate-400 uppercase tracking-widest hidden sm:block">
                     I Education Module v1.0
                 </div>
             </div>
@@ -126,12 +124,7 @@ export default function IEducationPage() {
                         <ContentLibrary />
                     </div>
                 )}
-                {/* Defaulting Plans as main view when user lands (home) */}
-                {currentView === "plans" && (
-                    <div className="h-full">
-                        <ActionPlanView />
-                    </div>
-                )}
+
                 {currentView === "diagnostic" && (
                     <div className="h-full bg-slate-50/50 rounded-4xl border border-white/50 shadow-inner p-8">
                         <div className="mb-4 flex gap-4">
@@ -147,7 +140,7 @@ export default function IEducationPage() {
                             <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
                                 <GraduationCap className="w-8 h-8 text-amber-500" />
                             </div>
-                            <h3 className="text-xl font-display font-bold text-navy-950 mb-3">
+                            <h3 className="text-xl font-display font-semibold tracking-tight text-navy-950 mb-3">
                                 Protocolo Requerido
                             </h3>
                             <p className="text-slate-600 text-sm leading-relaxed">

@@ -5,7 +5,8 @@ import { useState, useEffect, useCallback } from "react";
 import IngestInput from "./IngestInput";
 import ContentGrid from "./ContentGrid";
 import ContentDetail from "./ContentDetail";
-import { Loader2, Database, Sparkles } from "lucide-react";
+import EmptyLibrary from "./EmptyLibrary";
+import { Loader2, Database } from "lucide-react";
 import { Banner } from "@/components/ui/Banner";
 import { useToast } from "@/components/ui/ToastProvider";
 import api from "@/lib/api";
@@ -78,14 +79,27 @@ export default function ContentLibrary() {
                 body: formData,
             });
 
-            const result = await response.json().catch(() => ({}));
+            // 1. Safe Response Reading (Read once)
+            const responseText = await response.text();
+            let rawResult;
+            try {
+                rawResult = responseText ? JSON.parse(responseText) : {};
+            } catch (e) {
+                console.error("Non-JSON response:", responseText);
+                rawResult = { message: "Invalid server response" };
+            }
 
+            // 2. Normalize N8N Array Structure
+            const result = Array.isArray(rawResult) ? rawResult[0] : rawResult;
+
+            // 3. Error Handling
             if (!response.ok) {
-                const err = new Error(
-                    result.error || `Error: ${response.status}`,
-                ) as any;
-                err.details = result.details;
-                throw err;
+                const message =
+                    result.error ||
+                    result.message ||
+                    result.details ||
+                    `Error: ${response.status}`;
+                throw new Error(message);
             }
 
             if (result.status === "success" || result.success === true) {
@@ -95,10 +109,41 @@ export default function ContentLibrary() {
 
                 // Si n8n devolvió un ID de recurso, intentamos abrirlo directamente
                 if (result.resource_id) {
-                    const newItem = updatedItems.find(
+                    let newItem = updatedItems.find(
                         (item: EducationContent) =>
                             item.id === result.resource_id,
                     );
+
+                    // ⚡ RAPID HYDRATION: If webhook returns questions directly, inject them immediately
+                    if (
+                        newItem &&
+                        (result.question_process || result.questions)
+                    ) {
+                        try {
+                            const directProcess = result.question_process || {
+                                completed: false,
+                                meta: result.meta || {},
+                                question_blocks: Array.isArray(result.questions)
+                                    ? result.questions
+                                    : [],
+                            };
+
+                            newItem = {
+                                ...newItem,
+                                question_process: directProcess,
+                            };
+
+                            // Update local library state to reflect this enhanced item
+                            setLibraryItems((prev) =>
+                                prev.map((i) =>
+                                    i.id === newItem!.id ? newItem! : i,
+                                ),
+                            );
+                        } catch (e) {
+                            console.error("Hydration error:", e);
+                        }
+                    }
+
                     if (newItem) {
                         setSelectedItem(newItem);
                     }
@@ -108,8 +153,10 @@ export default function ContentLibrary() {
                     result.message || "Error al procesar el recurso",
                 );
             }
-        } catch (error: any) {
-            showToast(error.message || "Error en la ingesta", "error");
+        } catch (error: unknown) {
+            const message =
+                error instanceof Error ? error.message : "Error en la ingesta";
+            showToast(message, "error");
         } finally {
             setIsProcessing(false);
         }
@@ -122,7 +169,7 @@ export default function ContentLibrary() {
             await api.delete(`/education/content/${id}`);
             showToast("Recurso eliminado correctamente", "success");
             setLibraryItems((prev) => prev.filter((item) => item.id !== id));
-        } catch (error) {
+        } catch {
             showToast("No se pudo eliminar el recurso", "error");
         }
     };
@@ -180,7 +227,6 @@ export default function ContentLibrary() {
             <section className="mt-4">
                 <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-100">
                     <div className="flex items-center gap-2 text-navy-900">
-                        <Sparkles className="w-5 h-5 text-blue-600" />
                         <h3 className="font-display font-bold text-lg">
                             Recursos en Red
                         </h3>
@@ -194,12 +240,14 @@ export default function ContentLibrary() {
                             Sincronizando...
                         </span>
                     </div>
-                ) : (
+                ) : libraryItems.length > 0 ? (
                     <ContentGrid
                         extraItems={libraryItems}
                         onSelect={setSelectedItem}
                         onDelete={handleDelete}
                     />
+                ) : (
+                    <EmptyLibrary />
                 )}
             </section>
         </div>

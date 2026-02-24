@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles, ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 
 export default function DiagnosticForm({ onComplete }: { onComplete?: () => void }) {
     const [step, setStep] = useState(1);
@@ -15,30 +15,30 @@ export default function DiagnosticForm({ onComplete }: { onComplete?: () => void
     };
 
     return (
-        <div className="w-full max-w-2xl mx-auto py-6 md:py-12">
+        <div className="w-full max-w-3xl mx-auto py-6 md:py-12">
             {/* Progress Header */}
             <div className="flex items-center justify-between mb-8">
                 <div>
-                     <h2 className="text-2xl font-display font-bold text-navy-900">Diagnóstico Inteligente</h2>
-                     <p className="text-slate-400 text-sm">IA + n8n Analysis</p>
+                     <h2 className="text-2xl font-display font-bold text-navy-950 tracking-tight">Diagnóstico Inteligente</h2>
+                     <p className="text-slate-500 text-sm font-medium">Arquitectura de Procesos & Modelado IA</p>
                 </div>
-                <div className="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+                <div className="text-[10px] font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100 uppercase tracking-widest">
                     {step} / 10
                 </div>
             </div>
 
             {/* Question Card */}
-            <div className="bg-white rounded-3xl md:rounded-4xl p-6 md:p-8 shadow-2xl shadow-blue-900/5 border border-slate-100 relative overflow-hidden">
+            <div className="bg-white/90 backdrop-blur-xl rounded-4xl p-6 md:p-10 shadow-sovereign border border-slate-200/60 relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1 bg-slate-100">
-                    <div className="h-full bg-blue-600 transition-all duration-500" style={{ width: `${step * 10}%` }}></div>
+                    <div className="h-full bg-blue-600 shadow-[0_0_10px_rgba(37,99,235,0.5)] transition-all duration-500" style={{ width: `${step * 10}%` }}></div>
                 </div>
 
-                <div className="min-h-[200px] flex flex-col justify-center">
-                    <h3 className="text-xl font-medium text-navy-800 mb-8 leading-relaxed">
+                <div className="min-h-[220px] flex flex-col justify-center">
+                    <h3 className="text-2xl font-display font-bold text-navy-900 mb-10 leading-tight tracking-tight">
                         ¿Cómo describirías tu proceso actual de gestión de tareas y delegación?
                     </h3>
                     
-                    <div className="space-y-3">
+                    <div className="grid grid-cols-1 gap-3">
                         <OptionButton label="Totalmente manual (Yo hago todo)" onClick={handleNext} />
                         <OptionButton label="Uso herramientas pero es caótico" onClick={handleNext} />
                         <OptionButton label="Tengo equipo pero falta sistema" onClick={handleNext} />
@@ -54,10 +54,10 @@ function OptionButton({ label, onClick }: { label: string, onClick: () => void }
     return (
         <button 
             onClick={onClick}
-            className="w-full text-left px-6 py-4 rounded-xl border border-slate-200 text-slate-600 hover:border-blue-500 hover:bg-blue-50/50 hover:text-blue-700 font-medium transition-all group flex items-center justify-between active:scale-[0.98]"
+            className="w-full text-left px-6 py-5 rounded-2xl border border-slate-200/60 text-navy-900 hover:border-blue-400 hover:bg-white hover:shadow-lg hover:shadow-blue-500/5 font-bold transition-all group flex items-center justify-between active:scale-[0.98] bg-slate-50/50"
         >
-            {label}
-            <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-blue-500" />
+            <span className="text-base">{label}</span>
+            <ArrowRight className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-all translate-x-[-10px] group-hover:translate-x-0 text-blue-600" />
         </button>
     )
 }

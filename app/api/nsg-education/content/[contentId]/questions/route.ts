@@ -13,34 +13,28 @@ export async function POST(
     try {
         const { contentId } = await params;
         const body = await req.json();
+        const authHeader = req.headers.get('Authorization');
 
-        const WEBHOOK_URL = `${CONFIG.N8N_URL}/questions`;
+        const BACKEND_URL = `${CONFIG.API_URL}/education/content/${contentId}/questions`;
 
-        console.log(`[Education Questions] Triggering webhook for content: ${contentId}`);
+        console.log(`[Education Questions] Delegating setup to backend for content: ${contentId}`);
 
-        const response = await fetch(WEBHOOK_URL, {
+        const response = await fetch(BACKEND_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                ...(authHeader ? { 'Authorization': authHeader } : {}),
             },
             body: JSON.stringify({
                 action: body.action || 'start_questions',
-                contentId,
                 telegramId: body.telegramId,
             }),
         });
 
-        if (!response.ok) {
-            throw new Error(`n8n responded with status ${response.status}`);
-        }
+        const data = await response.json();
 
-        const responseText = await response.text();
-        let data;
-        try {
-            data = responseText ? JSON.parse(responseText) : { success: true, message: 'Questions workflow started' };
-        } catch {
-            console.warn("[Education Questions] Response was not valid JSON:", responseText);
-            data = { success: true, raw: responseText };
+        if (!response.ok) {
+            return NextResponse.json(data, { status: response.status });
         }
 
         return NextResponse.json(data);
@@ -48,7 +42,7 @@ export async function POST(
     } catch (error: any) {
         console.error('[Education Questions] Error:', error);
         return NextResponse.json(
-            { error: 'Failed to trigger question generation', message: error.message },
+            { error: 'Failed to trigger questions protocol', message: error.message },
             { status: 502 }
         );
     }
