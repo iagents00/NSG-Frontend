@@ -280,7 +280,7 @@ export default function BillingPage() {
                         </p>
                     </div>
                     <Link
-                        href="mailto:soporte@nsgintelligence.com"
+                        href="mailto:soporte@example.com"
                         className="px-8 py-4 bg-white border border-slate-200 rounded-2xl font-bold text-xs uppercase tracking-widest text-navy-950 hover:border-blue-300 hover:text-blue-600 transition-all"
                     >
                         Hablar con Ventas

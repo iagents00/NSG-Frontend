@@ -143,7 +143,7 @@ const nextConfig: NextConfig = {
   // REWRITES (API Proxy)
   // ============================================
   async rewrites() {
-    const backendUrl = (process.env.API_URL || 'https://api.nsgintelligence.com').replace(/\/$/, '');
+    const backendUrl = (process.env.API_URL || '').replace(/\/$/, '');
     return [
       {
         source: '/api/backend/:path*',

@@ -17,7 +17,7 @@ Crea un archivo llamado `.env.local` en la raíz del directorio `NSG-Frontend`. 
 NEXT_PUBLIC_API_URL=http://localhost:4000
 
 # Producción (Ejemplo)
-# NEXT_PUBLIC_API_URL=https://api.nsgintelligence.com
+# NEXT_PUBLIC_API_URL=https://your-api.com
 
 # ============================================
 # IA & SERVICIOS (Server-side)
