@@ -37,7 +37,7 @@ Se actualizó el archivo `.env.local` con las variables correctas:
 # NO están expuestas al navegador
 
 # Backend API URL (VPS)
-API_URL=https://api.nsgintelligence.com
+API_URL=https://api.your-backend.com
 
 # Frontend App URL (Local)
 APP_URL=http://localhost:3000
@@ -76,10 +76,10 @@ Next.js **solo carga las variables de entorno al iniciar**, por lo que fue neces
 │  └─────────────────────────────────────────────────────┘   │
 └────────────────────────┬────────────────────────────────────┘
                          │
-                         │ fetch('https://api.nsgintelligence.com/auth/verify-token')
+                         │ fetch('https://api.your-backend.com/auth/verify-token')
                          ▼
 ┌─────────────────────────────────────────────────────────────┐
-│              BACKEND VPS (api.nsgintelligence.com)          │
+│              BACKEND VPS (api.your-backend.com)          │
 │  - Verifica el token JWT                                    │
 │  - Consulta MongoDB                                         │
 │  - Devuelve datos del usuario                               │
@@ -118,8 +118,8 @@ Cuando despliegues a Vercel, asegúrate de configurar estas mismas variables en:
 **Vercel Dashboard → Settings → Environment Variables**
 
 ```
-API_URL=https://api.nsgintelligence.com
-APP_URL=https://nsgintelligence.com
+API_URL=https://api.your-backend.com
+APP_URL=https://nsg-eight.vercel.app
 N8N_WEBHOOK=https://personal-n8n.suwsiw.easypanel.host/webhook
 APP_ENV=production
 ```

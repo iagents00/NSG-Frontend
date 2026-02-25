@@ -19,7 +19,7 @@ Se refactorizó completamente la configuración del frontend para **NO exponer n
 - **Archivo**: `app/api/backend/[...path]/route.ts`
 - **Función**: Actúa como proxy entre cliente y backend
 - El cliente llama a `/api/backend/*`
-- El proxy reenvía a `https://api.nsgintelligence.com/*`
+- El proxy reenvía a `https://api.your-backend.com/*`
 - **Resultado**: El cliente nunca conoce la URL real del backend
 
 ### 3. **Refactorizado `lib/config.ts`**
@@ -48,8 +48,8 @@ Se refactorizó completamente la configuración del frontend para **NO exponer n
 
 ```bash
 APP_ENV=production
-API_URL=https://api.nsgintelligence.com
-APP_URL=https://nsgintelligence.com
+API_URL=https://api.your-backend.com
+APP_URL=https://nsg-eight.vercel.app
 N8N_WEBHOOK=https://personal-n8n.suwsiw.easypanel.host/webhook
 MONGODB_URI=mongodb+srv://iagentsnsg_db_user:Nc0lLH0zK6LEFJQP@cluster0.pgbmwuy.mongodb.net/Database?appName=Cluster0
 ```
@@ -83,7 +83,7 @@ GOOGLE_MAPS_API_KEY=tu_api_key_de_google_maps
                       │
                       ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  Backend VPS (https://api.nsgintelligence.com)              │
+│  Backend VPS (https://api.your-backend.com)              │
 │  - Procesa peticiones normalmente                           │
 │  - Responde al proxy                                        │
 └─────────────────────────────────────────────────────────────┘
@@ -157,7 +157,7 @@ GOOGLE_MAPS_API_KEY=tu_api_key_de_google_maps
 2. Abre DevTools → Network
 3. Verifica que las llamadas vayan a `/api/backend/*`
 4. Abre DevTools → Sources
-5. Busca "nsgintelligence" en el código del cliente
+5. Busca "your-backend-domain" en el código del cliente
 6. **NO debería encontrar URLs del backend**
 
 ---

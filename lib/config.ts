@@ -13,13 +13,13 @@ const isProduction = APP_ENV === 'production';
 export const CONFIG = {
     // Backend API URL - ONLY available on server
     API_URL: (process.env.API_URL || (isProduction
-        ? 'https://api.nsgintelligence.com'
+        ? ''
         : 'http://localhost:4000')).replace(/\/$/, ''),
 
     // Frontend App URL - ONLY available on server
     // We try to use APP_URL, then VERCEL_URL (if on Vercel), then production/dev defaults
     APP_URL: (process.env.APP_URL || process.env.NEXT_PUBLIC_VERCEL_URL || (isProduction
-        ? 'https://nsgintelligence.com'
+        ? 'https://nsg-eight.vercel.app'
         : 'http://localhost:3200')).replace(/\/$/, ''),
 
     // N8N Webhooks Base URL - ONLY available on server

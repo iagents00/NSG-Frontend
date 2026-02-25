@@ -162,41 +162,17 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
 
                 try {
                     const fullData = currentItem.fullData as any;
-
-                    const res = await fetch(
-                        `/api/nsg-education/content/${currentItem.id}/questions`,
-                        {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({
-                                action: "start_questions",
-                                telegramId: fullData?.telegram_id,
-                            }),
-                        },
+                    const data = await educationService.startQuestions(
+                        currentItem.id,
+                        fullData?.telegram_id,
                     );
 
-                    if (res.ok) {
-                        const responseText = await res.text();
-                        let raw;
-                        try {
-                            raw = responseText ? JSON.parse(responseText) : {};
-                        } catch {
-                            raw = {};
-                        }
-
-                        // Normalize n8n array response [ { ... } ]
-                        const data = Array.isArray(raw) ? raw[0] : raw;
-
-                        if (data && data.question_process) {
-                            setCurrentItem((prev) => ({
-                                ...prev,
-                                question_process: data.question_process,
-                            }));
-                            showToast(
-                                "Protocolo de preguntas generado",
-                                "success",
-                            );
-                        }
+                    if (data && data.question_process) {
+                        setCurrentItem((prev) => ({
+                            ...prev,
+                            question_process: data.question_process,
+                        }));
+                        showToast("Protocolo de preguntas generado", "success");
                     }
 
                     setTimeout(refreshContent, 3000);
@@ -305,7 +281,6 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                     Análisis Estratégico
                                 </ReactMarkdown>
                             </div>
-
                         </div>
                         <div className="text-slate-500 text-lg font-medium leading-relaxed max-w-2xl prose prose-p:my-0 prose-strong:text-slate-700">
                             <ReactMarkdown>
@@ -342,7 +317,9 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                             {insight.icon || "💡"}
                                         </span>
                                         <div className="text-sm font-medium text-slate-700 leading-relaxed prose prose-p:my-0 prose-strong:text-slate-900">
-                                            <ReactMarkdown>{insight.text}</ReactMarkdown>
+                                            <ReactMarkdown>
+                                                {insight.text}
+                                            </ReactMarkdown>
                                         </div>
                                     </div>
                                 ),
@@ -371,7 +348,8 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                 </span>
                                 <div className="text-sm leading-relaxed text-slate-200 prose prose-p:my-0 prose-strong:text-white prose-invert">
                                     <ReactMarkdown>
-                                        {data.strategic_analysis?.alignment || ''}
+                                        {data.strategic_analysis?.alignment ||
+                                            ""}
                                     </ReactMarkdown>
                                 </div>
                             </div>
@@ -381,7 +359,8 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                 </span>
                                 <div className="text-sm leading-relaxed text-slate-200 prose prose-p:my-0 prose-strong:text-white prose-invert">
                                     <ReactMarkdown>
-                                        {data.strategic_analysis?.friction_bypass || ''}
+                                        {data.strategic_analysis
+                                            ?.friction_bypass || ""}
                                     </ReactMarkdown>
                                 </div>
                             </div>
@@ -425,7 +404,9 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                     </div>
                                     <div className="flex-1">
                                         <div className="font-bold text-navy-900 prose prose-p:my-0 prose-strong:text-navy-900">
-                                            <ReactMarkdown>{step.task}</ReactMarkdown>
+                                            <ReactMarkdown>
+                                                {step.task}
+                                            </ReactMarkdown>
                                         </div>
                                         <div className="flex items-center gap-4 mt-1">
                                             <span
@@ -495,27 +476,56 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                 {isCompleted ? (
                     renderAnalysis()
                 ) : allQuestions.length > 0 ? (
-                    <div className="w-full max-w-3xl mx-auto flex flex-col flex-1 overflow-hidden" style={{ gap: 'clamp(0.5rem, 1.2dvh, 0.75rem)' }}>
+                    <div
+                        className="w-full max-w-3xl mx-auto flex flex-col flex-1 overflow-hidden"
+                        style={{ gap: "clamp(0.5rem, 1.2dvh, 0.75rem)" }}
+                    >
                         {/* Progress Header — Dark Glass */}
-                        <div 
+                        <div
                             className="rounded-2xl shrink-0 border border-white/10 backdrop-blur-xl"
-                            style={{ 
-                                padding: 'clamp(0.6rem, 1.5dvh, 1.25rem) clamp(0.75rem, 2dvw, 1.5rem)',
-                                background: 'linear-gradient(135deg, rgba(15,23,42,0.95), rgba(30,41,59,0.9))',
+                            style={{
+                                padding:
+                                    "clamp(0.6rem, 1.5dvh, 1.25rem) clamp(0.75rem, 2dvw, 1.5rem)",
+                                background:
+                                    "linear-gradient(135deg, rgba(15,23,42,0.95), rgba(30,41,59,0.9))",
                             }}
                         >
-                            <div className="flex items-center justify-between" style={{ marginBottom: 'clamp(0.375rem, 1dvh, 0.75rem)' }}>
+                            <div
+                                className="flex items-center justify-between"
+                                style={{
+                                    marginBottom:
+                                        "clamp(0.375rem, 1dvh, 0.75rem)",
+                                }}
+                            >
                                 <div>
-                                    <span className="font-semibold uppercase tracking-[0.15em] text-cyan-400/80" style={{ fontSize: 'clamp(0.5rem, 1.1dvh, 0.625rem)' }}>
+                                    <span
+                                        className="font-semibold uppercase tracking-[0.15em] text-cyan-400/80"
+                                        style={{
+                                            fontSize:
+                                                "clamp(0.5rem, 1.1dvh, 0.625rem)",
+                                        }}
+                                    >
                                         Protocolo de Análisis
                                     </span>
-                                    <h4 className="font-display font-bold text-white/90" style={{ fontSize: 'clamp(0.75rem, 1.8dvh, 1rem)' }}>
+                                    <h4
+                                        className="font-display font-bold text-white/90"
+                                        style={{
+                                            fontSize:
+                                                "clamp(0.75rem, 1.8dvh, 1rem)",
+                                        }}
+                                    >
                                         Etapa {currentStep + 1} de{" "}
                                         {allQuestions.length}
                                     </h4>
                                 </div>
                                 <div className="text-right">
-                                    <span className="font-display font-bold text-white" style={{ fontSize: 'clamp(1rem, 2.8dvh, 1.5rem)' }}>
+                                    <span
+                                        className="font-display font-bold text-white"
+                                        style={{
+                                            fontSize:
+                                                "clamp(1rem, 2.8dvh, 1.5rem)",
+                                        }}
+                                    >
                                         {Math.round(
                                             ((currentStep + 1) /
                                                 allQuestions.length) *
@@ -525,10 +535,21 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                     </span>
                                 </div>
                             </div>
-                            <div className="w-full rounded-full overflow-hidden" style={{ height: 'clamp(3px, 0.6dvh, 6px)', background: 'rgba(255,255,255,0.08)' }}>
+                            <div
+                                className="w-full rounded-full overflow-hidden"
+                                style={{
+                                    height: "clamp(3px, 0.6dvh, 6px)",
+                                    background: "rgba(255,255,255,0.08)",
+                                }}
+                            >
                                 <motion.div
                                     className="h-full rounded-full"
-                                    style={{ background: 'linear-gradient(90deg, #06b6d4, #3b82f6, #8b5cf6)', boxShadow: '0 0 20px rgba(6,182,212,0.4)' }}
+                                    style={{
+                                        background:
+                                            "linear-gradient(90deg, #06b6d4, #3b82f6, #8b5cf6)",
+                                        boxShadow:
+                                            "0 0 20px rgba(6,182,212,0.4)",
+                                    }}
                                     initial={{ width: 0 }}
                                     animate={{
                                         width: `${((currentStep + 1) / allQuestions.length) * 100}%`,
@@ -542,7 +563,12 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                         </div>
 
                         {/* Question Card */}
-                        <div className="relative flex-1 flex flex-col overflow-hidden" style={{ paddingTop: 'clamp(0.125rem, 0.3dvh, 0.25rem)' }}>
+                        <div
+                            className="relative flex-1 flex flex-col overflow-hidden"
+                            style={{
+                                paddingTop: "clamp(0.125rem, 0.3dvh, 0.25rem)",
+                            }}
+                        >
                             <AnimatePresence mode="wait" custom={direction}>
                                 <motion.div
                                     key={currentStep}
@@ -566,21 +592,58 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                 >
                                     <div
                                         className="rounded-2xl border border-white/[0.08] backdrop-blur-xl flex flex-col relative overflow-hidden flex-1"
-                                        style={{ 
-                                            padding: 'clamp(0.75rem, 2dvh, 1.5rem) clamp(0.875rem, 2.5dvw, 1.75rem)', 
-                                            gap: 'clamp(0.5rem, 1.5dvh, 1.25rem)',
-                                            background: 'linear-gradient(160deg, rgba(15,23,42,0.97), rgba(20,30,48,0.95), rgba(15,23,42,0.97))',
-                                            boxShadow: '0 0 0 1px rgba(6,182,212,0.06), 0 25px 50px -12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)',
+                                        style={{
+                                            padding:
+                                                "clamp(0.75rem, 2dvh, 1.5rem) clamp(0.875rem, 2.5dvw, 1.75rem)",
+                                            gap: "clamp(0.5rem, 1.5dvh, 1.25rem)",
+                                            background:
+                                                "linear-gradient(160deg, rgba(15,23,42,0.97), rgba(20,30,48,0.95), rgba(15,23,42,0.97))",
+                                            boxShadow:
+                                                "0 0 0 1px rgba(6,182,212,0.06), 0 25px 50px -12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)",
                                         }}
                                     >
                                         {/* Top accent line */}
-                                        <div className="absolute top-0 left-0 w-full" style={{ height: '2px', background: 'linear-gradient(90deg, transparent, rgba(6,182,212,0.5), rgba(59,130,246,0.5), transparent)' }} />
-                                        
+                                        <div
+                                            className="absolute top-0 left-0 w-full"
+                                            style={{
+                                                height: "2px",
+                                                background:
+                                                    "linear-gradient(90deg, transparent, rgba(6,182,212,0.5), rgba(59,130,246,0.5), transparent)",
+                                            }}
+                                        />
+
                                         {/* Question header */}
-                                        <div className="shrink-0" style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(0.25rem, 0.7dvh, 0.5rem)' }}>
-                                            <div className="flex items-center" style={{ gap: 'clamp(0.375rem, 0.8dvh, 0.5rem)' }}>
-                                                <div className="rounded-full" style={{ width: 'clamp(5px, 0.8dvh, 7px)', height: 'clamp(5px, 0.8dvh, 7px)', background: '#06b6d4', boxShadow: '0 0 12px rgba(6,182,212,0.6)' }} />
-                                                <span className="font-semibold text-cyan-400/70 uppercase tracking-[0.15em]" style={{ fontSize: 'clamp(0.5rem, 1.1dvh, 0.625rem)' }}>
+                                        <div
+                                            className="shrink-0"
+                                            style={{
+                                                display: "flex",
+                                                flexDirection: "column",
+                                                gap: "clamp(0.25rem, 0.7dvh, 0.5rem)",
+                                            }}
+                                        >
+                                            <div
+                                                className="flex items-center"
+                                                style={{
+                                                    gap: "clamp(0.375rem, 0.8dvh, 0.5rem)",
+                                                }}
+                                            >
+                                                <div
+                                                    className="rounded-full"
+                                                    style={{
+                                                        width: "clamp(5px, 0.8dvh, 7px)",
+                                                        height: "clamp(5px, 0.8dvh, 7px)",
+                                                        background: "#06b6d4",
+                                                        boxShadow:
+                                                            "0 0 12px rgba(6,182,212,0.6)",
+                                                    }}
+                                                />
+                                                <span
+                                                    className="font-semibold text-cyan-400/70 uppercase tracking-[0.15em]"
+                                                    style={{
+                                                        fontSize:
+                                                            "clamp(0.5rem, 1.1dvh, 0.625rem)",
+                                                    }}
+                                                >
                                                     {
                                                         allQuestions[
                                                             currentStep
@@ -588,7 +651,13 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                                     }
                                                 </span>
                                             </div>
-                                            <h4 className="font-display font-bold text-white/95 leading-snug" style={{ fontSize: 'clamp(0.875rem, 2.2dvh, 1.25rem)' }}>
+                                            <h4
+                                                className="font-display font-bold text-white/95 leading-snug"
+                                                style={{
+                                                    fontSize:
+                                                        "clamp(0.875rem, 2.2dvh, 1.25rem)",
+                                                }}
+                                            >
                                                 {
                                                     allQuestions[currentStep]
                                                         .question
@@ -602,106 +671,173 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                                 .options &&
                                             allQuestions[currentStep].options!
                                                 .length > 0 ? (
-                                                <div className="grid grid-cols-1" style={{ gap: 'clamp(0.375rem, 0.9dvh, 0.75rem)' }}>
+                                                <div
+                                                    className="grid grid-cols-1"
+                                                    style={{
+                                                        gap: "clamp(0.375rem, 0.9dvh, 0.75rem)",
+                                                    }}
+                                                >
                                                     {(
                                                         allQuestions[
                                                             currentStep
                                                         ].options || []
-                                                    ).map((opt: string, idx: number) => (
-                                                        <motion.button
-                                                            key={opt}
-                                                            whileHover={{
-                                                                x: 4,
-                                                                transition: { duration: 0.2 },
-                                                            }}
-                                                            whileTap={{
-                                                                scale: 0.98,
-                                                            }}
-                                                            onClick={() =>
-                                                                setAnswers({
-                                                                    ...answers,
-                                                                    [allQuestions[
-                                                                        currentStep
-                                                                    ].id ||
-                                                                    `q-${currentStep}`]:
-                                                                        opt,
-                                                                })
-                                                            }
-                                                            className={clsx(
-                                                                "w-full rounded-xl text-left font-medium transition-all flex items-center justify-between group border",
-                                                                answers[
-                                                                    allQuestions[
-                                                                        currentStep
-                                                                    ].id ||
-                                                                        `q-${currentStep}`
-                                                                ] === opt
-                                                                    ? "border-cyan-500/50 text-white"
-                                                                    : "border-white/[0.06] text-white/70 hover:text-white hover:border-white/15",
-                                                            )}
-                                                            style={{ 
-                                                                padding: 'clamp(0.5rem, 1.4dvh, 1rem) clamp(0.75rem, 1.5dvw, 1.25rem)',
-                                                                background: answers[
-                                                                    allQuestions[currentStep].id || `q-${currentStep}`
-                                                                ] === opt 
-                                                                    ? 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(59,130,246,0.12))'
-                                                                    : 'rgba(255,255,255,0.03)',
-                                                                boxShadow: answers[
-                                                                    allQuestions[currentStep].id || `q-${currentStep}`
-                                                                ] === opt 
-                                                                    ? '0 0 20px rgba(6,182,212,0.15), inset 0 1px 0 rgba(255,255,255,0.08)'
-                                                                    : 'inset 0 1px 0 rgba(255,255,255,0.03)',
-                                                            }}
-                                                        >
-                                                            <div className="flex items-center" style={{ gap: 'clamp(0.5rem, 1dvh, 0.75rem)' }}>
-                                                                <span 
-                                                                    className={clsx(
-                                                                        "font-mono font-bold shrink-0 flex items-center justify-center rounded-lg",
-                                                                        answers[allQuestions[currentStep].id || `q-${currentStep}`] === opt
-                                                                            ? "text-cyan-300"
-                                                                            : "text-white/30"
-                                                                    )}
-                                                                    style={{ 
-                                                                        fontSize: 'clamp(0.563rem, 1.2dvh, 0.75rem)',
-                                                                        width: 'clamp(1.25rem, 3dvh, 1.75rem)', 
-                                                                        height: 'clamp(1.25rem, 3dvh, 1.75rem)',
-                                                                        background: answers[allQuestions[currentStep].id || `q-${currentStep}`] === opt
-                                                                            ? 'rgba(6,182,212,0.15)'
-                                                                            : 'rgba(255,255,255,0.05)',
-                                                                        border: `1px solid ${answers[allQuestions[currentStep].id || `q-${currentStep}`] === opt ? 'rgba(6,182,212,0.3)' : 'rgba(255,255,255,0.08)'}`,
-                                                                    }}
-                                                                >
-                                                                    {String.fromCharCode(65 + idx)}
-                                                                </span>
-                                                                <span style={{ fontSize: 'clamp(0.75rem, 1.7dvh, 0.938rem)' }}>
-                                                                    {opt}
-                                                                </span>
-                                                            </div>
-                                                            <CheckCircle2
+                                                    ).map(
+                                                        (
+                                                            opt: string,
+                                                            idx: number,
+                                                        ) => (
+                                                            <motion.button
+                                                                key={opt}
+                                                                whileHover={{
+                                                                    x: 4,
+                                                                    transition:
+                                                                        {
+                                                                            duration: 0.2,
+                                                                        },
+                                                                }}
+                                                                whileTap={{
+                                                                    scale: 0.98,
+                                                                }}
+                                                                onClick={() =>
+                                                                    setAnswers({
+                                                                        ...answers,
+                                                                        [allQuestions[
+                                                                            currentStep
+                                                                        ].id ||
+                                                                        `q-${currentStep}`]:
+                                                                            opt,
+                                                                    })
+                                                                }
                                                                 className={clsx(
-                                                                    "shrink-0 ml-2 transition-all",
+                                                                    "w-full rounded-xl text-left font-medium transition-all flex items-center justify-between group border",
                                                                     answers[
                                                                         allQuestions[
                                                                             currentStep
                                                                         ].id ||
                                                                             `q-${currentStep}`
                                                                     ] === opt
-                                                                        ? "opacity-100 text-cyan-400"
-                                                                        : "opacity-0 group-hover:opacity-20 text-white/40",
+                                                                        ? "border-cyan-500/50 text-white"
+                                                                        : "border-white/[0.06] text-white/70 hover:text-white hover:border-white/15",
                                                                 )}
-                                                                style={{ width: 'clamp(0.875rem, 2dvh, 1.25rem)', height: 'clamp(0.875rem, 2dvh, 1.25rem)' }}
-                                                            />
-                                                        </motion.button>
-                                                    ))}
+                                                                style={{
+                                                                    padding:
+                                                                        "clamp(0.5rem, 1.4dvh, 1rem) clamp(0.75rem, 1.5dvw, 1.25rem)",
+                                                                    background:
+                                                                        answers[
+                                                                            allQuestions[
+                                                                                currentStep
+                                                                            ]
+                                                                                .id ||
+                                                                                `q-${currentStep}`
+                                                                        ] ===
+                                                                        opt
+                                                                            ? "linear-gradient(135deg, rgba(6,182,212,0.15), rgba(59,130,246,0.12))"
+                                                                            : "rgba(255,255,255,0.03)",
+                                                                    boxShadow:
+                                                                        answers[
+                                                                            allQuestions[
+                                                                                currentStep
+                                                                            ]
+                                                                                .id ||
+                                                                                `q-${currentStep}`
+                                                                        ] ===
+                                                                        opt
+                                                                            ? "0 0 20px rgba(6,182,212,0.15), inset 0 1px 0 rgba(255,255,255,0.08)"
+                                                                            : "inset 0 1px 0 rgba(255,255,255,0.03)",
+                                                                }}
+                                                            >
+                                                                <div
+                                                                    className="flex items-center"
+                                                                    style={{
+                                                                        gap: "clamp(0.5rem, 1dvh, 0.75rem)",
+                                                                    }}
+                                                                >
+                                                                    <span
+                                                                        className={clsx(
+                                                                            "font-mono font-bold shrink-0 flex items-center justify-center rounded-lg",
+                                                                            answers[
+                                                                                allQuestions[
+                                                                                    currentStep
+                                                                                ]
+                                                                                    .id ||
+                                                                                    `q-${currentStep}`
+                                                                            ] ===
+                                                                                opt
+                                                                                ? "text-cyan-300"
+                                                                                : "text-white/30",
+                                                                        )}
+                                                                        style={{
+                                                                            fontSize:
+                                                                                "clamp(0.563rem, 1.2dvh, 0.75rem)",
+                                                                            width: "clamp(1.25rem, 3dvh, 1.75rem)",
+                                                                            height: "clamp(1.25rem, 3dvh, 1.75rem)",
+                                                                            background:
+                                                                                answers[
+                                                                                    allQuestions[
+                                                                                        currentStep
+                                                                                    ]
+                                                                                        .id ||
+                                                                                        `q-${currentStep}`
+                                                                                ] ===
+                                                                                opt
+                                                                                    ? "rgba(6,182,212,0.15)"
+                                                                                    : "rgba(255,255,255,0.05)",
+                                                                            border: `1px solid ${answers[allQuestions[currentStep].id || `q-${currentStep}`] === opt ? "rgba(6,182,212,0.3)" : "rgba(255,255,255,0.08)"}`,
+                                                                        }}
+                                                                    >
+                                                                        {String.fromCharCode(
+                                                                            65 +
+                                                                                idx,
+                                                                        )}
+                                                                    </span>
+                                                                    <span
+                                                                        style={{
+                                                                            fontSize:
+                                                                                "clamp(0.75rem, 1.7dvh, 0.938rem)",
+                                                                        }}
+                                                                    >
+                                                                        {opt}
+                                                                    </span>
+                                                                </div>
+                                                                <CheckCircle2
+                                                                    className={clsx(
+                                                                        "shrink-0 ml-2 transition-all",
+                                                                        answers[
+                                                                            allQuestions[
+                                                                                currentStep
+                                                                            ]
+                                                                                .id ||
+                                                                                `q-${currentStep}`
+                                                                        ] ===
+                                                                            opt
+                                                                            ? "opacity-100 text-cyan-400"
+                                                                            : "opacity-0 group-hover:opacity-20 text-white/40",
+                                                                    )}
+                                                                    style={{
+                                                                        width: "clamp(0.875rem, 2dvh, 1.25rem)",
+                                                                        height: "clamp(0.875rem, 2dvh, 1.25rem)",
+                                                                    }}
+                                                                />
+                                                            </motion.button>
+                                                        ),
+                                                    )}
                                                 </div>
                                             ) : allQuestions[currentStep]
                                                   .type === "boolean" ? (
-                                                <div className="grid grid-cols-2" style={{ gap: 'clamp(0.5rem, 1.2dvh, 1rem)' }}>
+                                                <div
+                                                    className="grid grid-cols-2"
+                                                    style={{
+                                                        gap: "clamp(0.5rem, 1.2dvh, 1rem)",
+                                                    }}
+                                                >
                                                     {["Sí", "No"].map((opt) => (
                                                         <motion.button
                                                             key={opt}
                                                             whileHover={{
                                                                 y: -3,
-                                                                transition: { duration: 0.2 },
+                                                                transition: {
+                                                                    duration: 0.2,
+                                                                },
                                                             }}
                                                             whileTap={{
                                                                 scale: 0.96,
@@ -727,19 +863,29 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                                                     ? "border-cyan-500/50 text-white"
                                                                     : "border-white/[0.06] text-white/60 hover:text-white hover:border-white/15",
                                                             )}
-                                                            style={{ 
-                                                                padding: 'clamp(0.75rem, 2.5dvh, 1.5rem)', 
-                                                                fontSize: 'clamp(0.938rem, 2.2dvh, 1.125rem)',
-                                                                background: answers[
-                                                                    allQuestions[currentStep].id || `q-${currentStep}`
-                                                                ] === opt 
-                                                                    ? 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(59,130,246,0.12))'
-                                                                    : 'rgba(255,255,255,0.03)',
-                                                                boxShadow: answers[
-                                                                    allQuestions[currentStep].id || `q-${currentStep}`
-                                                                ] === opt 
-                                                                    ? '0 0 20px rgba(6,182,212,0.15), inset 0 1px 0 rgba(255,255,255,0.08)'
-                                                                    : 'inset 0 1px 0 rgba(255,255,255,0.03)',
+                                                            style={{
+                                                                padding:
+                                                                    "clamp(0.75rem, 2.5dvh, 1.5rem)",
+                                                                fontSize:
+                                                                    "clamp(0.938rem, 2.2dvh, 1.125rem)",
+                                                                background:
+                                                                    answers[
+                                                                        allQuestions[
+                                                                            currentStep
+                                                                        ].id ||
+                                                                            `q-${currentStep}`
+                                                                    ] === opt
+                                                                        ? "linear-gradient(135deg, rgba(6,182,212,0.15), rgba(59,130,246,0.12))"
+                                                                        : "rgba(255,255,255,0.03)",
+                                                                boxShadow:
+                                                                    answers[
+                                                                        allQuestions[
+                                                                            currentStep
+                                                                        ].id ||
+                                                                            `q-${currentStep}`
+                                                                    ] === opt
+                                                                        ? "0 0 20px rgba(6,182,212,0.15), inset 0 1px 0 rgba(255,255,255,0.08)"
+                                                                        : "inset 0 1px 0 rgba(255,255,255,0.03)",
                                                             }}
                                                         >
                                                             {opt}
@@ -750,13 +896,18 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                                 <textarea
                                                     placeholder="Describe tu respuesta aquí..."
                                                     className="w-full flex-1 rounded-xl text-white/90 font-medium outline-none transition-all resize-none placeholder:text-white/25"
-                                                    style={{ 
-                                                        padding: 'clamp(0.625rem, 1.5dvh, 1rem)', 
-                                                        fontSize: 'clamp(0.75rem, 1.6dvh, 0.875rem)', 
-                                                        minHeight: 'clamp(60px, 15dvh, 150px)',
-                                                        background: 'rgba(255,255,255,0.04)',
-                                                        border: '1px solid rgba(255,255,255,0.08)',
-                                                        boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.2)',
+                                                    style={{
+                                                        padding:
+                                                            "clamp(0.625rem, 1.5dvh, 1rem)",
+                                                        fontSize:
+                                                            "clamp(0.75rem, 1.6dvh, 0.875rem)",
+                                                        minHeight:
+                                                            "clamp(60px, 15dvh, 150px)",
+                                                        background:
+                                                            "rgba(255,255,255,0.04)",
+                                                        border: "1px solid rgba(255,255,255,0.08)",
+                                                        boxShadow:
+                                                            "inset 0 2px 4px rgba(0,0,0,0.2)",
                                                     }}
                                                     value={
                                                         answers[
@@ -781,19 +932,39 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                         </div>
 
                                         {/* Navigation */}
-                                        <div className="flex items-center justify-between shrink-0" style={{ paddingTop: 'clamp(0.5rem, 1dvh, 1rem)', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                                        <div
+                                            className="flex items-center justify-between shrink-0"
+                                            style={{
+                                                paddingTop:
+                                                    "clamp(0.5rem, 1dvh, 1rem)",
+                                                borderTop:
+                                                    "1px solid rgba(255,255,255,0.06)",
+                                            }}
+                                        >
                                             <button
                                                 onClick={handleBackBtn}
                                                 disabled={currentStep === 0}
                                                 className="flex items-center font-semibold uppercase tracking-[0.15em] text-white/30 hover:text-white/60 disabled:opacity-0 transition-colors"
-                                                style={{ gap: 'clamp(0.25rem, 0.5dvh, 0.5rem)', fontSize: 'clamp(0.563rem, 1.1dvh, 0.688rem)' }}
+                                                style={{
+                                                    gap: "clamp(0.25rem, 0.5dvh, 0.5rem)",
+                                                    fontSize:
+                                                        "clamp(0.563rem, 1.1dvh, 0.688rem)",
+                                                }}
                                             >
-                                                <ArrowLeft style={{ width: 'clamp(0.75rem, 1.8dvh, 1rem)', height: 'clamp(0.75rem, 1.8dvh, 1rem)' }} />
+                                                <ArrowLeft
+                                                    style={{
+                                                        width: "clamp(0.75rem, 1.8dvh, 1rem)",
+                                                        height: "clamp(0.75rem, 1.8dvh, 1rem)",
+                                                    }}
+                                                />
                                                 Atrás
                                             </button>
 
                                             <motion.button
-                                                whileHover={{ scale: 1.03, y: -1 }}
+                                                whileHover={{
+                                                    scale: 1.03,
+                                                    y: -1,
+                                                }}
                                                 whileTap={{ scale: 0.97 }}
                                                 onClick={() =>
                                                     handleNext(
@@ -812,17 +983,27 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                                         ])
                                                 }
                                                 className="rounded-xl font-bold uppercase tracking-[0.12em] transition-all flex items-center disabled:opacity-40 disabled:cursor-not-allowed text-white"
-                                                style={{ 
-                                                    padding: 'clamp(0.5rem, 1.3dvh, 0.875rem) clamp(1rem, 2.5dvw, 1.75rem)', 
-                                                    fontSize: 'clamp(0.563rem, 1.1dvh, 0.688rem)', 
-                                                    gap: 'clamp(0.375rem, 0.7dvh, 0.5rem)',
-                                                    background: 'linear-gradient(135deg, #06b6d4, #3b82f6)',
-                                                    boxShadow: '0 0 20px rgba(6,182,212,0.25), 0 4px 12px rgba(0,0,0,0.3)',
+                                                style={{
+                                                    padding:
+                                                        "clamp(0.5rem, 1.3dvh, 0.875rem) clamp(1rem, 2.5dvw, 1.75rem)",
+                                                    fontSize:
+                                                        "clamp(0.563rem, 1.1dvh, 0.688rem)",
+                                                    gap: "clamp(0.375rem, 0.7dvh, 0.5rem)",
+                                                    background:
+                                                        "linear-gradient(135deg, #06b6d4, #3b82f6)",
+                                                    boxShadow:
+                                                        "0 0 20px rgba(6,182,212,0.25), 0 4px 12px rgba(0,0,0,0.3)",
                                                 }}
                                             >
                                                 {isSubmitting ? (
                                                     <>
-                                                        <Loader2 className="animate-spin" style={{ width: 'clamp(0.75rem, 1.8dvh, 1rem)', height: 'clamp(0.75rem, 1.8dvh, 1rem)' }} />{" "}
+                                                        <Loader2
+                                                            className="animate-spin"
+                                                            style={{
+                                                                width: "clamp(0.75rem, 1.8dvh, 1rem)",
+                                                                height: "clamp(0.75rem, 1.8dvh, 1rem)",
+                                                            }}
+                                                        />{" "}
                                                         Procesando...
                                                     </>
                                                 ) : (
@@ -831,7 +1012,12 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                                         allQuestions.length - 1
                                                             ? "Finalizar"
                                                             : "Continuar"}
-                                                        <ChevronRight style={{ width: 'clamp(0.75rem, 1.8dvh, 1rem)', height: 'clamp(0.75rem, 1.8dvh, 1rem)' }} />
+                                                        <ChevronRight
+                                                            style={{
+                                                                width: "clamp(0.75rem, 1.8dvh, 1rem)",
+                                                                height: "clamp(0.75rem, 1.8dvh, 1rem)",
+                                                            }}
+                                                        />
                                                     </>
                                                 )}
                                             </motion.button>
@@ -852,18 +1038,33 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                             <div className="absolute -inset-4 bg-blue-500/10 blur-3xl rounded-full -z-10 animate-pulse"></div>
                         </div>
                         <div className="text-center space-y-3 max-w-md mx-auto relative h-24">
-                             <h3 className="text-xl font-display font-semibold text-navy-950 tracking-tight">
+                            <h3 className="text-xl font-display font-semibold text-navy-950 tracking-tight">
                                 Generando Protocolo...
                             </h3>
-                            
+
                             <div className="relative h-12 flex items-center justify-center">
                                 <AnimatePresence mode="wait">
                                     <motion.p
                                         key={phraseIndex}
-                                        initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
-                                        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                                        exit={{ opacity: 0, y: -10, filter: "blur(4px)" }}
-                                        transition={{ duration: 0.5, ease: "easeOut" }}
+                                        initial={{
+                                            opacity: 0,
+                                            y: 10,
+                                            filter: "blur(4px)",
+                                        }}
+                                        animate={{
+                                            opacity: 1,
+                                            y: 0,
+                                            filter: "blur(0px)",
+                                        }}
+                                        exit={{
+                                            opacity: 0,
+                                            y: -10,
+                                            filter: "blur(4px)",
+                                        }}
+                                        transition={{
+                                            duration: 0.5,
+                                            ease: "easeOut",
+                                        }}
                                         className="text-slate-500 text-sm font-medium leading-relaxed absolute w-full text-center"
                                     >
                                         {LOADING_PHRASES[phraseIndex]}
@@ -875,10 +1076,14 @@ export default function ContentDetail({ item, onBack }: ContentDetailProps) {
                                 {[0, 1, 2].map((i) => (
                                     <motion.div
                                         key={i}
-                                        animate={{ 
+                                        animate={{
                                             opacity: [0.3, 1, 0.3],
                                             scale: [1, 1.2, 1],
-                                            backgroundColor: ["#cbd5e1", "#2563eb", "#cbd5e1"]
+                                            backgroundColor: [
+                                                "#cbd5e1",
+                                                "#2563eb",
+                                                "#cbd5e1",
+                                            ],
                                         }}
                                         transition={{
                                             duration: 1.5,

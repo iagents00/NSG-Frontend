@@ -10,6 +10,7 @@ import { Loader2, Database } from "lucide-react";
 import { Banner } from "@/components/ui/Banner";
 import { useToast } from "@/components/ui/ToastProvider";
 import api from "@/lib/api";
+import { educationService } from "@/lib/education";
 import { EducationContent } from "@/types/education";
 
 export default function ContentLibrary() {
@@ -66,41 +67,7 @@ export default function ContentLibrary() {
             if (data.document) formData.append("document", data.document);
             if (data.image) formData.append("image", data.image);
 
-            const token =
-                typeof window !== "undefined"
-                    ? localStorage.getItem("nsg-token")
-                    : null;
-
-            const response = await fetch("/api/nsg-education/content", {
-                method: "POST",
-                headers: {
-                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                },
-                body: formData,
-            });
-
-            // 1. Safe Response Reading (Read once)
-            const responseText = await response.text();
-            let rawResult;
-            try {
-                rawResult = responseText ? JSON.parse(responseText) : {};
-            } catch (e) {
-                console.error("Non-JSON response:", responseText);
-                rawResult = { message: "Invalid server response" };
-            }
-
-            // 2. Normalize N8N Array Structure
-            const result = Array.isArray(rawResult) ? rawResult[0] : rawResult;
-
-            // 3. Error Handling
-            if (!response.ok) {
-                const message =
-                    result.error ||
-                    result.message ||
-                    result.details ||
-                    `Error: ${response.status}`;
-                throw new Error(message);
-            }
+            const result = await educationService.ingestContent(formData);
 
             if (result.status === "success" || result.success === true) {
                 showToast(`Recurso procesado exitosamente`, "success");

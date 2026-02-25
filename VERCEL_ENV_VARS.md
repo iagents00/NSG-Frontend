@@ -8,8 +8,8 @@ Copia y pega estas variables en **Vercel → Settings → Environment Variables*
 
 ```bash
 APP_ENV=production
-API_URL=https://api.nsgintelligence.com
-APP_URL=https://nsgintelligence.com
+API_URL=https://your-api-domain.com
+APP_URL=https://nsg-eight.vercel.app
 N8N_WEBHOOK=https://personal-n8n.suwsiw.easypanel.host/webhook
 MONGODB_URI=mongodb+srv://iagentsnsg_db_user:Nc0lLH0zK6LEFJQP@cluster0.pgbmwuy.mongodb.net/Database?appName=Cluster0
 ```
@@ -51,8 +51,8 @@ GOOGLE_MAPS_API_KEY=tu_api_key_de_google_maps
 | Variable              | Valor                                                | Production  | Preview          | Development |
 | --------------------- | ---------------------------------------------------- | ----------- | ---------------- | ----------- |
 | `APP_ENV`             | `production`                                         | ✅          | ✅               | ✅          |
-| `API_URL`             | `https://api.nsgintelligence.com`                    | ✅          | ✅               | ✅          |
-| `APP_URL`             | `https://nsgintelligence.com`                        | ✅          | (URL de preview) | (localhost) |
+| `API_URL`             | `https://your-api-domain.com`                        | ✅          | ✅               | ✅          |
+| `APP_URL`             | `https://nsg-eight.vercel.app`                       | ✅          | (URL de preview) | (localhost) |
 | `N8N_WEBHOOK`         | `https://personal-n8n.suwsiw.easypanel.host/webhook` | ✅          | ✅               | ✅          |
 | `MONGODB_URI`         | `mongodb+srv://...`                                  | ✅          | ✅               | ✅          |
 | `GEMINI_API_KEY`      | `[tu-key]`                                           | ⚠️ Opcional | ⚠️ Opcional      | ⚠️ Opcional |

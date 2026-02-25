@@ -15,7 +15,7 @@ Next.js API Route (Proxy)
     ↓
     ↓ (reenvía a API_URL)
     ↓
-Backend VPS (https://api.nsgintelligence.com)
+Backend VPS (https://api.your-backend.com)
 ```
 
 ### ✅ Ventajas de esta arquitectura:
@@ -41,8 +41,8 @@ N8N_WEBHOOK=https://personal-n8n.suwsiw.easypanel.host/webhook
 
 ```bash
 APP_ENV=production
-API_URL=https://api.nsgintelligence.com
-APP_URL=https://nsgintelligence.com
+API_URL=https://api.your-backend.com
+APP_URL=https://nsg-eight.vercel.app
 N8N_WEBHOOK=https://personal-n8n.suwsiw.easypanel.host/webhook
 ```
 
@@ -61,8 +61,8 @@ GOOGLE_MAPS_API_KEY=tu_api_key_aqui
 | Name          | Value                                                | Environments                     |
 | ------------- | ---------------------------------------------------- | -------------------------------- |
 | `APP_ENV`     | `production`                                         | Production, Preview, Development |
-| `API_URL`     | `https://api.nsgintelligence.com`                    | Production, Preview, Development |
-| `APP_URL`     | `https://nsgintelligence.com`                        | Production                       |
+| `API_URL`     | `https://api.your-backend.com`                    | Production, Preview, Development |
+| `APP_URL`     | `https://nsg-eight.vercel.app`                       | Production                       |
 | `N8N_WEBHOOK` | `https://personal-n8n.suwsiw.easypanel.host/webhook` | Production, Preview, Development |
 
 ### Opcional (si se usa):
@@ -114,7 +114,7 @@ Para probar localmente con el backend del VPS:
 ```bash
 # En .env.local
 APP_ENV=production
-API_URL=https://api.nsgintelligence.com
+API_URL=https://api.your-backend.com
 APP_URL=http://localhost:3000
 N8N_WEBHOOK=https://personal-n8n.suwsiw.easypanel.host/webhook
 ```

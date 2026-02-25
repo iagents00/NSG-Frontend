@@ -181,5 +181,52 @@ export const educationService = {
     async getGeneratedContent(contentId: string): Promise<any> {
         const response = await api.get(`/education/content/${contentId}/generated`);
         return response.data.data;
+    },
+
+    /**
+     * Starts the questions process for a specific content item
+     */
+    async startQuestions(contentId: string, telegramId?: number): Promise<any> {
+        try {
+            const response = await api.post(`/education/content/${contentId}/questions`, {
+                action: 'start_questions',
+                telegramId
+            });
+            return response.data;
+        } catch (error) {
+            console.error("Failed to start questions protocol", error);
+            throw error;
+        }
+    },
+
+    /**
+     * Ingests new content (text, document, or image)
+     */
+    async ingestContent(formData: FormData): Promise<any> {
+        try {
+            // We use a custom fetch here instead of 'api' because 'api' (axios) 
+            // instance in this project is configured with 'Content-Type: application/json'
+            // which breaks FormData boundaries.
+            const token = typeof window !== "undefined" ? localStorage.getItem("nsg-token") : null;
+            
+            const response = await fetch("/api/nsg-education/content", {
+                method: "POST",
+                headers: {
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
+                body: formData,
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || errorData.message || `Error ${response.status}`);
+            }
+
+            const rawResult = await response.json();
+            return Array.isArray(rawResult) ? rawResult[0] : rawResult;
+        } catch (error) {
+            console.error("Failed to ingest content", error);
+            throw error;
+        }
     }
 };
